@@ -1,0 +1,63 @@
+from mongoengine import (connect, Document, EmbeddedDocument, IntField,
+                         StringField, ReferenceField, DateTimeField, ListField,
+                         BooleanField, DictField, EmbeddedDocumentListField,
+                         FloatField)
+from datetime import datetime
+
+connect(db='wb22')
+
+# https://flask-httpauth.readthedocs.io/en/latest/
+
+
+class Categories(Document):
+    name = StringField(required=True)
+    wb_id = IntField(required=True)
+    parent = IntField(required=True)
+    query = StringField()
+    seo = StringField()
+    shard = StringField()
+    url = StringField(required=True)
+    parsed_at = DateTimeField()
+    last_parsed_page_at = DateTimeField()
+    last_parsed_page = IntField()
+    start_parsing_at = DateTimeField()
+    current_parsing_id = IntField()
+    meta = {
+        'indexes': [
+            'parsed_at',
+        ],
+    }
+
+
+class Sizes(EmbeddedDocument):
+    quantity = IntField(required=True)
+    date = DateTimeField(required=True)
+
+
+class Products(Document):
+    articul = IntField(required=True)
+    name = StringField(required=True)
+    brand = StringField(required=True)
+    brand_id = IntField(required=True)
+    category_name = StringField(required=True)
+    category_id = ReferenceField('Categories')
+    subject_id = IntField(required=True)
+    rating = IntField()
+    feedbacks = IntField()
+    data = DictField()
+    is_new = BooleanField()
+    price = IntField()
+    priceU = IntField()
+    quantity = IntField()
+    created_at = DateTimeField(default=datetime.utcnow)
+    updated_at = DateTimeField(default=datetime.utcnow)
+    last_parsing_id = IntField()
+    parsed_at = DateTimeField()
+    sizes = EmbeddedDocumentListField('Sizes')
+    meta = {
+        'indexes': [
+            'articul',
+            'parsed_at',
+            ('category_id', 'last_parsing_id'),
+        ],
+    }
