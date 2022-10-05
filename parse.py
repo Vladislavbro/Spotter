@@ -57,6 +57,14 @@ class Parser(object):
             print(item['name'])
             for child in item.get('childs', []):
                 print(child['url'])
+                # Гостиная
+                # Кухня
+                # Досуг и творчество
+                # Сумки и рюкзаки
+                # Мебельная фурнитура
+                # Краски и грунтовки
+                # Одежда для девочек
+                # Одежда для мальчиков
                 if child['url'] in categoryUrlList:
                     if child['name'] == 'Школьные принадлежности':
                         for subchild in child['childs']:
