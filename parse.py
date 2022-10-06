@@ -27,23 +27,35 @@ class Parser(object):
     couponsGeo = '12,3,18,15,21'
     page = 1
     category = None
-    admin_ids = [259180458]
+    adminIds = [259180458]
+    expandCategories = [
+        'Гостиная',
+        'Кухня',
+        'Досуг и творчество',
+        'Сумки и рюкзаки',
+        'Мебельная фурнитура',
+        'Краски и грунтовки',
+        'Одежда для девочек',
+        'Одежда для мальчиков',
+        'Школьные принадлежности',
+    ]
 
     def __init__(self):
         super(Parser, self).__init__()
         self.get_category()
 
     def create_category(self, child):
-        category = Categories(
-            name=child['name'],
-            wb_id=child['id'],
-            parent=child['parent'],
-            query=child.get('query'),
-            seo=child.get('seo'),
-            url=child['url'],
-            shard=child.get('shard'),
-        )
-        category.save()
+        if Categories.objects(wb_id=child['id']).first() is None:
+            category = Categories(
+                name=child['name'],
+                wb_id=child['id'],
+                parent=child['parent'],
+                query=child.get('query'),
+                seo=child.get('seo'),
+                url=child['url'],
+                shard=child.get('shard'),
+            )
+            category.save()
 
     def get_categories(self):
         f = open('catalog.txt', 'r')
@@ -57,16 +69,9 @@ class Parser(object):
             print(item['name'])
             for child in item.get('childs', []):
                 print(child['url'])
-                # Гостиная
-                # Кухня
-                # Досуг и творчество
-                # Сумки и рюкзаки
-                # Мебельная фурнитура
-                # Краски и грунтовки
-                # Одежда для девочек
-                # Одежда для мальчиков
                 if child['url'] in categoryUrlList:
-                    if child['name'] == 'Школьные принадлежности':
+                    if child['name'] in self.expandCategories:
+                        print('expandCategories', child['id'])
                         for subchild in child['childs']:
                             self.create_category(subchild)
                     else:
@@ -75,7 +80,7 @@ class Parser(object):
                         self.create_category(child)
 
     def notify(self, text):
-        for id in self.admin_ids:
+        for id in self.adminIds:
             try:
                 bot.send_message(chat_id=id, text=text)
             except:
@@ -195,7 +200,7 @@ class Parser(object):
             self.category.save()
             self.page += 1
 
-            sleep(0.5)
+            sleep(0.2)
 
             if self.page > 100:
                 self.change_category()
