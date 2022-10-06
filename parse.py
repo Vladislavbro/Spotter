@@ -42,7 +42,7 @@ class Parser(object):
 
     def __init__(self):
         super(Parser, self).__init__()
-        self.get_categories()
+        self.get_category()
 
     def create_category(self, child):
         if Categories.objects(wb_id=child['id']).first() is None:
