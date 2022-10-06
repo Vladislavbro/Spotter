@@ -42,7 +42,7 @@ class Parser(object):
 
     def __init__(self):
         super(Parser, self).__init__()
-        self.get_category()
+        self.get_categories()
 
     def create_category(self, child):
         if Categories.objects(wb_id=child['id']).first() is None:
@@ -66,13 +66,13 @@ class Parser(object):
         response = requests.get(url, headers=headers)
         data = response.json()
         for item in data:
-            print(item['name'])
+            # print(item['name'])
             for child in item.get('childs', []):
-                print(child['url'])
+                # print(child['url'])
                 if child['url'] in categoryUrlList:
                     if child['name'] in self.expandCategories:
                         print('expandCategories', child['id'])
-                        for subchild in child['childs']:
+                        for subchild in child.get('childs', []):
                             self.create_category(subchild)
                     else:
                         if child['url'] == '/catalog/dlya-remonta/krepezh/mebelnaya-furnitura':
