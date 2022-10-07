@@ -59,7 +59,7 @@ class Products(Document):
         'indexes': [
             'articul',
             'parsed_at',
-            'sales',
+            '-sales',
             ('category_id', 'last_parsing_id'),
         ],
     }
