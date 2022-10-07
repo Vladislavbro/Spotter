@@ -164,6 +164,7 @@ class Parser(object):
             print('products:', len(data['data']['products']))
             ids = [p['id'] for p in data['data']['products']]
             details = self.get_details(ids)
+            print('details': len(details))
             for index, item in enumerate(data['data']['products']):
                 product = Products.objects(
                     articul=item['id']
