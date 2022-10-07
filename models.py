@@ -31,6 +31,7 @@ class Categories(Document):
 
 class Sizes(EmbeddedDocument):
     quantity = IntField(required=True)
+    sales = IntField(required=True)
     date = DateTimeField(required=True)
 
 

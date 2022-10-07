@@ -1,7 +1,7 @@
 import requests
 from models import Categories, Products
 from time import sleep
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import sys
 from telegram import Bot
@@ -134,42 +134,69 @@ class Parser(object):
         self.category.save()
         self.get_category()
 
+    def get_details(self, ids):
+        ids = ';'.join(str(ids))
+        url = (
+            f'https://card.wb.ru/cards/detail?spp=25&'
+            f'regions={self.regions}&pricemarginCoeff=1.0&reg=1&appType=1&'
+            f'emp=0&locale=ru&lang=ru&curr=rub&couponsGeo={self.couponsGeo}&'
+            f'dest={self.dest}&nm={ids}'
+        )
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            if response.text == '':
+                self.notify('get_details empty')
+                return []
+            try:
+                data = response.json()
+                return data['data']['products']
+            except JSONDecodeError as e:
+                self.notify('JSONDecodeError ' + str(e))
+                print('JSONDecodeError', e, response)
+            except Exception as e:
+                print('except', str(e))
+                self.notify('Exception ' + str(e))
+        return []
+
     def parse_catalog(self, data):
         print('parse_catalog', self.category.name, self.page)
         if len(data.get('data', {}).get('products', [])) > 0:
             print('products:', len(data['data']['products']))
+            ids = [p['id'] for p in data['data']['products']]
+            details = self.get_details(ids)
             for index, item in enumerate(data['data']['products']):
                 product = Products.objects(
                     articul=item['id']
                 ).fields(slice__sizes=[-2, 2]).first()
                 price = item.get('salePriceU') / 100
-                sizes = item.get('sizes', [])
-                quantity = sum([
-                    sum(
-                        [stock.get('qty', 0) for stock
-                         in size.get('stocks', [])]
-                    ) for size in sizes
-                ])
-                sales = 0
-                if product:
-                    if len(product.sizes):
-                        # фиксануть первоначальные остатки неправильные
-                        if product.quantity == 0:
-                            product.quantity = sum([
-                                sum(
-                                    [stock.get('qty', 0) for stock
-                                     in size.get('stocks', [])]
-                                ) for size in product.sizes[-1]
-                            ])
-                        # Проверить что последняя запись вчерашняя
-                        if product.sizes[-1].date.day != datetime.utcnow().day:
-                            # Если вчерашняя то посчитать разницу остатков и
-                            # записать как количество продаж
-                            sales = product.quantity - quantity
-                            # если цифра отрицательная то вероятно поступление
-                            # на склад и расчет не получится
-                            if sales < 0:
-                                sales = 0
+
+                detail = [detail for detail in details if detail['id'] == item['id']]
+                if len(detail):
+                    detail = detail[0]
+                    sizes = detail.get('sizes', [])
+                    quantity = sum([
+                        sum(
+                            [stock.get('qty', 0) for stock
+                             in size.get('stocks', [])]
+                        ) for size in sizes
+                    ])
+                    sales = 0
+                else:
+                    detail = None
+                    quantity = None
+                    sales = None
+
+                if product and detail:
+                    if product.sizes[-1].date.date() == (datetime.utcnow() - timedelta(days=1)).date():
+                        # Если последняя цена вчерашняя то посчитать разницу остатков и
+                        # записать как количество продаж
+                        sales = product.quantity - quantity
+                        # если цифра отрицательная то вероятно поступление
+                        # на склад и расчет не получится
+                        if sales < 0:
+                            sales = 0
+                    else:
+                        sales = None
                     Products.objects(id=product.id).update_one(
                         set__last_parsing_id=self.category.current_parsing_id,
                         set__name=item['name'],
@@ -188,16 +215,17 @@ class Parser(object):
                         set__sales=sales,
                         set__parsed_at=datetime.utcnow(),
                     )
-                    if len(product.sizes) and product.sizes[-1].date.day == datetime.utcnow().day:
+                    if len(product.sizes) and product.sizes[-1].date.date() == datetime.utcnow().date():
                         pass
                     else:
                         Products.objects(id=product.id).update_one(
                             push__sizes={
+                                'sales': sales,
                                 'quantity': quantity,
                                 'date': datetime.utcnow()
                             }
                         )
-                else:
+                elif detail:
                     product = Products(
                         articul=item['id'],
                         name=item['name'],
@@ -216,8 +244,10 @@ class Parser(object):
                         last_parsing_id=self.category.current_parsing_id,
                         parsed_at=datetime.utcnow(),
                     )
-                    product.sizes.create(quantity=quantity,
-                                         date=datetime.utcnow())
+                    product.sizes.create(
+                        quantity=quantity,
+                        sales=sales,
+                        date=datetime.utcnow())
                     product.save()
 
             self.category.last_parsed_page = self.page
@@ -225,7 +255,7 @@ class Parser(object):
             self.category.save()
             self.page += 1
 
-            sleep(0.2)
+            # sleep(0.2)
 
             if self.page > 100:
                 self.change_category()
