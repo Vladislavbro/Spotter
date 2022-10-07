@@ -153,6 +153,14 @@ class Parser(object):
                 sales = 0
                 if product:
                     if len(product.sizes):
+                        # фиксануть первоначальные остатки неправильные
+                        if product.quantity == 0:
+                            product.quantity = sum([
+                                sum(
+                                    [stock.get('qty', 0) for stock
+                                     in size.get('stocks', [])]
+                                ) for size in product.sizes[-1]
+                            ])
                         # Проверить что последняя запись вчерашняя
                         if product.sizes[-1].date.day != datetime.utcnow().day:
                             # Если вчерашняя то посчитать разницу остатков и
