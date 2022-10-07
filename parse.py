@@ -144,7 +144,12 @@ class Parser(object):
                 ).fields(slice__sizes=[-2, 2]).first()
                 price = item.get('salePriceU') / 100
                 sizes = item.get('sizes', [])
-                quantity = sum([size['rank'] for size in sizes])
+                quantity = sum([
+                    sum(
+                        [stock.get('qty', 0) for stock
+                         in size.get('stocks', [])]
+                    ) for size in sizes
+                ])
                 sales = 0
                 if product:
                     if len(product.sizes):
