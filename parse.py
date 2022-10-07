@@ -148,7 +148,7 @@ class Parser(object):
                 sales = 0
                 if len(product.sizes):
                     # Проверить что последняя запись вчерашняя
-                    if product.sizes[-1].date.day == datetime.utcnow().day:
+                    if product.sizes[-1].date.day != datetime.utcnow().day:
                         # Если вчерашняя то посчитать разницу остатков и
                         # записать как количество продаж
                         sales = product.quantity - quantity
