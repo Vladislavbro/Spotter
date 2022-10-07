@@ -145,6 +145,18 @@ class Parser(object):
                 price = item.get('salePriceU') / 100
                 sizes = item.get('sizes', [])
                 quantity = sum([size['rank'] for size in sizes])
+                sales = 0
+                if len(product.sizes):
+                    # Проверить что последняя запись вчерашняя
+                    if product.sizes[-1].date.day == datetime.utcnow().day:
+                        # Если вчерашняя то посчитать разницу остатков и
+                        # записать как количество продаж
+                        sales = product.quantity - quantity
+                        # если цифра отрицательная то вероятно поступление
+                        # на склад и расчет не получится
+                        if sales < 0:
+                            sales = 0
+
                 if product:
                     Products.objects(id=product.id).update_one(
                         set__last_parsing_id=self.category.current_parsing_id,
@@ -161,6 +173,7 @@ class Parser(object):
                         set__price=price,
                         set__priceU=item.get('priceU') / 100,
                         set__quantity=quantity,
+                        set__sales=sales,
                         set__parsed_at=datetime.utcnow(),
                     )
                     if len(product.sizes) and product.sizes[-1].date.day == datetime.utcnow().day:

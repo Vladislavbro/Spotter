@@ -49,6 +49,7 @@ class Products(Document):
     price = IntField()
     priceU = IntField()
     quantity = IntField()
+    sales = IntField()
     created_at = DateTimeField(default=datetime.utcnow)
     updated_at = DateTimeField(default=datetime.utcnow)
     last_parsing_id = IntField()
@@ -58,6 +59,7 @@ class Products(Document):
         'indexes': [
             'articul',
             'parsed_at',
+            'sales',
             ('category_id', 'last_parsing_id'),
         ],
     }
