@@ -1,5 +1,5 @@
 import requests
-from models import Categories, Products
+from models import Categories, Products, Config
 from time import sleep
 from datetime import datetime, timedelta
 import time
@@ -39,10 +39,29 @@ class Parser(object):
         'Одежда для мальчиков',
         'Школьные принадлежности',
     ]
+    config = None
 
     def __init__(self):
         super(Parser, self).__init__()
-        self.get_category()
+        self.config = Config.objects.first()
+        if self.config.current_parsing_date.date() == datetime.utcnow().date():
+            if self.config.parsing_done:
+                # done = True and parsing day = today
+                pass
+            else:
+                # done = False and parsing day = today
+                self.get_category()
+        else:
+            if self.config.parsing_done:
+                pass
+                # done = True and parsing day != today
+            else:
+                pass
+                # done = False and parsing day != today
+            self.config.parsing_done = False
+            self.config.current_parsing_date = datetime.utcnow()
+            self.config.save()
+            self.get_category()
 
     def create_category(self, child):
         if Categories.objects(wb_id=child['id']).first() is None:
@@ -94,7 +113,11 @@ class Parser(object):
                 parsed_at=None,
                 last_parsed_page=None,
                 last_parsed_page_at=None,
+                start_parsing_at=None,
+                current_parsing_id=None,
             )
+            self.config.parsing_done = True
+            self.config.save()
             return self.caclulate()
         else:
             if self.category.last_parsed_page:

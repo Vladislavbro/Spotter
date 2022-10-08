@@ -9,6 +9,12 @@ connect(db='wb22')
 # https://flask-httpauth.readthedocs.io/en/latest/
 
 
+class Config(Document):
+    current_parsing_date = DateTimeField()
+    current_parsing_id = IntField()
+    parsing_done = BooleanField()
+
+
 class Categories(Document):
     name = StringField(required=True)
     wb_id = IntField(required=True)
