@@ -135,16 +135,15 @@ class Parser(object):
         self.get_category()
 
     def get_details(self, ids):
-        ids = ';'.join(str(ids))
+        ids = ';'.join([str(id) for id in ids])
         url = (
             f'https://card.wb.ru/cards/detail?spp=25&'
             f'regions={self.regions}&pricemarginCoeff=1.0&reg=1&appType=1&'
             f'emp=0&locale=ru&lang=ru&curr=rub&couponsGeo={self.couponsGeo}&'
             f'dest={self.dest}&nm={ids}'
         )
-        print('get_details', url)
         response = requests.get(url, headers=headers)
-        print('response', response.status_code, response.text)
+        print('get_details', url, response.status_code)
         if response.status_code == 200:
             if response.text == '':
                 self.notify('get_details empty')
@@ -260,12 +259,12 @@ class Parser(object):
 
             sleep(0.2)
 
-        #     if self.page > 100:
-        #         self.change_category()
-        #     else:
-        #         self.get_category()
-        # else:
-        #     self.change_category()
+            if self.page > 100:
+                self.change_category()
+            else:
+                self.get_category()
+        else:
+            self.change_category()
 
     def caclulate(self):
         self.notify('Расчёт начался')
