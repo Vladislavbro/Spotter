@@ -142,7 +142,9 @@ class Parser(object):
             f'emp=0&locale=ru&lang=ru&curr=rub&couponsGeo={self.couponsGeo}&'
             f'dest={self.dest}&nm={ids}'
         )
+        print('get_details', url)
         response = requests.get(url, headers=headers)
+        print('response', response.status_code, response.text)
         if response.status_code == 200:
             if response.text == '':
                 self.notify('get_details empty')
@@ -256,14 +258,14 @@ class Parser(object):
             self.category.save()
             self.page += 1
 
-            # sleep(0.2)
+            sleep(0.2)
 
-            if self.page > 100:
-                self.change_category()
-            else:
-                self.get_category()
-        else:
-            self.change_category()
+        #     if self.page > 100:
+        #         self.change_category()
+        #     else:
+        #         self.get_category()
+        # else:
+        #     self.change_category()
 
     def caclulate(self):
         self.notify('Расчёт начался')
