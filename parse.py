@@ -287,6 +287,7 @@ class Parser(object):
                         is_new=item.get('isNew', False),
                         data=item,
                         price=price,
+                        sales=sales,
                         priceU=(item.get('priceU') / 100),
                         quantity=quantity,
                         last_parsing_id=self.category.current_parsing_id,
