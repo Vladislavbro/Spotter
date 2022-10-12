@@ -7,15 +7,14 @@ import sys
 from telegram import Bot
 import sys, traceback
 from json import JSONDecodeError
+from .proxies import proxies
+from random import choice
+from random_user_agent.user_agent import UserAgent
 
+
+user_agent_rotator = UserAgent()
 TOKEN = '507933514:AAHP_BHtTUEES3Mq9giC231W4ZkvfeqSBb0'
 bot = Bot(token=TOKEN)
-headers = {
-    'User-Agent': (
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
-        '(KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36'
-    ),
-}
 
 sys.setrecursionlimit(10**6)
 
@@ -40,6 +39,10 @@ class Parser(object):
         'Школьные принадлежности',
     ]
     config = None
+    proxies = {
+       'http': 'http://CrCWgH3r:bb3KGpCE@45.145.88.250:47173',
+       'https': 'http://CrCWgH3r:bb3KGpCE@45.145.88.250:47173',
+    }
 
     def __init__(self):
         super(Parser, self).__init__()
@@ -82,7 +85,14 @@ class Parser(object):
         categoryUrlList = [line for line in content.strip().split('\n')
                            if '/catalog/' in line]
         url = 'https://www.wildberries.ru/webapi/menu/main-menu-ru-ru.json'
-        response = requests.get(url, headers=headers)
+        headers = {
+            'User-Agent': user_agent_rotator.get_random_user_agent()
+        }
+        proxy = choice(proxies)
+        response = requests.get(url, headers=headers, proxies={
+            'http': proxy,
+            'https': proxy,
+        })
         data = response.json()
         for item in data:
             # print(item['name'])
@@ -138,7 +148,14 @@ class Parser(object):
             f'sort=popular&spp=25&page={self.page}&{self.category.query}'
         )
         print(self.category.name, self.page)
-        response = requests.get(url, headers=headers)
+        headers = {
+            'User-Agent': user_agent_rotator.get_random_user_agent()
+        }
+        proxy = choice(proxies)
+        response = requests.get(url, headers=headers, proxies={
+            'http': proxy,
+            'https': proxy,
+        })
 
         if response.status_code == 200:
             if response.text == '':
@@ -165,8 +182,14 @@ class Parser(object):
             f'emp=0&locale=ru&lang=ru&curr=rub&couponsGeo={self.couponsGeo}&'
             f'dest={self.dest}&nm={ids}'
         )
-        response = requests.get(url, headers=headers)
-        print('get_details', url, response.status_code)
+        headers = {
+            'User-Agent': user_agent_rotator.get_random_user_agent()
+        }
+        proxy = choice(proxies)
+        response = requests.get(url, headers=headers, proxies={
+            'http': proxy,
+            'https': proxy,
+        })
         if response.status_code == 200:
             if response.text == '':
                 self.notify('get_details empty')
@@ -280,7 +303,7 @@ class Parser(object):
             self.category.save()
             self.page += 1
 
-            sleep(0.2)
+            # sleep(0.2)
 
             if self.page > 100:
                 self.change_category()
