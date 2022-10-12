@@ -7,7 +7,7 @@ import sys
 from telegram import Bot
 import sys, traceback
 from json import JSONDecodeError
-from .proxies import proxies
+from proxies import proxies
 from random import choice
 from random_user_agent.user_agent import UserAgent
 
