@@ -44,6 +44,21 @@ class Parser(object):
        'https': 'http://CrCWgH3r:bb3KGpCE@45.145.88.250:47173',
     }
 
+    def get_url(self, url):
+        try:
+            headers = {
+                'User-Agent': user_agent_rotator.get_random_user_agent()
+            }
+            proxy = choice(proxies)
+            response = requests.get(url, headers=headers, proxies={
+                'http': proxy,
+                'https': proxy,
+            })
+            return response
+        except:
+            print('get_url except', proxy)
+            return self.get_url(url)
+
     def __init__(self):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
@@ -148,14 +163,8 @@ class Parser(object):
             f'sort=popular&spp=25&page={self.page}&{self.category.query}'
         )
         print(self.category.name, self.page)
-        headers = {
-            'User-Agent': user_agent_rotator.get_random_user_agent()
-        }
-        proxy = choice(proxies)
-        response = requests.get(url, headers=headers, proxies={
-            'http': proxy,
-            'https': proxy,
-        })
+
+        response = self.get_url(url)
 
         if response.status_code == 200:
             if response.text == '':
@@ -182,14 +191,7 @@ class Parser(object):
             f'emp=0&locale=ru&lang=ru&curr=rub&couponsGeo={self.couponsGeo}&'
             f'dest={self.dest}&nm={ids}'
         )
-        headers = {
-            'User-Agent': user_agent_rotator.get_random_user_agent()
-        }
-        proxy = choice(proxies)
-        response = requests.get(url, headers=headers, proxies={
-            'http': proxy,
-            'https': proxy,
-        })
+        response = self.get_url(url)
         if response.status_code == 200:
             if response.text == '':
                 self.notify('get_details empty')

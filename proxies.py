@@ -1,3 +1,11 @@
+import requests
+from random import choice
+from random_user_agent.user_agent import UserAgent
+from time import sleep
+
+
+user_agent_rotator = UserAgent()
+
 proxies = [
     'http://CrCWgH3r:bb3KGpCE@91.230.38.109:64220',
     'http://CrCWgH3r:bb3KGpCE@45.152.226.227:50242',
@@ -75,6 +83,24 @@ proxies = [
     'http://CrCWgH3r:bb3KGpCE@194.32.238.125:52494',
 ]
 
+
+def check_proxies():
+    for proxy in proxies:
+        headers = {
+            'User-Agent': user_agent_rotator.get_random_user_agent()
+        }
+        proxy = choice(proxies)
+        url = 'https://ipinfo.io'
+        response = requests.get(url, headers=headers, proxies={
+            'http': proxy,
+            'https': proxy,
+        })
+        print(proxy, response.status_code)
+        sleep(1)
+
+
+if __name__ == '__main__':
+    check_proxies()
 
 # 'http://CrCWgH3r:bb3KGpCE@84.54.28.154:56818',
 # 'http://CrCWgH3r:bb3KGpCE@84.252.71.19:51548',
