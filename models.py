@@ -28,6 +28,7 @@ class Categories(Document):
     last_parsed_page = IntField()
     start_parsing_at = DateTimeField()
     current_parsing_id = IntField()
+    updated_at = DateTimeField()
     meta = {
         'indexes': [
             'parsed_at',

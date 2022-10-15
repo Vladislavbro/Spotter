@@ -39,10 +39,6 @@ class Parser(object):
         'Школьные принадлежности',
     ]
     config = None
-    proxies = {
-       'http': 'http://CrCWgH3r:bb3KGpCE@45.145.88.250:47173',
-       'https': 'http://CrCWgH3r:bb3KGpCE@45.145.88.250:47173',
-    }
 
     def get_url(self, url):
         try:
@@ -62,6 +58,10 @@ class Parser(object):
     def __init__(self):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
+        # self.start_parsing()
+        self.update_categories()
+
+    def start_parsing(self):
         if self.config.current_parsing_date.date() == datetime.utcnow().date():
             if self.config.parsing_done:
                 # done = True and parsing day = today
@@ -94,6 +94,15 @@ class Parser(object):
             )
             category.save()
 
+    def update_category(self, child):
+        category = Categories.objects(wb_id=child['id']).first()
+        if category:
+            category.shard = child.get('shard')
+            category.updated_at = datetime.utcnow()
+            category.save()
+            print('update category', category.name, category.wb_id,
+                  category.shard)
+
     def get_categories(self):
         f = open('catalog.txt', 'r')
         content = f.read()
@@ -122,6 +131,24 @@ class Parser(object):
                         if child['url'] == '/catalog/dlya-remonta/krepezh/mebelnaya-furnitura':
                             child['query'] = 'subject=2361;2893;3817;4263;5059;5176;5975;6341;7308;7349;7350;7351;7353;7354;7355;7356;7357;7564'
                         self.create_category(child)
+
+    def update_categories(self):
+        url = 'https://www.wildberries.ru/webapi/menu/main-menu-ru-ru.json'
+        headers = {
+            'User-Agent': user_agent_rotator.get_random_user_agent()
+        }
+        proxy = choice(proxies)
+        response = requests.get(url, headers=headers, proxies={
+            'http': proxy,
+            'https': proxy,
+        })
+        data = response.json()
+        for item in data:
+            print(item['name'])
+            for child in item.get('childs', []):
+                self.update_category(child)
+                for subchild in child.get('childs', []):
+                    self.update_category(subchild)
 
     def notify(self, text):
         for id in self.adminIds:
