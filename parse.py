@@ -58,8 +58,8 @@ class Parser(object):
     def __init__(self):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
-        # self.start_parsing()
-        self.update_categories()
+        self.start_parsing()
+        # self.update_categories()
 
     def start_parsing(self):
         if self.config.current_parsing_date.date() == datetime.utcnow().date():
