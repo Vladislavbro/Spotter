@@ -205,9 +205,13 @@ class Parser(object):
                 print('except', str(e))
 
     def change_category(self):
-        self.category.last_parsed_page_at = datetime.utcnow()
-        self.category.parsed_at = datetime.utcnow()
-        self.category.save()
+        # self.category.last_parsed_page_at = datetime.utcnow()
+        # self.category.parsed_at = datetime.utcnow()
+        # self.category.save()
+        Categories.objects.filter(shard=self.category.shard).update(
+            last_parsed_page_at=datetime.utcnow(),
+            parsed_at=datetime.utcnow()
+        )
         self.get_category()
 
     def get_details(self, ids):
