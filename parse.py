@@ -82,7 +82,10 @@ class Parser(object):
             self.get_category()
 
     def create_category(self, child):
-        if Categories.objects(wb_id=child['id']).first() is None:
+        category = Categories.objects(wb_id=child['id']).first()
+        if category:
+            category.shard = child.get('shard')
+        else:
             category = Categories(
                 name=child['name'],
                 wb_id=child['id'],
@@ -92,7 +95,7 @@ class Parser(object):
                 url=child['url'],
                 shard=child.get('shard'),
             )
-            category.save()
+        category.save()
 
     def update_category(self, child):
         category = Categories.objects(wb_id=child['id']).first()
@@ -123,13 +126,18 @@ class Parser(object):
             for child in item.get('childs', []):
                 # print(child['url'])
                 if child['url'] in categoryUrlList:
-                    if child['name'] in self.expandCategories:
-                        print('expandCategories', child['id'])
+                    # if child['name'] in self.expandCategories:
+                    #     print('expandCategories', child['id'])
+                    #     for subchild in child.get('childs', []):
+                    #         self.create_category(subchild)
+                    # else:
+                    #     if child['url'] == '/catalog/dlya-remonta/krepezh/mebelnaya-furnitura':
+                    #         child['query'] = 'subject=2361;2893;3817;4263;5059;5176;5975;6341;7308;7349;7350;7351;7353;7354;7355;7356;7357;7564'
+                    #     self.create_category(child)
+                    if child['shard'] == 'blackhole':
                         for subchild in child.get('childs', []):
                             self.create_category(subchild)
                     else:
-                        if child['url'] == '/catalog/dlya-remonta/krepezh/mebelnaya-furnitura':
-                            child['query'] = 'subject=2361;2893;3817;4263;5059;5176;5975;6341;7308;7349;7350;7351;7353;7354;7355;7356;7357;7564'
                         self.create_category(child)
 
     def update_categories(self):
@@ -285,6 +293,7 @@ class Parser(object):
                         set__brand_id=item['siteBrandId'],
                         set__category_name=self.category.name,
                         set__category_id=self.category.id,
+                        set__category_wb_id=self.category.wb_id,
                         set__subject_id=item['subjectId'],
                         set__rating=item['rating'],
                         set__feedbacks=item['feedbacks'],
@@ -314,6 +323,7 @@ class Parser(object):
                         brand_id=item['siteBrandId'],
                         category_name=self.category.name,
                         category_id=self.category.id,
+                        category_wb_id=self.category.wb_id,
                         subject_id=item['subjectId'],
                         rating=item['rating'],
                         feedbacks=item['feedbacks'],

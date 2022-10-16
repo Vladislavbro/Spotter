@@ -49,6 +49,7 @@ class Products(Document):
     brand_id = IntField(required=True)
     category_name = StringField(required=True)
     category_id = ReferenceField('Categories')
+    category_wb_id = IntField()
     subject_id = IntField(required=True)
     rating = IntField()
     feedbacks = IntField()
