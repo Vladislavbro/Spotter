@@ -212,7 +212,7 @@ class Parser(object):
             except Exception as e:
                 print('except', str(e))
         else:
-            self.notify('404', self.category.name)
+            self.notify('404 ' + self.category.name)
             return self.change_category()
 
     def change_category(self):
