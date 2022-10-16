@@ -134,7 +134,7 @@ class Parser(object):
                     #     if child['url'] == '/catalog/dlya-remonta/krepezh/mebelnaya-furnitura':
                     #         child['query'] = 'subject=2361;2893;3817;4263;5059;5176;5975;6341;7308;7349;7350;7351;7353;7354;7355;7356;7357;7564'
                     #     self.create_category(child)
-                    if child['shard'] == 'blackhole':
+                    if child.get('shard') == 'blackhole':
                         for subchild in child.get('childs', []):
                             self.create_category(subchild)
                     else:
