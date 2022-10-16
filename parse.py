@@ -211,6 +211,9 @@ class Parser(object):
                 print('JSONDecodeError', e, response)
             except Exception as e:
                 print('except', str(e))
+        else:
+            self.notify('404', self.category.name)
+            return self.change_category()
 
     def change_category(self):
         # self.category.last_parsed_page_at = datetime.utcnow()
@@ -361,3 +364,7 @@ class Parser(object):
 
 
 parser = Parser()
+
+# Досуг и творчество
+# Кухонный текстиль
+# Мебельная фурнитура
