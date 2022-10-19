@@ -4,6 +4,7 @@ from time import sleep
 from datetime import datetime, timedelta
 import time
 import sys
+import json
 from telegram import Bot
 import sys, traceback
 from json import JSONDecodeError
@@ -206,7 +207,8 @@ class Parser(object):
             if response.text == '':
                 return self.change_category()
             try:
-                data = response.json()
+                # data = response.json()
+                data = json.loads(response.text)
                 self.parse_catalog(data)
             except JSONDecodeError as e:
                 print('JSONDecodeError', e, response.text, url)
