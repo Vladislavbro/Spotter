@@ -208,7 +208,7 @@ class Parser(object):
                 return self.change_category()
             try:
                 # data = response.json()
-                data = json.loads(response.text)
+                data = json.loads(response.text.replace('\"', ''))
                 self.parse_catalog(data)
             except JSONDecodeError as e:
                 print('JSONDecodeError', e, response.text, url)
