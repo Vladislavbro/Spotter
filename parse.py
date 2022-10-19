@@ -4,6 +4,7 @@ from time import sleep
 from datetime import datetime, timedelta
 import time
 import sys
+import re
 import json
 from telegram import Bot
 import sys, traceback
@@ -208,10 +209,12 @@ class Parser(object):
                 return self.change_category()
             try:
                 # data = response.json()
-                data = json.loads(response.text.replace('\"', ''))
+                content = re.escape(response.text)
+                data = json.loads(content)
                 self.parse_catalog(data)
             except JSONDecodeError as e:
-                print('JSONDecodeError', e, response.text, url)
+                self.notify('JSONDecodeError ' + self.category.name + ' ' + str(self.page))
+                print('JSONDecodeError', e, url)
             except Exception as e:
                 print('except', str(e))
         else:
@@ -242,7 +245,9 @@ class Parser(object):
                 self.notify('get_details empty')
                 return []
             try:
-                data = response.json()
+                # data = response.json()
+                content = re.escape(response.text)
+                data = json.loads(content)
                 return data['data']['products']
             except JSONDecodeError as e:
                 self.notify('JSONDecodeError ' + str(e))
