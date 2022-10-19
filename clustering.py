@@ -26,7 +26,8 @@ class Clustering(object):
                     if (product.sizes[-1].sales is not None
                             and product.sizes[-2].sales is not None):
                         with open('out.csv', 'a') as file:
-                            line = str(product.sizes[-2].sales) + ';'
+                            line = str(product.sizes[-1].sales - product.sizes[-2].sales) + ';'
+                            line += str(product.sizes[-2].sales) + ';'
                             line += str(product.sizes[-1].sales) + ';'
                             line += str(product.articul) + ';'
                             line += str(product.category_wb_id) + ';'
