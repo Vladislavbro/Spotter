@@ -27,9 +27,8 @@ class Clustering(object):
                             and product.sizes[-2].quantity is not None):
                         with open('out.csv', 'a') as file:
                             line = str(product.sizes[-2].quantity) + ';'
-                            line += str(product.sizes[-2].quantity) + ';'
-                            line += self.categories.get(
-                                product.category_wb_id, '') + ';'
+                            line += str(product.sizes[-1].quantity) + ';'
+                            line += str(product.category_wb_id) + ';'
                             line += product.name + '\n'
                             file.write(line)
                             file.close()
