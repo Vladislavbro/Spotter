@@ -29,7 +29,7 @@ class Clustering(object):
                             line = str(product.sizes[-2].sales) + ';'
                             line += str(product.sizes[-1].sales) + ';'
                             line += str(product.category_wb_id) + ';'
-                            line += product.name + '\n'
+                            line += self.preprocess_text(product.name) + '\n'
                             file.write(line)
                             file.close()
             skip += 1000
