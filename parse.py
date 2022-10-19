@@ -204,7 +204,6 @@ class Parser(object):
         response = self.get_url(url)
 
         if response.status_code == 200:
-            print('response.text')
             if response.text == '':
                 return self.change_category()
             try:
