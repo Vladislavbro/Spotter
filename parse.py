@@ -202,13 +202,14 @@ class Parser(object):
         response = self.get_url(url)
 
         if response.status_code == 200:
+            print('response.text')
             if response.text == '':
                 return self.change_category()
             try:
                 data = response.json()
                 self.parse_catalog(data)
             except JSONDecodeError as e:
-                print('JSONDecodeError', e, response)
+                print('JSONDecodeError', e, response.text, url)
             except Exception as e:
                 print('except', str(e))
         else:
@@ -368,3 +369,14 @@ parser = Parser()
 # Досуг и творчество
 # Кухонный текстиль
 # Мебельная фурнитура
+# Школьные принадлежности
+# Большие размеры
+# Офис
+# Подарки мужчинам
+# Кронштейны
+# Белье и аксессуары
+# Школьные принадлежности
+# Женщинам
+# Лакокрасочные материалы
+# Бассейны
+# Бумажная продукция
