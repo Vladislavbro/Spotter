@@ -208,9 +208,7 @@ class Parser(object):
             if response.text == '':
                 return self.change_category()
             try:
-                # data = response.json()
-                content = re.escape(response.text)
-                data = json.loads(content)
+                data = json.loads(repr(response.text))
                 self.parse_catalog(data)
             except JSONDecodeError as e:
                 self.notify('JSONDecodeError ' + self.category.name + ' ' + str(self.page))
@@ -246,8 +244,7 @@ class Parser(object):
                 return []
             try:
                 # data = response.json()
-                content = re.escape(response.text)
-                data = json.loads(content)
+                data = json.loads(repr(response.text))
                 return data['data']['products']
             except JSONDecodeError as e:
                 self.notify('JSONDecodeError ' + str(e))
