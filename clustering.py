@@ -23,11 +23,11 @@ class Clustering(object):
             products = Products.objects.skip(skip).limit(1000)
             for product in products:
                 if len(product.sizes) > 2:
-                    if (product.sizes[-1].quantity is not None
-                            and product.sizes[-2].quantity is not None):
+                    if (product.sizes[-1].sales is not None
+                            and product.sizes[-2].sales is not None):
                         with open('out.csv', 'a') as file:
-                            line = str(product.sizes[-2].quantity) + ';'
-                            line += str(product.sizes[-1].quantity) + ';'
+                            line = str(product.sizes[-2].sales) + ';'
+                            line += str(product.sizes[-1].sales) + ';'
                             line += str(product.category_wb_id) + ';'
                             line += product.name + '\n'
                             file.write(line)
