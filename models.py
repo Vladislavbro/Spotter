@@ -18,7 +18,7 @@ class Config(Document):
 class Categories(Document):
     name = StringField(required=True)
     wb_id = IntField(required=True)
-    parent = IntField(required=True)
+    parent = IntField()
     query = StringField()
     seo = StringField()
     shard = StringField()

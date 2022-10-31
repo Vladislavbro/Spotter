@@ -2,3 +2,6 @@ __pycache__
 docs
 dump/*
 model/*
+data/*.csv
+data/*.hdf
+node_modules

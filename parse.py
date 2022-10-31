@@ -29,17 +29,6 @@ class Parser(object):
     page = 1
     category = None
     adminIds = [259180458]
-    expandCategories = [
-        'Гостиная',
-        'Кухня',
-        'Досуг и творчество',
-        'Сумки и рюкзаки',
-        'Мебельная фурнитура',
-        'Краски и грунтовки',
-        'Одежда для девочек',
-        'Одежда для мальчиков',
-        'Школьные принадлежности',
-    ]
     config = None
 
     def get_url(self, url):
@@ -91,10 +80,10 @@ class Parser(object):
             category = Categories(
                 name=child['name'],
                 wb_id=child['id'],
-                parent=child['parent'],
+                parent=child.get('parent'),
                 query=child.get('query'),
                 seo=child.get('seo'),
-                url=child['url'],
+                url=child.get('url'),
                 shard=child.get('shard'),
             )
         category.save()
@@ -109,38 +98,21 @@ class Parser(object):
                   category.shard)
 
     def get_categories(self):
-        f = open('catalog.txt', 'r')
+        f = open('data/catalog.txt', 'r')
         content = f.read()
         categoryUrlList = [line for line in content.strip().split('\n')
                            if '/catalog/' in line]
         url = 'https://www.wildberries.ru/webapi/menu/main-menu-ru-ru.json'
-        headers = {
-            'User-Agent': user_agent_rotator.get_random_user_agent()
-        }
-        proxy = choice(proxies)
-        response = requests.get(url, headers=headers, proxies={
-            'http': proxy,
-            'https': proxy,
-        })
+        response = self.get_url(url)
         data = response.json()
         for item in data:
-            # print(item['name'])
+            self.create_category(item)
             for child in item.get('childs', []):
-                # print(child['url'])
                 if child['url'] in categoryUrlList:
-                    # if child['name'] in self.expandCategories:
-                    #     print('expandCategories', child['id'])
-                    #     for subchild in child.get('childs', []):
-                    #         self.create_category(subchild)
-                    # else:
-                    #     if child['url'] == '/catalog/dlya-remonta/krepezh/mebelnaya-furnitura':
-                    #         child['query'] = 'subject=2361;2893;3817;4263;5059;5176;5975;6341;7308;7349;7350;7351;7353;7354;7355;7356;7357;7564'
-                    #     self.create_category(child)
+                    self.create_category(child)
                     if child.get('shard') == 'blackhole':
                         for subchild in child.get('childs', []):
                             self.create_category(subchild)
-                    else:
-                        self.create_category(child)
 
     def update_categories(self):
         url = 'https://www.wildberries.ru/webapi/menu/main-menu-ru-ru.json'
