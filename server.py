@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 from werkzeug.utils import secure_filename
 # import spacy
+from collections import Counter
 
 app = Flask(__name__)
 # nlp = spacy.load('ru_core_news_md')
@@ -44,12 +45,15 @@ def get_child_ids(category, ids):
 @app.route('/api/categories/<id>')
 def category(id):
     root_category = Categories.objects.get(pk=id)
-    ids = get_child_ids(root_category, [])
+    ids = get_child_ids(root_category, [root_category.wb_id])
     products = Products.objects(category_wb_id__in=ids)
+    counter = Counter([p.root for p in products.only('root')])
+    groups = dict(sorted(counter.items(), key=lambda item: item[1], reverse=True))
     return {
         'category': json.loads(root_category.to_json()),
         'ids': ids,
         'info': products.count(),
+        'groups': groups
     }
 
 
