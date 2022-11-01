@@ -1,10 +1,10 @@
 module.exports = {
 
   apps : [
-    // {
-    //   script: 'server.py',
-    //   interpreter: '/home/deploy/venv/bin/python',
-    // },
+    {
+      script: 'server.py',
+      interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
+    },
   ],
 
   deploy : {
