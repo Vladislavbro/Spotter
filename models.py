@@ -70,6 +70,7 @@ class Products(Document):
     meta = {
         'indexes': [
             'articul',
+            'category_wb_id',
             'parsed_at',
             'root',
             '-sales',

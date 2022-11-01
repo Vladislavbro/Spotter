@@ -30,6 +30,10 @@ def categories():
     }
 
 
+def get_category_stat(category):
+    pass
+
+
 def get_child_ids(category, ids):
     for child in Categories.objects(parent=category.wb_id):
         ids.append(child.wb_id)
