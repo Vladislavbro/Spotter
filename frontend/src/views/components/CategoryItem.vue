@@ -26,23 +26,23 @@
         </button>
       </div> -->
     </div>
-    <!-- <div
+    <div
       v-for="child in category.children"
       :key="child._id.$oid"
       class="mb-1 ps-4">
-      <Category :category="child"/>
-    </div> -->
+      <CategoryItem :category="child"/>
+    </div>
   </div>
 </template>
 
 <script>
-// import Category from './Category'
+import CategoryItem from './CategoryItem'
 export default {
   props: {
     category: Object
   },
   components: {
-    // Category
+    CategoryItem
   }
 }
 </script>

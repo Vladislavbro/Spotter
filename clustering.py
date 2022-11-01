@@ -27,7 +27,28 @@ class Clustering(object):
     def __init__(self):
         super(Clustering, self).__init__()
         # self.categories = {c.wb_id: c.name for c in Categories.objects.all()}
-        self.get_data()
+        # self.get_data()
+        self.add_data()
+
+    def add_data(self):
+        while True:
+            product = Products.objects(root=None).first()
+            if product:
+                doc = nlp(product.name)
+                root = [w for w in doc if w.dep_ == 'ROOT'][0]
+                if root.tag_ != 'NOUN':
+                    nsubj = [w for w in doc if w.dep_ == 'nsubj']
+                    if len(nsubj):
+                        root = nsubj[0]
+                product.root = root.text.lemma_
+                product.features = [w.lemma_ for w in doc if w.tag_ == 'ADJ']
+                if len(doc.ents):
+                    product.entity = doc.ents[0].lemma_
+                product.save()
+                print(product.root, product.entity, product.features,
+                      product.name, product.id)
+            else:
+                break
 
     def get_data(self):
         skip = 0

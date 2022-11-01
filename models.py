@@ -45,6 +45,9 @@ class Sizes(EmbeddedDocument):
 class Products(Document):
     articul = IntField(required=True)
     name = StringField(required=True)
+    root = StringField()
+    entity = StringField()
+    features = ListField(default=[])
     brand = StringField(required=True)
     brand_id = IntField(required=True)
     category_name = StringField(required=True)
@@ -68,6 +71,7 @@ class Products(Document):
         'indexes': [
             'articul',
             'parsed_at',
+            'root',
             '-sales',
             ('category_id', 'last_parsing_id'),
         ],

@@ -1,10 +1,14 @@
+# import os
+# os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 from flask import Flask, request, jsonify
 from models import Categories, Products
 import json
 from datetime import datetime
 from werkzeug.utils import secure_filename
+# import spacy
 
 app = Flask(__name__)
+# nlp = spacy.load('ru_core_news_md')
 
 
 def get_children(category, categories):
@@ -26,10 +30,22 @@ def categories():
     }
 
 
+def get_child_ids(category, ids):
+    for child in Categories.objects(parent=category.wb_id):
+        ids.append(child.wb_id)
+        get_child_ids(child, ids)
+    return ids
+
+
 @app.route('/api/categories/<id>')
-def delete_category(id):
+def category(id):
+    root_category = Categories.objects.get(pk=id)
+    ids = get_child_ids(root_category, [])
+    products = Products.objects(category_wb_id__in=ids)
     return {
-        'category': Categories.objects.get(pk=id).to_json()
+        'category': json.loads(root_category.to_json()),
+        'ids': ids,
+        'info': products.count(),
     }
 
 
