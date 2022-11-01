@@ -5,7 +5,7 @@ import spacy
 from string import punctuation
 import re
 import pandas as pd
-from sklearn.cluster import DBSCAN, OPTICS, KMeans, Birch
+# from sklearn.cluster import DBSCAN, OPTICS, KMeans, Birch
 import os
 import numpy as np
 
@@ -40,7 +40,7 @@ class Clustering(object):
                     nsubj = [w for w in doc if w.dep_ == 'nsubj']
                     if len(nsubj):
                         root = nsubj[0]
-                product.root = root.text.lemma_
+                product.root = root.lemma_
                 product.features = [w.lemma_ for w in doc if w.tag_ == 'ADJ']
                 if len(doc.ents):
                     product.entity = doc.ents[0].lemma_
