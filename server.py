@@ -47,7 +47,7 @@ def category(id):
     root_category = Categories.objects.get(pk=id)
     ids = get_child_ids(root_category, [root_category.wb_id])
     products = Products.objects(category_wb_id__in=ids)
-    counter = Counter([p.root for p in products.only('root')])
+    counter = Counter([p.root for p in products.filter(root__ne=None).only('root')])
     groups = dict(sorted(counter.items(), key=lambda item: item[1], reverse=True))
     return {
         'category': json.loads(root_category.to_json()),
