@@ -6,6 +6,8 @@ const store = new Vuex.Store({
     categories: [],
     category: {},
     products: [],
+    groups: [],
+    info: null,
   },
   mutations: {
     mergeStore (state, data) {
@@ -40,7 +42,11 @@ const store = new Vuex.Store({
       try {
         const response = await api.getCategory(id)
         if (response.status === 200 && response.data) {
-          context.commit('mergeStore', {category: response.data.category})
+          context.commit('mergeStore', {
+            category: response.data.category,
+            groups: response.data.groups,
+            info: response.data.info,
+          })
         }
       } catch (e) {
         app.$toast.error(`${e.type}: ${e.message}`)

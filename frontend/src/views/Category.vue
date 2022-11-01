@@ -1,12 +1,28 @@
 <template>
   <div class="container py-4">
-    {{ $store.state.category }}
+    <h3>{{ $store.state.category.name }}</h3>
+    <small>{{ $store.state.category }}</small>
+    <div class="py-3 text-end">
+      Товаров: <strong>{{ $store.state.info }}</strong>
+    </div>
+    <table class="table table-bordered table-hover">
+      <tbody>
+        <tr v-for="(group, i) in $store.state.groups" :key="i">
+          <td>{{ group[0] }}</td>
+          <td>{{ group[1] }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 <script>
 export default {
   mounted () {
+    this.$store.commit('mergeStore', {
+      groups: [],
+      info: null,
+    })
     const id = this.$route.params.id
     this.$store.dispatch('getCategory', id)
   }
