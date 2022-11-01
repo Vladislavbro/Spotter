@@ -20,6 +20,7 @@
 export default {
   mounted () {
     this.$store.commit('mergeStore', {
+      category: {},
       groups: [],
       info: null,
     })
