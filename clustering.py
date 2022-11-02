@@ -34,19 +34,22 @@ class Clustering(object):
         while True:
             product = Products.objects(root=None).first()
             if product:
-                doc = nlp(product.name)
-                root = [w for w in doc if w.dep_ == 'ROOT'][0]
-                if root.tag_ != 'NOUN':
-                    nsubj = [w for w in doc if w.dep_ == 'nsubj']
-                    if len(nsubj):
-                        root = nsubj[0]
-                product.root = root.lemma_
-                product.features = [w.lemma_ for w in doc if w.tag_ == 'ADJ']
-                if len(doc.ents):
-                    product.entity = doc.ents[0].lemma_
+                if product.name.strip():
+                    doc = nlp(product.name)
+                    root = [w for w in doc if w.dep_ == 'ROOT'][0]
+                    if root.tag_ != 'NOUN':
+                        nsubj = [w for w in doc if w.dep_ == 'nsubj']
+                        if len(nsubj):
+                            root = nsubj[0]
+                    product.root = root.lemma_
+                    product.features = [w.lemma_ for w in doc if w.tag_ == 'ADJ']
+                    if len(doc.ents):
+                        product.entity = doc.ents[0].lemma_
+                    print(product.root, product.entity, product.features,
+                          product.name, product.id)
+                else:
+                    product.root = ''
                 product.save()
-                print(product.root, product.entity, product.features,
-                      product.name, product.id)
             else:
                 break
 
