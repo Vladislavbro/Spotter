@@ -78,6 +78,7 @@ class Products(Document):
             'category_wb_id',
             'parsed_at',
             'root',
+            'decada_sales_growth',
             '-sales',
             ('category_id', 'last_parsing_id'),
         ],
