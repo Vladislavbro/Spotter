@@ -49,6 +49,12 @@ def category(id):
     products = Products.objects(category_wb_id__in=ids)
     counter = Counter([p.root for p in products.filter(root__ne=None).only('root')])
     groups = sorted(counter.items(), key=lambda item: item[1], reverse=True)
+    groups = [g for g in groups if g[1] > 15]
+    for group in groups:
+        current_decada_sales = products.filter(root=group[0]).sum('current_decada_sales')
+        last_decada_sales = products.filter(root=group[0]).sum('last_decada_sales')
+        growth = int(current_decada_sales / last_decada_sales * 100)
+        group += [last_decada_sales, last_decada_sales, growth]
     return {
         'category': json.loads(root_category.to_json()),
         'ids': ids,
