@@ -67,6 +67,11 @@ class Products(Document):
     last_parsing_id = IntField()
     parsed_at = DateTimeField()
     sizes = EmbeddedDocumentListField('Sizes')
+    # current_week_sales = IntField()
+    # last_week_sales = IntField()
+    current_decada_sales = IntField()
+    last_decada_sales = IntField()
+    decada_sales_growth = IntField()
     meta = {
         'indexes': [
             'articul',
