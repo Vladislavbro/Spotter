@@ -27,9 +27,12 @@ class Statistic(object):
                                            if sales.date > current_decada_start]
                     product.current_decada_sales = sum([(s.sales or 0) for s
                                                         in current_decada_data])
-                    product.decada_sales_growth = int(
-                        product.current_decada_sales /
-                        product.last_decada_sales * 100)
+                    if product.current_decada_sales > 0:
+                        product.decada_sales_growth = int(
+                            product.current_decada_sales /
+                            product.last_decada_sales * 100)
+                    else:
+                        product.decada_sales_growth = 0
                 else:
                     product.last_decada_sales = 0
                     product.current_decada_sales = 0
