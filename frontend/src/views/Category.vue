@@ -6,10 +6,20 @@
       Товаров: <strong>{{ $store.state.info }}</strong>
     </div>
     <table class="table table-bordered table-hover">
+      <thead>
+        <th>Группа</th>
+        <th>Товаров</th>
+        <th>Продаж в предыдущей декаде</th>
+        <th>Продаж в текущей декаде</th>
+        <th>Процент роста</th>
+      </thead>
       <tbody>
         <tr v-for="(group, i) in $store.state.groups" :key="i">
           <td>{{ group[0] }}</td>
           <td>{{ group[1] }}</td>
+          <td>{{ group[2] }}</td>
+          <td>{{ group[3] }}</td>
+          <td>{{ group[4] }}</td>
         </tr>
       </tbody>
     </table>

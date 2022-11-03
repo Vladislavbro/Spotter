@@ -54,7 +54,7 @@ def category(id):
         current_decada_sales = products.filter(root=group[0]).sum('current_decada_sales')
         last_decada_sales = products.filter(root=group[0]).sum('last_decada_sales')
         growth = int(current_decada_sales / last_decada_sales * 100)
-        group += [last_decada_sales, last_decada_sales, growth]
+        group += [last_decada_sales, current_decada_sales, growth]
     return {
         'category': json.loads(root_category.to_json()),
         'ids': ids,
