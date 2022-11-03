@@ -12,7 +12,11 @@ from json import JSONDecodeError
 from proxies import proxies
 from random import choice
 from random_user_agent.user_agent import UserAgent
+import spacy
+import os
 
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+nlp = spacy.load('ru_core_news_md')
 
 user_agent_rotator = UserAgent()
 TOKEN = '507933514:AAHP_BHtTUEES3Mq9giC231W4ZkvfeqSBb0'
@@ -116,14 +120,7 @@ class Parser(object):
 
     def update_categories(self):
         url = 'https://www.wildberries.ru/webapi/menu/main-menu-ru-ru.json'
-        headers = {
-            'User-Agent': user_agent_rotator.get_random_user_agent()
-        }
-        proxy = choice(proxies)
-        response = requests.get(url, headers=headers, proxies={
-            'http': proxy,
-            'https': proxy,
-        })
+        response = self.get_url(url)
         data = response.json()
         for item in data:
             print(item['name'])
@@ -294,7 +291,7 @@ class Parser(object):
                                 'date': datetime.utcnow()
                             }
                         )
-                elif detail:
+                elif detail and item['name'].strip():
                     product = Products(
                         articul=item['id'],
                         name=item['name'],
@@ -319,6 +316,16 @@ class Parser(object):
                         quantity=quantity,
                         sales=sales,
                         date=datetime.utcnow())
+                    doc = nlp(product.name)
+                    root = [w for w in doc if w.dep_ == 'ROOT'][0]
+                    if root.tag_ != 'NOUN':
+                        nsubj = [w for w in doc if w.dep_ == 'nsubj']
+                        if len(nsubj):
+                            root = nsubj[0]
+                    product.root = root.lemma_
+                    product.features = [w.lemma_ for w in doc if w.tag_ == 'ADJ']
+                    if len(doc.ents):
+                        product.entity = doc.ents[0].lemma_
                     product.save()
 
             self.category.last_parsed_page = self.page
