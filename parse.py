@@ -12,11 +12,11 @@ from json import JSONDecodeError
 from proxies import proxies
 from random import choice
 from random_user_agent.user_agent import UserAgent
-# import spacy
+import spacy
 import os
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-# nlp = spacy.load('ru_core_news_md')
+nlp = spacy.load('ru_core_news_md')
 
 user_agent_rotator = UserAgent()
 TOKEN = '507933514:AAHP_BHtTUEES3Mq9giC231W4ZkvfeqSBb0'
@@ -53,8 +53,8 @@ class Parser(object):
     def __init__(self):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
-        # self.start_parsing()
-        self.get_categories()
+        self.start_parsing()
+        # self.get_categories()
 
     def start_parsing(self):
         if self.config.current_parsing_date.date() == datetime.utcnow().date():
