@@ -41,6 +41,10 @@ export const api = {
     return axios.get('/api/products', {params: context.state.params})
   },
 
+  async getTopCategories () {
+    return axios.get('/api/categories-top')
+  },
+
   async getCategories () {
     return axios.get('/api/categories')
   },

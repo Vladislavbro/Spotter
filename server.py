@@ -20,7 +20,7 @@ def get_children(category, categories):
 
 
 @app.route('/api/categories')
-def categories():
+def categories_list():
     out = []
     categories = json.loads(Categories.objects().all().to_json())
     for root in [c for c in categories if c.get('parent') is None]:
@@ -29,6 +29,13 @@ def categories():
     return {
         'categories': out
     }
+
+
+@app.route('/api/categories-top')
+def categories_top():
+    parent_ids = list(set([c.parent for c in Categories.objects.all()]))
+    categories = Categories.objects(wb_id__nin=parent_ids).to_json()
+    return categories
 
 
 def get_category_stat(category):

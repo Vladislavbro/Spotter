@@ -12,11 +12,11 @@ from json import JSONDecodeError
 from proxies import proxies
 from random import choice
 from random_user_agent.user_agent import UserAgent
-import spacy
+# import spacy
 import os
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-nlp = spacy.load('ru_core_news_md')
+# nlp = spacy.load('ru_core_news_md')
 
 user_agent_rotator = UserAgent()
 TOKEN = '507933514:AAHP_BHtTUEES3Mq9giC231W4ZkvfeqSBb0'
@@ -53,8 +53,8 @@ class Parser(object):
     def __init__(self):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
-        self.start_parsing()
-        # self.get_categories()
+        # self.start_parsing()
+        self.get_categories()
 
     def start_parsing(self):
         if self.config.current_parsing_date.date() == datetime.utcnow().date():
@@ -76,58 +76,48 @@ class Parser(object):
             self.config.save()
             self.get_category()
 
-    def create_category(self, child):
-        category = Categories.objects(wb_id=child['id']).first()
-        if category:
-            category.shard = child.get('shard')
-        else:
-            category = Categories(
-                name=child['name'],
-                wb_id=child['id'],
-                parent=child.get('parent'),
-                query=child.get('query'),
-                seo=child.get('seo'),
-                url=child.get('url'),
-                shard=child.get('shard'),
-            )
-        category.save()
-
     def update_category(self, child):
         category = Categories.objects(wb_id=child['id']).first()
-        if category:
-            category.shard = child.get('shard')
-            category.updated_at = datetime.utcnow()
-            category.save()
-            print('update category', category.name, category.wb_id,
-                  category.shard)
+        if category is None:
+            category = Categories(wb_id=child['id'])
+        category.name = child.get('name')
+        category.shard = child.get('shard')
+        category.query = child.get('query')
+        category.parent = child.get('parent')
+        category.query = child.get('query')
+        category.seo = child.get('seo')
+        category.url = child.get('url')
+        category.shard = child.get('shard')
+        category.parse = child.get('childs') is None
+        category.save()
 
     def get_categories(self):
+        self.upgrade_parsing()
         f = open('data/catalog.txt', 'r')
         content = f.read()
-        categoryUrlList = [line for line in content.strip().split('\n')
-                           if '/catalog/' in line]
+        categoryUrlList = [line for line in content.strip().split('\n')]
+        # if '/catalog/' in line]
         url = 'https://www.wildberries.ru/webapi/menu/main-menu-ru-ru.json'
         response = self.get_url(url)
         data = response.json()
-        for item in data:
-            self.create_category(item)
+        for item in [item for item in data if item['name'] in categoryUrlList]:
+            self.update_category(item)
             for child in item.get('childs', []):
                 if child['url'] in categoryUrlList:
-                    self.create_category(child)
+                    self.update_category(child)
                     if child.get('shard') == 'blackhole':
                         for subchild in child.get('childs', []):
-                            self.create_category(subchild)
+                            self.update_category(subchild)
 
-    def update_categories(self):
-        url = 'https://www.wildberries.ru/webapi/menu/main-menu-ru-ru.json'
-        response = self.get_url(url)
-        data = response.json()
-        for item in data:
-            print(item['name'])
-            for child in item.get('childs', []):
-                self.update_category(child)
-                for subchild in child.get('childs', []):
-                    self.update_category(subchild)
+    def upgrade_parsing(self):
+        Categories.objects.update(
+            parse=False,
+            parsed_at=None,
+            last_parsed_page=None,
+            last_parsed_page_at=None,
+            start_parsing_at=None,
+            current_parsing_id=None,
+        )
 
     def notify(self, text):
         for id in self.adminIds:
@@ -137,10 +127,11 @@ class Parser(object):
                 print('send message except')
 
     def get_category(self):
-        self.category = Categories.objects.filter(parsed_at=None).first()
+        self.category = Categories.objects.filter(parsed_at=None,
+                                                  parse=True).first()
         if self.category is None:
             self.notify('Парсинг категорий закончился')
-            Categories.objects.all().update(
+            Categories.objects(parse=True).update(
                 parsed_at=None,
                 last_parsed_page=None,
                 last_parsed_page_at=None,
@@ -291,6 +282,30 @@ class Parser(object):
                                 'date': datetime.utcnow()
                             }
                         )
+                    # now = datetime.utcnow()
+                    # current_decada_start = (now - timedelta(days=10)).replace(
+                    #     hour=0, minute=0, second=0, microsecond=0)
+                    # last_decada_start = current_decada_start - timedelta(days=10)
+                    # if len(product.sizes):
+                    #     last_decada_data = [sales for sales in product.sizes
+                    #                         if sales.date > last_decada_start
+                    #                         and sales.date < current_decada_start]
+                    #     product.last_decada_sales = sum([(s.sales or 0) for s
+                    #                                      in last_decada_data])
+                    #     current_decada_data = [sales for sales in product.sizes
+                    #                            if sales.date > current_decada_start]
+                    #     product.current_decada_sales = sum([(s.sales or 0) for s
+                    #                                         in current_decada_data])
+                    #     if product.last_decada_sales != 0:
+                    #         product.decada_sales_growth = int(
+                    #             product.current_decada_sales /
+                    #             product.last_decada_sales * 100)
+                    #     else:
+                    #         product.decada_sales_growth = 0
+                    # else:
+                    #     product.last_decada_sales = 0
+                    #     product.current_decada_sales = 0
+                    #     product.decada_sales_growth = 0
                 elif detail and item['name'].strip():
                     product = Products(
                         articul=item['id'],
@@ -362,3 +377,16 @@ parser = Parser()
 # Лакокрасочные материалы
 # Бассейны
 # Бумажная продукция
+
+# import requests
+# regions = '68,64,83,4,38,80,33,70,82,86,75,30,69,1,48,22,66,31,40,71'
+# dest = '-1029256,-102269,-2162196,-1257786'
+# couponsGeo = '12,3,18,15,21'
+# page = 1
+# url = (
+#     f'https://catalog.wb.ru/catalog/{category.shard}/catalog?'
+#     f'appType=1&couponsGeo={couponsGeo}&curr=rub&'
+#     f'dest={dest}&emp=0&lang=ru&locale=ru&'
+#     f'pricemarginCoeff=1.0&reg=1&regions={regions}&'
+#     f'sort=popular&spp=25&page={page}&{category.query}'
+# )

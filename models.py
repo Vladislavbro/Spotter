@@ -23,6 +23,7 @@ class Categories(Document):
     seo = StringField()
     shard = StringField()
     url = StringField(required=True)
+    parse = BooleanField(default=False)
     parsed_at = DateTimeField()
     last_parsed_page_at = DateTimeField()
     last_parsed_page = IntField()

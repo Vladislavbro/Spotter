@@ -3,6 +3,7 @@ import {app} from './main'
 import {api} from './api'
 const store = new Vuex.Store({
   state: {
+    topCategories: [],
     categories: [],
     category: {},
     products: [],
@@ -26,6 +27,17 @@ const store = new Vuex.Store({
     },
   },
   actions: {
+
+    async getTopCategories (context) {
+      try {
+        const response = await api.getTopCategories()
+        if (response.status === 200 && response.data) {
+          context.commit('mergeStore', {topCategories: response.data})
+        }
+      } catch (e) {
+        app.$toast.error(`${e.type}: ${e.message}`)
+      }
+    },
 
     async getCategories (context) {
       try {
