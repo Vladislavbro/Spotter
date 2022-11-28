@@ -282,30 +282,30 @@ class Parser(object):
                                 'date': datetime.utcnow()
                             }
                         )
-                    # now = datetime.utcnow()
-                    # current_decada_start = (now - timedelta(days=10)).replace(
-                    #     hour=0, minute=0, second=0, microsecond=0)
-                    # last_decada_start = current_decada_start - timedelta(days=10)
-                    # if len(product.sizes):
-                    #     last_decada_data = [sales for sales in product.sizes
-                    #                         if sales.date > last_decada_start
-                    #                         and sales.date < current_decada_start]
-                    #     product.last_decada_sales = sum([(s.sales or 0) for s
-                    #                                      in last_decada_data])
-                    #     current_decada_data = [sales for sales in product.sizes
-                    #                            if sales.date > current_decada_start]
-                    #     product.current_decada_sales = sum([(s.sales or 0) for s
-                    #                                         in current_decada_data])
-                    #     if product.last_decada_sales != 0:
-                    #         product.decada_sales_growth = int(
-                    #             product.current_decada_sales /
-                    #             product.last_decada_sales * 100)
-                    #     else:
-                    #         product.decada_sales_growth = 0
-                    # else:
-                    #     product.last_decada_sales = 0
-                    #     product.current_decada_sales = 0
-                    #     product.decada_sales_growth = 0
+                    now = datetime.utcnow()
+                    current_decada_start = (now - timedelta(days=10)).replace(
+                        hour=0, minute=0, second=0, microsecond=0)
+                    last_decada_start = current_decada_start - timedelta(days=10)
+                    if len(product.sizes):
+                        last_decada_data = [sales for sales in product.sizes
+                                            if sales.date > last_decada_start
+                                            and sales.date < current_decada_start]
+                        product.last_decada_sales = sum([(s.sales or 0) for s
+                                                         in last_decada_data])
+                        current_decada_data = [sales for sales in product.sizes
+                                               if sales.date > current_decada_start]
+                        product.current_decada_sales = sum([(s.sales or 0) for s
+                                                            in current_decada_data])
+                        if product.last_decada_sales != 0:
+                            product.decada_sales_growth = int(
+                                product.current_decada_sales /
+                                product.last_decada_sales * 100)
+                        else:
+                            product.decada_sales_growth = 0
+                    else:
+                        product.last_decada_sales = 0
+                        product.current_decada_sales = 0
+                        product.decada_sales_growth = 0
                 elif detail and item['name'].strip():
                     product = Products(
                         articul=item['id'],
