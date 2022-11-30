@@ -236,7 +236,7 @@ class Parser(object):
                 else:
                     detail = None
                     quantity = None
-                    sales = None
+                    sales = 0
 
                 if product and detail:
                     if product.sizes[-1].date.date() == (datetime.utcnow() - timedelta(days=1)).date():
@@ -248,7 +248,7 @@ class Parser(object):
                         if sales < 0:
                             sales = 0
                     else:
-                        sales = None
+                        sales = 0
                     Products.objects(id=product.id).update_one(
                         set__last_parsing_id=self.category.current_parsing_id,
                         set__name=item['name'],
