@@ -274,6 +274,8 @@ class Parser(object):
                         Products.objects(id=product.id).update_one(
                             push__sizes={
                                 'sales': sales,
+                                'price': price,
+                                'profit': sales * price,
                                 'quantity': quantity,
                                 'date': datetime.utcnow()
                             }
@@ -331,6 +333,8 @@ class Parser(object):
                     product.sizes.create(
                         quantity=quantity,
                         sales=sales,
+                        price=price,
+                        profit=sales * price,
                         date=datetime.utcnow())
                     doc = nlp(product.name)
                     root = [w for w in doc if w.dep_ == 'ROOT'][0]
