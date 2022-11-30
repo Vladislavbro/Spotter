@@ -111,7 +111,7 @@ class Parser(object):
 
     def upgrade_parsing(self):
         Categories.objects.update(
-            parse=False,
+            # parse=False,
             parsed_at=None,
             last_parsed_page=None,
             last_parsed_page_at=None,

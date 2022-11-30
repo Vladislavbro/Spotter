@@ -41,6 +41,7 @@ class Sizes(EmbeddedDocument):
     quantity = IntField(required=True)
     sales = IntField()
     profit = IntField()
+    price = IntField()
     date = DateTimeField(required=True)
 
 
