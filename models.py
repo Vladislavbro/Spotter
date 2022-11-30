@@ -54,6 +54,7 @@ class Products(Document):
     category_name = StringField(required=True)
     category_id = ReferenceField('Categories')
     category_wb_id = IntField()
+    categories = ListField(default=[])
     subject_id = IntField(required=True)
     rating = IntField()
     feedbacks = IntField()
@@ -77,6 +78,7 @@ class Products(Document):
         'indexes': [
             'articul',
             'category_wb_id',
+            'categories',
             'parsed_at',
             'root',
             'decada_sales_growth',

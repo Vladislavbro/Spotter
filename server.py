@@ -33,6 +33,8 @@ def categories_list():
 
 @app.route('/api/categories-top')
 def categories_top():
+    # for category in Categories.objects(parse=True):
+    #     print(f'{category.name}|https://www.wildberries.ru{category.url}|{category.shard}|{category.query}|{Products.objects(category_id=category.id).count()}')
     parent_ids = list(set([c.parent for c in Categories.objects.all()]))
     categories = Categories.objects(wb_id__nin=parent_ids).to_json()
     return categories

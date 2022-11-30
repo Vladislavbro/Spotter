@@ -179,13 +179,9 @@ class Parser(object):
             return self.change_category()
 
     def change_category(self):
-        # self.category.last_parsed_page_at = datetime.utcnow()
-        # self.category.parsed_at = datetime.utcnow()
-        # self.category.save()
-        Categories.objects.filter(shard=self.category.shard).update(
-            last_parsed_page_at=datetime.utcnow(),
-            parsed_at=datetime.utcnow()
-        )
+        self.category.last_parsed_page_at = datetime.utcnow()
+        self.category.parsed_at = datetime.utcnow()
+        self.category.save()
         self.get_category()
 
     def get_details(self, ids):
@@ -282,6 +278,10 @@ class Parser(object):
                                 'date': datetime.utcnow()
                             }
                         )
+                    if self.category.wb_id not in product.categories:
+                        Products.objects(id=product.id).update_one(
+                            push__categories=self.category.wb_id
+                        )
                     now = datetime.utcnow()
                     current_decada_start = (now - timedelta(days=10)).replace(
                         hour=0, minute=0, second=0, microsecond=0)
@@ -315,6 +315,7 @@ class Parser(object):
                         category_name=self.category.name,
                         category_id=self.category.id,
                         category_wb_id=self.category.wb_id,
+                        categories=[self.category.wb_id],
                         subject_id=item['subjectId'],
                         rating=item['rating'],
                         feedbacks=item['feedbacks'],
