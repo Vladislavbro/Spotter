@@ -1,29 +1,51 @@
 <template lang="html">
-  <div class="container">
+  <div class="container-xl">
     <div class="d-flex my-4">
       <div class="me-auto">
         <h3>Топ категорий</h3>
       </div>
-      <!-- <div class="">
-        <button
-          class="btn btn-sm btn-light"
-          data-bs-toggle="modal"
-          data-bs-target="#categoryModal"
-          @click="$store.commit('setData', {attr: 'category', value: {name: '', slug: '', k: 1, subjects: ''}})">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-          </svg>
-        </button>
-      </div> -->
     </div>
 
-    <div
-      v-for="category in $store.state.topCategories"
-      :key="category._id.$oid"
-      class="mb-2">
-      <CategoryItem :category="category"/>
-    </div>
+    <!-- "В этой странице открывается таблица с лучшими категориями товаров
+    Категории отбираются согласно разделу анализ ниши
+    Какие данные отражаются в таблице с подборкой:
+    9. Среднее количество продаж на один товар
+    10. Среднее количество продаж на одного продавца" -->
 
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>Название</th>
+          <th>Товаров</th>
+          <th>Продавцов</th>
+          <th>Оборот</th>
+          <th>Средняя цена</th>
+          <th>Продавцы с продажами</th>
+          <th>Товары с продажами</th>
+          <th>Продаж</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="category in $store.state.topCategories"
+          :key="category._id.$oid">
+          <td>
+            <a :href="'https://www.wildberries.ru' + category.url" target="_blank">{{ category.name }}</a>
+          </td>
+          <td>{{ category.products_count }}</td>
+          <td>{{ category.sellers }}</td>
+          <td>
+            {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_period) }}
+          </td>
+          <td>
+            {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.avg_price_period) }}
+          </td>
+          <td>{{ (category.rel_sellers * 100).toFixed() }}<small class="text-black-50"> %</small></td>
+          <td>{{ (category.rel_sales * 100).toFixed() }}<small class="text-black-50"> %</small></td>
+          <td>{{ category.sales_period }}</td>
+        </tr>
+      </tbody>
+    </table>
 
     <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -51,11 +73,11 @@
 </template>
 
 <script>
-import CategoryItem from './components/CategoryItem'
+
 export default {
   name: 'Brands',
   components: {
-    CategoryItem
+
   },
   computed: {
     getBrands () {

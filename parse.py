@@ -219,7 +219,7 @@ class Parser(object):
             for index, item in enumerate(data['data']['products']):
                 product = Products.objects(
                     articul=item['id']
-                ).fields(slice__sizes=[-2, 2]).first()
+                ).fields(slice__sizes=[-20, 20]).first()
                 price = item.get('salePriceU') / 100
 
                 detail = [detail for detail in details if detail['id'] == item['id']]
@@ -290,12 +290,12 @@ class Parser(object):
                     last_decada_start = current_decada_start - timedelta(days=10)
                     if len(product.sizes):
                         last_decada_data = [sales for sales in product.sizes
-                                            if sales.date > last_decada_start
+                                            if sales.date >= last_decada_start
                                             and sales.date < current_decada_start]
                         product.last_decada_sales = sum([(s.sales or 0) for s
                                                          in last_decada_data])
                         current_decada_data = [sales for sales in product.sizes
-                                               if sales.date > current_decada_start]
+                                               if sales.date >= current_decada_start]
                         product.current_decada_sales = sum([(s.sales or 0) for s
                                                             in current_decada_data])
                         if product.last_decada_sales != 0:

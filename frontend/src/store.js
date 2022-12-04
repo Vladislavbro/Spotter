@@ -32,7 +32,7 @@ const store = new Vuex.Store({
       try {
         const response = await api.getTopCategories()
         if (response.status === 200 && response.data) {
-          context.commit('mergeStore', {topCategories: response.data})
+          context.commit('mergeStore', {topCategories: response.data.top})
         }
       } catch (e) {
         app.$toast.error(`${e.type}: ${e.message}`)
