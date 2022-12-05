@@ -219,7 +219,7 @@ class Parser(object):
             for index, item in enumerate(data['data']['products']):
                 product = Products.objects(
                     articul=item['id']
-                ).fields(slice__sizes=[-20, 20]).first()
+                ).fields(slice__sizes=[-2, 2]).first()
                 price = item.get('salePriceU') / 100
 
                 detail = [detail for detail in details if detail['id'] == item['id']]
@@ -284,6 +284,9 @@ class Parser(object):
                         Products.objects(id=product.id).update_one(
                             push__categories=self.category.wb_id
                         )
+                    product = Products.objects(
+                        articul=item['id']
+                    ).fields(slice__sizes=[-20, 20]).first()
                     now = datetime.utcnow()
                     current_decada_start = (now - timedelta(days=10)).replace(
                         hour=0, minute=0, second=0, microsecond=0)
@@ -292,22 +295,27 @@ class Parser(object):
                         last_decada_data = [sales for sales in product.sizes
                                             if sales.date >= last_decada_start
                                             and sales.date < current_decada_start]
-                        product.last_decada_sales = sum([(s.sales or 0) for s
-                                                         in last_decada_data])
+                        last_decada_sales = sum([(s.sales or 0) for s
+                                                 in last_decada_data])
                         current_decada_data = [sales for sales in product.sizes
                                                if sales.date >= current_decada_start]
-                        product.current_decada_sales = sum([(s.sales or 0) for s
-                                                            in current_decada_data])
-                        if product.last_decada_sales != 0:
-                            product.decada_sales_growth = int(
-                                product.current_decada_sales /
-                                product.last_decada_sales * 100)
+                        current_decada_sales = sum([(s.sales or 0) for s
+                                                    in current_decada_data])
+                        if last_decada_sales != 0:
+                            decada_sales_growth = int(
+                                current_decada_sales /
+                                last_decada_sales * 100)
                         else:
-                            product.decada_sales_growth = 0
+                            decada_sales_growth = 0
                     else:
-                        product.last_decada_sales = 0
-                        product.current_decada_sales = 0
-                        product.decada_sales_growth = 0
+                        last_decada_sales = 0
+                        current_decada_sales = 0
+                        decada_sales_growth = 0
+                    Products.objects(id=product.id).update_one(
+                        set__decada_sales_growth=decada_sales_growth,
+                        set__current_decada_sales=current_decada_sales,
+                        set__last_decada_sales=last_decada_sales,
+                    )
                 elif detail and item['name'].strip():
                     product = Products(
                         articul=item['id'],
