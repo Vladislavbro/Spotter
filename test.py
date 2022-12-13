@@ -72,9 +72,9 @@ class Top(object):
                         (query_products[0].price or 0)
                     )
                     ten_product_decada_profit = (
-                        (query_products[10].current_decada_sales or 0)
+                        (query_products[9].current_decada_sales or 0)
                         *
-                        (query_products[10].price or 0)
+                        (query_products[9].price or 0)
                     )
                     products_with_sales = query_products.filter(
                         current_decada_sales__gt=0).count()

@@ -96,12 +96,12 @@ def get_top_v1():
                     *
                     (top_products[0].price or 0)
                 ),
-                'ten_product_price': top_products[10].price,
-                'ten_product_decada_sales': top_products[10].current_decada_sales,
+                'ten_product_price': top_products[9].price,
+                'ten_product_decada_sales': top_products[9].current_decada_sales,
                 'ten_product_decada_profit': (
-                    (top_products[10].current_decada_sales or 0)
+                    (top_products[9].current_decada_sales or 0)
                     *
-                    (top_products[10].price or 0)
+                    (top_products[9].price or 0)
                 ),
                 'products_count': _count,
                 'products_with_sales': products_with_sales,
