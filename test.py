@@ -58,7 +58,6 @@ class Top(object):
                     query = [top.root, features]
                     queries.append(query)
             for query in queries:
-                print('query', query)
                 query_products = Products.objects(
                     root=query[0],
                     features__all=query[1]
@@ -81,11 +80,11 @@ class Top(object):
                     avg_price_prev_period = self.get_avg(
                         [[s.price for s in p.sizes if s.price
                           and s.date >= start_prev_period
-                          and s.date < end_prev_period] for p in products]
+                          and s.date < end_prev_period] for p in query_products]
                     )
                     avg_price_period = self.get_avg(
                         [[s.price for s in p.sizes if s.price
-                          and s.date >= end_prev_period] for p in products]
+                          and s.date >= end_prev_period] for p in query_products]
                     )
                     profit_prev_period = self.get_sum(
                         [[s.profit or ((s.sales or 0) *
@@ -94,13 +93,13 @@ class Top(object):
                           if s.date >= start_prev_period
                           and s.date < end_prev_period
                           ]
-                         for p in products]
+                         for p in query_products]
                     )
                     profit_period = self.get_sum(
                         [[s.profit or ((s.sales or 0) *
                                        (s.price or p.price or 0))
                           for s in p.sizes if s.date >= end_prev_period]
-                         for p in products]
+                         for p in query_products]
                     )
                     top = {
                         'query': query,
@@ -108,8 +107,8 @@ class Top(object):
                         'first_product_decada_profit': first_product_decada_profit,
                         'ten_product_decada_profit': ten_product_decada_profit,
                         'products_with_sales': products_with_sales,
-                        'avg_price_prev_period': avg_price_prev_period,
-                        'avg_price_period': avg_price_period,
+                        'avg_price_prev_period': int(avg_price_prev_period),
+                        'avg_price_period': int(avg_price_period),
                         'profit_prev_period': profit_prev_period,
                         'profit_period': profit_period,
                     }

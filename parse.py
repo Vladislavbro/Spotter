@@ -217,7 +217,7 @@ class Parser(object):
             if len(nsubj):
                 root = nsubj[0]
         product.root = root.lemma_
-        features = [w.lemma_ for w in doc if w.tag_ == 'ADJ']
+        features = list(set([w.lemma_ for w in doc if w.tag_ == 'ADJ']))
         features.sort()
         product.features = features
         if len(doc.ents):
