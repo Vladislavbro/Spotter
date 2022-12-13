@@ -42,6 +42,21 @@ class Top(object):
     def get_sum(self, values):
         return sum([sum(value) for value in values])
 
+    def add_record(self, top, file_path):
+        file_object = open(file_path, 'a')
+        file_object.write(
+            top['query'][0] + ';' + ','.join(top['query'][1]) + ';' +
+            str(top['query_products_count']) + ';' +
+            str(top['first_product_decada_profit']) + ';' +
+            str(top['ten_product_decada_profit']) + ';' +
+            str(top['products_with_sales']) + ';' +
+            str(top['avg_price_prev_period']) + ';' +
+            str(top['avg_price_period']) + ';' +
+            str(top['profit_prev_period']) + ';' +
+            str(top['profit_period']) + ';'
+        )
+        file_object.close()
+
     def calculate(self):
         end_prev_period = (datetime.now() - timedelta(days=10)).replace(
             hour=0, minute=0, second=0, microsecond=0)
@@ -113,6 +128,7 @@ class Top(object):
                         'profit_period': profit_period,
                     }
                     print(top)
+                    self.add_record(top, 'out.csv')
                     # Оборот первого не меньше 500к
                     if first_product_decada_profit < self.profit_first_top:
                         continue
@@ -142,6 +158,7 @@ class Top(object):
                     print('-----')
                     print('-----')
                     print('-----')
+                    self.add_record(top, 'top.csv')
 
 
 Top()
