@@ -53,7 +53,7 @@ class Top(object):
             str(top['avg_price_prev_period']) + ';' +
             str(top['avg_price_period']) + ';' +
             str(top['profit_prev_period']) + ';' +
-            str(top['profit_period']) + ';'
+            str(top['profit_period']) + '\n'
         )
         file_object.close()
 
