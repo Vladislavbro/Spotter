@@ -15,6 +15,10 @@ class Config(Document):
     parsing_done = BooleanField()
 
 
+class Queries(Document):
+    text = StringField(required=True)
+
+
 class Categories(Document):
     name = StringField(required=True)
     wb_id = IntField(required=True)
@@ -76,6 +80,8 @@ class Products(Document):
     current_decada_sales = IntField()
     last_decada_sales = IntField()
     decada_sales_growth = IntField()
+    last_decada_profit = IntField()
+    current_decada_profit = IntField()
     meta = {
         'indexes': [
             'articul',

@@ -209,6 +209,20 @@ class Parser(object):
                 self.notify('Exception ' + str(e))
         return []
 
+    def text_process(self, product):
+        doc = nlp(product.name)
+        root = [w for w in doc if w.dep_ == 'ROOT'][0]
+        if root.tag_ != 'NOUN':
+            nsubj = [w for w in doc if w.dep_ == 'nsubj']
+            if len(nsubj):
+                root = nsubj[0]
+        product.root = root.lemma_
+        features = [w.lemma_ for w in doc if w.tag_ == 'ADJ']
+        features.sort()
+        product.features = features
+        if len(doc.ents):
+            product.entity = doc.ents[0].lemma_
+
     def parse_catalog(self, data):
         print('parse_catalog', self.category.name, self.page)
         if len(data.get('data', {}).get('products', [])) > 0:
@@ -249,6 +263,11 @@ class Parser(object):
                             sales = 0
                     else:
                         sales = 0
+                    # if product.name != item['name']:
+                    if True:
+                        product.name = item['name'].strip()
+                        self.text_process(product)
+                        product.save()
                     Products.objects(id=product.id).update_one(
                         set__last_parsing_id=self.category.current_parsing_id,
                         set__name=item['name'],
@@ -297,10 +316,17 @@ class Parser(object):
                                             and sales.date < current_decada_start]
                         last_decada_sales = sum([(s.sales or 0) for s
                                                  in last_decada_data])
+                        last_decada_profit = sum([(s.sales or 0) * (s.price or product.price or 0) for s
+                                                 in last_decada_data])
                         current_decada_data = [sales for sales in product.sizes
                                                if sales.date >= current_decada_start]
                         current_decada_sales = sum([(s.sales or 0) for s
                                                     in current_decada_data])
+                        current_decada_profit = sum(
+                            [(s.sales or 0) *
+                             (s.price or product.price or 0) for
+                             s in current_decada_data])
+
                         if last_decada_sales != 0:
                             decada_sales_growth = int(
                                 current_decada_sales /
@@ -311,10 +337,14 @@ class Parser(object):
                         last_decada_sales = 0
                         current_decada_sales = 0
                         decada_sales_growth = 0
+                        last_decada_profit = 0
+                        current_decada_profit = 0
                     Products.objects(id=product.id).update_one(
                         set__decada_sales_growth=decada_sales_growth,
                         set__current_decada_sales=current_decada_sales,
                         set__last_decada_sales=last_decada_sales,
+                        set__current_decada_profit=current_decada_profit,
+                        set__last_decada_profit=last_decada_profit,
                     )
                 elif detail and item['name'].strip():
                     product = Products(
@@ -344,16 +374,7 @@ class Parser(object):
                         price=price,
                         profit=sales * price,
                         date=datetime.utcnow())
-                    doc = nlp(product.name)
-                    root = [w for w in doc if w.dep_ == 'ROOT'][0]
-                    if root.tag_ != 'NOUN':
-                        nsubj = [w for w in doc if w.dep_ == 'nsubj']
-                        if len(nsubj):
-                            root = nsubj[0]
-                    product.root = root.lemma_
-                    product.features = [w.lemma_ for w in doc if w.tag_ == 'ADJ']
-                    if len(doc.ents):
-                        product.entity = doc.ents[0].lemma_
+                    self.text_process(product)
                     product.save()
 
             self.category.last_parsed_page = self.page
@@ -375,31 +396,3 @@ class Parser(object):
 
 
 parser = Parser()
-
-# Досуг и творчество
-# Кухонный текстиль
-# Мебельная фурнитура
-# Школьные принадлежности
-# Большие размеры
-# Офис
-# Подарки мужчинам
-# Кронштейны
-# Белье и аксессуары
-# Школьные принадлежности
-# Женщинам
-# Лакокрасочные материалы
-# Бассейны
-# Бумажная продукция
-
-# import requests
-# regions = '68,64,83,4,38,80,33,70,82,86,75,30,69,1,48,22,66,31,40,71'
-# dest = '-1029256,-102269,-2162196,-1257786'
-# couponsGeo = '12,3,18,15,21'
-# page = 1
-# url = (
-#     f'https://catalog.wb.ru/catalog/{category.shard}/catalog?'
-#     f'appType=1&couponsGeo={couponsGeo}&curr=rub&'
-#     f'dest={dest}&emp=0&lang=ru&locale=ru&'
-#     f'pricemarginCoeff=1.0&reg=1&regions={regions}&'
-#     f'sort=popular&spp=25&page={page}&{category.query}'
-# )
