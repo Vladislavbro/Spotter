@@ -217,7 +217,7 @@ class Parser(object):
             if len(nsubj):
                 root = nsubj[0]
         product.root = root.lemma_
-        features = list(set([w.lemma_ for w in doc if w.tag_ == 'ADJ']))
+        features = list(set([w.lemma_ for w in doc if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
         features.sort()
         product.features = features
         if len(doc.ents):
@@ -263,8 +263,8 @@ class Parser(object):
                             sales = 0
                     else:
                         sales = 0
-                    # if product.name != item['name']:
                     if True:
+                        # product.name != item['name'].strip()
                         product.name = item['name'].strip()
                         self.text_process(product)
                         product.save()

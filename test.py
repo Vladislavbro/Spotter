@@ -33,6 +33,7 @@ class Top(object):
 
     def __init__(self):
         super(Top, self).__init__()
+        Queries.objects.delete()
         self.create_empy_file('out.csv')
         self.create_empy_file('top.csv')
         self.end_prev_period = (datetime.now() - timedelta(days=10)).replace(
@@ -52,24 +53,24 @@ class Top(object):
         return sum([sum(value) for value in values])
 
     def calculate_queries(self):
+        queries = list()
         for category in self.categories:
             self.category = category
             products = Products.objects(categories__in=[self.category.wb_id])
             # top_products = products.filter(last_decada_profit__gte=profit_last_decada).order_by('-current_decada_sales')[0:50]
             top_products = products.order_by('-current_decada_sales')[0:50]
-            queries = list()
             for top in top_products:
                 features = top.features
                 features.sort()
                 if top.root and features and [top.root, features] not in queries:
                     query = [top.root, features]
                     queries.append(query)
-            for query in queries:
-                query_products = Products.objects(
-                    root=query[0],
-                    features__all=query[1]
-                ).order_by('-current_decada_sales')
-                self.calculate(query_products, query)
+        for query in queries:
+            query_products = Products.objects(
+                root=query[0],
+                features__all=query[1]
+            ).order_by('-current_decada_sales')
+            self.calculate(query_products, query)
 
     def calculate_categories(self):
         for category in self.categories:
@@ -90,18 +91,18 @@ class Top(object):
     def add_record(self, top, file_path):
         file_object = open(file_path, 'a')
         file_object.write(
-            top['query'][0] + ';' + ','.join(top['query'][1]) + ';' +
-            str(top['query_products_count']) + ';' +
-            str(top['first_product_decada_profit']) + ';' +
-            str(top['ten_product_decada_profit']) + ';' +
-            str(top['products_with_sales']) + ';' +
-            str(top['avg_price_prev_period']) + ';' +
-            str(top['avg_price_period']) + ';' +
-            str(top['profit_prev_period']) + ';' +
-            str(top['profit_period']) + ';' +
-            str(top['sellers']) + ';' +
-            str(top['sellers_with_sales']) + ';' +
-            str(top['sales_period']) + '\n'
+            top.root + ';' + ','.join(top.features) + ';' +
+            str(top.query_products_count) + ';' +
+            str(top.first_product_decada_profit) + ';' +
+            str(top.ten_product_decada_profit) + ';' +
+            str(top.products_with_sales) + ';' +
+            str(top.avg_price_prev_period) + ';' +
+            str(top.avg_price_period) + ';' +
+            str(top.profit_prev_period) + ';' +
+            str(top.profit_period) + ';' +
+            str(top.sellers) + ';' +
+            str(top.sellers_with_sales) + ';' +
+            str(top.sales_period) + '\n'
         )
         file_object.close()
 
@@ -152,21 +153,23 @@ class Top(object):
             sales_period = self.get_sum(
                 [[(s.sales or 0) for s in p.sizes
                   if s.date >= self.end_prev_period] for p in query_products])
-            top = {
-                'query': query,
-                'query_products_count': query_products_count,
-                'first_product_decada_profit': first_product_decada_profit,
-                'ten_product_decada_profit': ten_product_decada_profit,
-                'products_with_sales': products_with_sales,
-                'avg_price_prev_period': int(avg_price_prev_period),
-                'avg_price_period': int(avg_price_period),
-                'profit_prev_period': profit_prev_period,
-                'profit_period': profit_period,
-                'sellers': sellers,
-                'sellers_with_sales': sellers_with_sales,
-                'sales_period': sales_period
-            }
-            print(top)
+            top = Queries.objects(
+                root=query[0],
+                features=query[1],
+                query_products_count=query_products_count,
+                first_product_decada_profit=first_product_decada_profit,
+                ten_product_decada_profit=ten_product_decada_profit,
+                products_with_sales=products_with_sales,
+                avg_price_prev_period=int(avg_price_prev_period),
+                avg_price_period=int(avg_price_period),
+                profit_prev_period=profit_prev_period,
+                profit_period=profit_period,
+                sellers=sellers,
+                sellers_with_sales=sellers_with_sales,
+                sales_period=sales_period
+            )
+            if query is None:
+                top.category_id = self.category.id
             self.add_record(top, 'out.csv')
             # Оборот первого не меньше 500к
             if first_product_decada_profit < self.profit_first_top:
@@ -198,9 +201,7 @@ class Top(object):
             print('-----')
             print('-----')
             self.add_record(top, 'top.csv')
-            Queries.objects.create(
-
-            )
+            top.save()
 
 
 Top()

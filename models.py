@@ -16,7 +16,20 @@ class Config(Document):
 
 
 class Queries(Document):
-    text = StringField(required=True)
+    category_id = ReferenceField('Categories')
+    root = StringField()
+    features = ListField(default=[])
+    query_products_count = IntField()
+    first_product_decada_profit = IntField()
+    ten_product_decada_profit = IntField()
+    products_with_sales = IntField()
+    avg_price_prev_period = IntField()
+    avg_price_period = IntField()
+    profit_prev_period = IntField()
+    profit_period = IntField()
+    sellers = IntField()
+    sellers_with_sales = IntField()
+    sales_period = IntField()
 
 
 class Categories(Document):
