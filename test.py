@@ -154,7 +154,7 @@ class Top(object):
             sales_period = self.get_sum(
                 [[(s.sales or 0) for s in p.sizes
                   if s.date >= self.end_prev_period] for p in query_products])
-            top = Queries.objects(
+            top = Queries(
                 root=query[0],
                 features=query[1],
                 query_products_count=query_products_count,
