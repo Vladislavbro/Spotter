@@ -64,6 +64,7 @@ class Top(object):
                 features.sort()
                 if top.root and features and [top.root, features] not in queries:
                     query = [top.root, features]
+                    print('query', query)
                     queries.append(query)
         for query in queries:
             query_products = Products.objects(
@@ -200,8 +201,8 @@ class Top(object):
             print('-----')
             print('-----')
             print('-----')
-            self.add_record(top, 'top.csv')
             top.save()
+            self.add_record(top, 'top.csv')
 
 
 Top()
