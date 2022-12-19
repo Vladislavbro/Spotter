@@ -451,7 +451,7 @@ class Parser(object):
             self.query.last_parsed_page = self.page
             self.query.save()
             self.page += 1
-            if self.page > 4:
+            if self.page > 5:
                 self.change_query()
             else:
                 self.get_query()
