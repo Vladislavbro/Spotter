@@ -452,7 +452,7 @@ class Parser(object):
         print('parse_search', self.query)
         if len(data.get('data', {}).get('products', [])) > 0:
             products = data['data']['products']
-            ids = self.query.articuls + [p.wb_id for p in products]
+            ids = self.query.articuls + [p['id'] for p in products]
             Queries.objects(id=self.query.id).update_one(set__articuls=ids)
             self.parse_products(data['data']['products'])
             self.query.last_parsed_page = self.page
