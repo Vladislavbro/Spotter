@@ -137,7 +137,8 @@ class Parser(object):
                 print('send message except')
 
     def get_query(self):
-        self.query = Queries.objects.filter(parsed_at=None).first()
+        self.query = Queries.objects.filter(parsed_at=None,
+                                            root__ne=None).first()
         if self.query is None:
             self.notify('Парсинг запросов закончился')
             Queries.objects().update(
