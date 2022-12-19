@@ -40,9 +40,9 @@ class Parser(object):
     def __init__(self):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
-        # self.start_parsing()
+        self.start_parsing()
         # self.get_categories()
-        self.create_queries()
+        # self.create_queries()
 
     def get_url(self, url):
         try:
