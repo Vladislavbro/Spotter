@@ -10,8 +10,6 @@ class Top(object):
     - Оборот товара в первом периоде должен быть больше 10 000 рублей
     2. Алгоритм вычленияет главное слово и характеристику и забивает результат
     в поиск на маркетплейсе
-    Условия отбора:
-    - товаров по запросу должно быть не больше 300
     3. Составляется таблица товаров из выдачи с сортировкой по обороту от
     большего к меньшему
     Условия отбора:
@@ -53,25 +51,19 @@ class Top(object):
         return sum([sum(value) for value in values])
 
     def calculate_queries(self):
-        queries = list()
         for category in self.categories:
             self.category = category
             products = Products.objects(categories__in=[self.category.wb_id])
             # top_products = products.filter(last_decada_profit__gte=profit_last_decada).order_by('-current_decada_sales')[0:50]
-            top_products = products.order_by('-current_decada_sales')[0:50]
+            top_products = products.filter(
+                current_decada_sales__gt=0).order_by('-current_decada_sales')[0:50]
             for top in top_products:
                 features = top.features
                 features.sort()
-                if top.root and features and [top.root, features] not in queries:
-                    query = [top.root, features]
-                    print('query', query)
-                    queries.append(query)
-        for query in queries:
-            query_products = Products.objects(
-                root=query[0],
-                features__all=query[1]
-            ).order_by('-current_decada_sales')
-            self.calculate(query_products, query)
+                q = Queries.objects(root=top.root, features=features).first()
+                if q is None:
+                    q = Queries(root=top.root, features=features)
+                    q.save()
 
     def calculate_categories(self):
         for category in self.categories:
@@ -172,35 +164,28 @@ class Top(object):
             if query is None:
                 top.category_id = self.category.id
             self.add_record(top, 'out.csv')
+            calc = dict()
             # Оборот первого не меньше 500к
             if first_product_decada_profit < self.profit_first_top:
-                return
+                calc['profit_first_top'] = False
             # оборот десятого не меньше 100к
             if ten_product_decada_profit < self.profit_ten_top:
-                return
+                calc['profit_ten_top'] = False
             # Количество товаров с продажами: не меньше 20%
             if products_with_sales / query_products_count < 1/5:
-                return
+                calc['products_with_sales'] = False
             # Средний чек в категории месяц назад и сейчас
-            # отличается не более чем на +-10%
+            # отличается не более чем на +/- 10%
             if avg_price_period < avg_price_prev_period * 0.9:
-                return
+                calc['avg_price_diff'] = False
             if avg_price_period > avg_price_prev_period * 1.1:
-                return
+                calc['avg_price_diff'] = False
             # Оборот в категории месяц назад и сейчас отличается
-            # не более чем на +-10%
+            # не более чем на +/- 10%
             if profit_period < profit_prev_period * 0.9:
-                return
+                calc['profit_period'] = False
             if profit_period > profit_prev_period * 1.1:
-                return
-            print('-----')
-            print('-----')
-            print('-----')
-            print('SUPERTOP')
-            print('-----')
-            print('-----')
-            print('-----')
-            print('-----')
+                calc['profit_period'] = False
             top.save()
             self.add_record(top, 'top.csv')
 

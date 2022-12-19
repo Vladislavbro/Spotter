@@ -13,6 +13,7 @@ class Config(Document):
     current_parsing_date = DateTimeField()
     current_parsing_id = IntField()
     parsing_done = BooleanField()
+    queries_done = BooleanField()
 
 
 class Queries(Document):
@@ -30,6 +31,8 @@ class Queries(Document):
     sellers = IntField()
     sellers_with_sales = IntField()
     sales_period = IntField()
+    parsed_at = DateTimeField()
+    last_parsed_page = IntField()
 
 
 class Categories(Document):
@@ -73,6 +76,7 @@ class Products(Document):
     category_name = StringField(required=True)
     category_id = ReferenceField('Categories')
     category_wb_id = IntField()
+    queries = ListField(default=[])
     categories = ListField(default=[])
     subject_id = IntField(required=True)
     rating = IntField()
