@@ -18,6 +18,7 @@ class Config(Document):
 
 class Queries(Document):
     category_id = ReferenceField('Categories')
+    articuls = ListField(default=[])
     root = StringField()
     features = ListField(default=[])
     query_products_count = IntField()

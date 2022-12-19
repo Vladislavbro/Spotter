@@ -60,13 +60,13 @@ class Parser(object):
             return self.get_url(url)
 
     def start_parsing(self):
-        # if self.config.parsing_done is not True:
-        #     self.get_category()
+        if self.config.parsing_done is not True:
+            self.get_category()
         if self.config.queries_done is not True:
             self.get_query()
 
     def create_queries(self):
-        Queries.objects().delete()
+        # Queries.objects().delete()
         categories = Categories.objects(parse=True)
         for category in categories:
             self.category = category
@@ -166,7 +166,6 @@ class Parser(object):
                 last_parsed_page=None,
                 last_parsed_page_at=None,
                 start_parsing_at=None,
-                current_parsing_id=None,
             )
             self.config.parsing_done = True
             self.config.save()
@@ -209,6 +208,7 @@ class Parser(object):
             except JSONDecodeError as e:
                 self.notify('JSONDecodeError ' + query)
                 print('JSONDecodeError', e, url)
+                self.change_query()
             except Exception as e:
                 print('except', str(e))
         else:
@@ -366,12 +366,12 @@ class Parser(object):
                             'date': datetime.utcnow()
                         }
                     )
-                if self.query:
-                    if str(self.query.id) not in product.queries:
-                        Products.objects(id=product.id).update_one(
-                            push__queries=str(self.query.id)
-                        )
-                elif self.query is None and self.category.wb_id not in product.categories:
+                # if self.query:
+                #     if str(self.query.id) not in product.queries:
+                #         Products.objects(id=product.id).update_one(
+                #             push__queries=str(self.query.id)
+                #         )
+                if self.query is None and self.category.wb_id not in product.categories:
                     Products.objects(id=product.id).update_one(
                         push__categories=self.category.wb_id
                     )
@@ -451,6 +451,9 @@ class Parser(object):
     def parse_search(self, data):
         print('parse_search', self.query)
         if len(data.get('data', {}).get('products', [])) > 0:
+            products = data['data']['products']
+            ids = self.query.articuls + [p.wb_id for p in products]
+            Queries.objects(id=self.query.id).update_one(set__articuls=ids)
             self.parse_products(data['data']['products'])
             self.query.last_parsed_page = self.page
             self.query.save()
