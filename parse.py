@@ -302,7 +302,6 @@ class Parser(object):
                 articul=item['id']
             ).fields(slice__sizes=[-2, 2]).first()
             price = item.get('salePriceU') / 100
-
             detail = [detail for detail in details if detail['id'] == item['id']]
             if len(detail):
                 detail = detail[0]
@@ -367,7 +366,12 @@ class Parser(object):
                             'date': datetime.utcnow()
                         }
                     )
-                if self.query is None and self.category.wb_id not in product.categories:
+                if self.query:
+                    if str(self.query.id) not in product.queries:
+                        Products.objects(id=product.id).update_one(
+                            push__queries=str(self.query.id)
+                        )
+                elif self.query is None and self.category.wb_id not in product.categories:
                     Products.objects(id=product.id).update_one(
                         push__categories=self.category.wb_id
                     )

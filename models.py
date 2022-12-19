@@ -104,6 +104,7 @@ class Products(Document):
             'articul',
             'category_wb_id',
             'categories',
+            'queries',
             'parsed_at',
             'root',
             'decada_sales_growth',
