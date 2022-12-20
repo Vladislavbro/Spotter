@@ -60,10 +60,17 @@ class Parser(object):
             return self.get_url(url)
 
     def start_parsing(self):
-        if self.config.parsing_done is not True:
+        if self.config.current_parsing_date.date() == datetime.utcnow().date():
+            if self.config.parsing_done is not True:
+                self.get_category()
+            if self.config.queries_done is not True:
+                self.get_query()
+        else:
+            self.config.parsing_done = False
+            self.config.queries_done = False
+            self.config.current_parsing_date = datetime.utcnow()
+            self.config.save()
             self.get_category()
-        if self.config.queries_done is not True:
-            self.get_query()
 
     def create_queries(self):
         # Queries.objects().delete()
