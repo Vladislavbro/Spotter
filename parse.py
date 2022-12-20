@@ -84,12 +84,17 @@ class Parser(object):
             for top in top_products:
                 features = top.features
                 features.sort()
-                q = Queries.objects(root=top.root, features=features).first()
+                q = Queries.objects(
+                    root=top.root,
+                    features=features,
+                    current_parsing_id=self.config.current_parsing_id
+                ).first()
                 if q is None:
                     q = Queries(
                         root=top.root,
                         features=features,
-                        category_id=category.id
+                        category_id=category.id,
+                        current_parsing_id=self.config.current_parsing_id
                     )
                     q.save()
                     print(q.root, q.features)
@@ -144,14 +149,12 @@ class Parser(object):
                 print('send message except')
 
     def get_query(self):
-        self.query = Queries.objects.filter(parsed_at=None,
-                                            root__ne=None).first()
+        self.query = Queries.objects.filter(
+            parsed_at=None,
+            root__ne=None
+        ).first()
         if self.query is None:
             self.notify('Парсинг запросов закончился')
-            Queries.objects().update(
-                parsed_at=None,
-                last_parsed_page=None,
-            )
             self.config.queries_done = True
             self.config.save()
             return self.caclulate()
