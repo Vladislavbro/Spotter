@@ -69,7 +69,7 @@ class Sizes(EmbeddedDocument):
 
 
 class Products(Document):
-    articul = IntField(required=True, unique=True)
+    articul = IntField(required=True)  # , unique=True
     name = StringField(required=True)
     root = StringField()
     entity = StringField()
