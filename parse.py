@@ -152,7 +152,7 @@ class Parser(object):
 
     def get_query(self):
         self.query = Queries.objects.filter(
-            current_parsing_id=self.config.current_parsing_id
+            current_parsing_id=self.config.current_parsing_id,
             parsed_at=None,
             root__ne=None
         ).first()
