@@ -69,6 +69,7 @@ class Sizes(EmbeddedDocument):
 
 
 class Products(Document):
+    check_articul = BooleanField()
     articul = IntField(required=True)  # , unique=True
     name = StringField(required=True)
     root = StringField()
@@ -104,6 +105,7 @@ class Products(Document):
     current_decada_profit = IntField()
     meta = {
         'indexes': [
+            'check_articul',
             'articul',
             'category_wb_id',
             'categories',
