@@ -40,8 +40,8 @@ class Parser(object):
     def __init__(self):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
-        self.product_unique()
-        # self.start_parsing()
+        # self.product_unique()
+        self.start_parsing()
         # self.get_categories()
         # self.create_queries()
 
@@ -59,15 +59,6 @@ class Parser(object):
         except:
             print('get_url except', proxy)
             return self.get_url(url)
-
-    def product_unique(self):
-        product = Products.objects(check_articul__ne=True).first()
-        while product:
-            print(product.articul)
-            Products.objects(articul=product.articul, id__ne=product.id).delete()
-            product.check_articul = True
-            product.save()
-            product = Products.objects(check_articul__ne=True).first()
 
     def start_parsing(self):
         if self.config.current_parsing_date.date() == datetime.utcnow().date():
@@ -315,6 +306,12 @@ class Parser(object):
         if len(doc.ents):
             product.entity = doc.ents[0].lemma_
 
+    def check_unique(self, product):
+        print(product.articul)
+        Products.objects(articul=product.articul, id__ne=product.id).delete()
+        product.check_articul = True
+        product.save()
+
     def parse_products(self, products):
         print('products:', len(products))
         ids = [p['id'] for p in products]
@@ -342,6 +339,7 @@ class Parser(object):
                 sales = 0
 
             if product and detail:
+                self.check_unique(product)
                 if product.sizes[-1].date != datetime.now().date():
                     # Если последняя цена вчерашняя то посчитать разницу остатков и
                     # записать как количество продаж
