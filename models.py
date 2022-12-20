@@ -34,6 +34,8 @@ class Queries(Document):
     sales_period = IntField()
     parsed_at = DateTimeField()
     last_parsed_page = IntField()
+    current_parsing_id = IntField()
+    params = DictField(default={})
 
 
 class Categories(Document):
@@ -67,7 +69,7 @@ class Sizes(EmbeddedDocument):
 
 
 class Products(Document):
-    articul = IntField(required=True)
+    articul = IntField(required=True, unique=True)
     name = StringField(required=True)
     root = StringField()
     entity = StringField()

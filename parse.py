@@ -68,7 +68,9 @@ class Parser(object):
         else:
             self.config.parsing_done = False
             self.config.queries_done = False
-            self.config.current_parsing_date = datetime.utcnow()
+            date = datetime.utcnow()
+            self.config.current_parsing_date = date
+            self.config.current_parsing_id = int(date.timestamp())
             self.config.save()
             self.get_category()
 
@@ -150,6 +152,7 @@ class Parser(object):
 
     def get_query(self):
         self.query = Queries.objects.filter(
+            current_parsing_id=self.config.current_parsing_id
             parsed_at=None,
             root__ne=None
         ).first()
@@ -492,6 +495,82 @@ class Parser(object):
 
     def caclulate(self):
         self.notify('Расчёт начался')
+        queries = Queries.objects(
+            current_parsing_id=self.config.current_parsing_id)
+        for query in queries:
+            self.calculate_query(query)
+
+    def calculate_query(self, query):
+        products = Products.objects(articul__in=query.articuls)
+        if products.count() >= 10:
+            first_product_decada_profit = (
+                (products[0].current_decada_sales or 0)
+                *
+                (products[0].price or 0)
+            )
+            ten_product_decada_profit = (
+                (products[9].current_decada_sales or 0)
+                *
+                (products[9].price or 0)
+            )
+            products_with_sales = products.filter(
+                current_decada_sales__gt=0).count()
+            avg_price_prev_period = self.get_avg(
+                [[s.price for s in p.sizes if s.price
+                  and s.date >= self.start_prev_period
+                  and s.date < self.end_prev_period] for p in products]
+            )
+            avg_price_period = self.get_avg(
+                [[s.price for s in p.sizes if s.price
+                  and s.date >= self.end_prev_period] for p in products]
+            )
+            profit_prev_period = self.get_sum(
+                [[s.profit or ((s.sales or 0) *
+                               (s.price or p.price or 0))
+                  for s in p.sizes
+                  if s.date >= self.start_prev_period
+                  and s.date < self.end_prev_period
+                  ]
+                 for p in products]
+            )
+            profit_period = self.get_sum(
+                [[s.profit or ((s.sales or 0) *
+                               (s.price or p.price or 0))
+                  for s in p.sizes if s.date >= self.end_prev_period]
+                 for p in products]
+            )
+            sellers = len(list(set([p.brand_id for p in products])))
+            sellers_with_sales = len(list(set(
+                [p.brand_id for p
+                 in products.filter(current_decada_sales__gt=0)]
+            )))
+            sales_period = self.get_sum(
+                [[(s.sales or 0) for s in p.sizes
+                  if s.date >= self.end_prev_period] for p in products])
+            calc = dict()
+            # Оборот первого не меньше 500к
+            if first_product_decada_profit < self.profit_first_top:
+                calc['profit_first_top'] = False
+            # оборот десятого не меньше 100к
+            if ten_product_decada_profit < self.profit_ten_top:
+                calc['profit_ten_top'] = False
+            # Количество товаров с продажами: не меньше 20%
+            if products_with_sales / query_products_count < 1/5:
+                calc['products_with_sales'] = False
+            # Средний чек в категории месяц назад и сейчас
+            # отличается не более чем на +/- 10%
+            if avg_price_period < avg_price_prev_period * 0.9:
+                calc['avg_price_diff'] = False
+            if avg_price_period > avg_price_prev_period * 1.1:
+                calc['avg_price_diff'] = False
+            # Оборот в категории месяц назад и сейчас отличается
+            # не более чем на +/- 10%
+            if profit_period < profit_prev_period * 0.9:
+                calc['profit_period'] = False
+            if profit_period > profit_prev_period * 1.1:
+                calc['profit_period'] = False
+            query.params = calc
+            query.save()
 
 
 parser = Parser()
