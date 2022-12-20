@@ -339,7 +339,7 @@ class Parser(object):
                 sales = 0
 
             if product and detail:
-                self.check_unique(product)
+                # self.check_unique(product)
                 if product.sizes[-1].date != datetime.now().date():
                     # Если последняя цена вчерашняя то посчитать разницу остатков и
                     # записать как количество продаж
