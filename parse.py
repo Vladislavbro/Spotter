@@ -48,9 +48,9 @@ class Parser(object):
         self.end_prev_period = (datetime.now() - timedelta(days=10)).replace(
             hour=0, minute=0, second=0, microsecond=0)
         self.start_prev_period = self.end_prev_period - timedelta(days=10)
-        # self.calculate()
+        self.calculate()
         # self.create_queries()
-        self.start_parsing()
+        # self.start_parsing()
 
     def get_url(self, url):
         try:
@@ -518,7 +518,8 @@ class Parser(object):
     def calculate(self):
         self.notify('Расчёт начался')
         queries = Queries.objects(
-            current_parsing_id=self.config.current_parsing_id)
+            current_parsing_id=1)
+        # current_parsing_id=self.config.current_parsing_id)
         for query in queries:
             self.calculate_query(query)
         Categories.objects(parse=True).update(top=False)
@@ -675,6 +676,8 @@ class Parser(object):
             if profit_period > profit_prev_period * 1.1:
                 calc['profit_period'] = False
             query.params = calc
+            if False not in calc.values():
+                query.top = True
             query.save()
             print(query.to_json())
 

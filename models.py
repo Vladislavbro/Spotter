@@ -36,6 +36,7 @@ class Queries(Document):
     last_parsed_page = IntField()
     current_parsing_id = IntField()
     params = DictField(default={})
+    top = BooleanField()
 
 
 class Categories(Document):
