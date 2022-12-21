@@ -499,6 +499,16 @@ class Parser(object):
         else:
             self.change_category()
 
+    def get_avg(self, values):
+        if len(values):
+            return sum([sum(value) / len(value) for value in values if len(value)]) / len(values)
+        else:
+            return 0
+
+    def get_sum(self, values):
+        return sum([sum(value) for value in values])
+
+
     def calculate(self):
         self.notify('Расчёт начался')
         queries = Queries.objects(
