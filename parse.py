@@ -517,11 +517,11 @@ class Parser(object):
 
     def calculate(self):
         self.notify('Расчёт начался')
-        queries = Queries.objects(
-            current_parsing_id=1)
-        # current_parsing_id=self.config.current_parsing_id)
-        for query in queries:
-            self.calculate_query(query)
+        # queries = Queries.objects(
+        #     current_parsing_id=1)
+        # # current_parsing_id=self.config.current_parsing_id)
+        # for query in queries:
+        #     self.calculate_query(query)
         Categories.objects(parse=True).update(top=False)
         categories = Categories.objects(parse=True)
         for category in categories:
