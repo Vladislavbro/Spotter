@@ -38,6 +38,8 @@ class Parser(object):
     config = None
     end_prev_period = None
     start_prev_period = None
+    profit_first_top = 500000 / 3
+    profit_ten_top = 100000 / 3
 
     def __init__(self):
         super(Parser, self).__init__()
@@ -540,9 +542,6 @@ class Parser(object):
         # не более чем на +-10%
         # Если все условия пройдены - то информация о нише и топ 50 товарах
         # отправляются в раздел ""топ категории"" для декады делим месяц на три
-        profit_first_top = 500000 / 3
-        profit_ten_top = 100000 / 3
-
         products = Products.objects(categories__in=[category.wb_id])
         _count = products.count()
         # print(category.name, _count)
@@ -596,8 +595,8 @@ class Parser(object):
             category.avg_price_prev_period = avg_price_prev_period
             category.avg_price_period = avg_price_period
             if (
-                    category.first_product_decada_profit >= profit_first_top and
-                    category.ten_product_decada_profit >= profit_ten_top and
+                    category.first_product_decada_profit >= self.profit_first_top and
+                    category.ten_product_decada_profit >= self.profit_ten_top and
                     category.rel_sales >= 1/5 and
                     category.avg_price_prev_period > 0 and
                     category.avg_price_period > 0 and
