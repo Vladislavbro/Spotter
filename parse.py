@@ -544,7 +544,7 @@ class Parser(object):
         # отправляются в раздел ""топ категории"" для декады делим месяц на три
         products = Products.objects(categories__in=[category.wb_id])
         _count = products.count()
-        # print(category.name, _count)
+        print(category.name, _count)
         if _count <= 300 and _count > 10:
             top_products = products.order_by('-current_decada_sales')[0:50]
             products_with_sales = products.filter(
