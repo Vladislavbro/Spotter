@@ -36,12 +36,17 @@ class Parser(object):
     query = None
     adminIds = [259180458]
     config = None
+    end_prev_period = None
+    start_prev_period = None
 
     def __init__(self):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.product_unique()
         # self.start_parsing()
+        self.end_prev_period = (datetime.now() - timedelta(days=10)).replace(
+            hour=0, minute=0, second=0, microsecond=0)
+        self.start_prev_period = self.end_prev_period - timedelta(days=10)
         self.calculate()
         # self.create_queries()
 
@@ -508,7 +513,6 @@ class Parser(object):
     def get_sum(self, values):
         return sum([sum(value) for value in values])
 
-
     def calculate(self):
         self.notify('Расчёт начался')
         queries = Queries.objects(
@@ -538,9 +542,7 @@ class Parser(object):
         # отправляются в раздел ""топ категории"" для декады делим месяц на три
         profit_first_top = 500000 / 3
         profit_ten_top = 100000 / 3
-        end_prev_period = (datetime.now() - timedelta(days=10)).replace(
-            hour=0, minute=0, second=0, microsecond=0)
-        start_prev_period = end_prev_period - timedelta(days=10)
+
         products = Products.objects(categories__in=[category.wb_id])
         _count = products.count()
         # print(category.name, _count)
@@ -550,7 +552,7 @@ class Parser(object):
                 current_decada_sales__gt=0).count()
             profit_period = self.get_sum([
                 [s.profit or ((s.sales or 0) * (s.price or p.price or 0))
-                 for s in p.sizes if s.date >= end_prev_period]
+                 for s in p.sizes if s.date >= self.end_prev_period]
                 for p in products])
 
             sellers = len(list(set([p.brand_id for p in products])))
@@ -559,14 +561,15 @@ class Parser(object):
                 in products.filter(current_decada_sales__gt=0)])))
             avg_price_prev_period = self.get_avg([
                 [s.price for s in p.sizes
-                 if s.price and s.date >= start_prev_period and
-                 s.date < end_prev_period] for p in products])
+                 if s.price and s.date >= self.start_prev_period and
+                 s.date < self.end_prev_period] for p in products])
             avg_price_period = self.get_avg([
                 [s.price for s in p.sizes
-                 if s.price and s.date >= end_prev_period] for p in products])
+                 if s.price and s.date >= self.end_prev_period]
+                for p in products])
             sales_period = self.get_sum([
                 [(s.sales or 0) for s in p.sizes
-                 if s.date >= end_prev_period] for p in products])
+                 if s.date >= self.end_prev_period] for p in products])
 
             category.profit_period = profit_period
             category.first_product_price = top_products[0].price
