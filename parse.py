@@ -61,12 +61,11 @@ class Parser(object):
             return self.get_url(url)
 
     def start_parsing(self):
-        if self.config.current_parsing_date.date() == datetime.utcnow().date():
-            if self.config.parsing_done is not True:
-                self.get_category()
-            if self.config.queries_done is not True:
-                self.get_query()
-        else:
+        if self.config.parsing_done is not True:
+            self.get_category()
+        elif self.config.queries_done is not True:
+            self.get_query()
+        elif self.config.current_parsing_date.date() != datetime.utcnow().date():
             self.config.parsing_done = False
             self.config.queries_done = False
             date = datetime.utcnow()
