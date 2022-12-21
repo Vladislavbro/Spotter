@@ -499,7 +499,7 @@ class Parser(object):
         else:
             self.change_category()
 
-    def caclulate(self):
+    def calculate(self):
         self.notify('Расчёт начался')
         queries = Queries.objects(
             current_parsing_id=1)
