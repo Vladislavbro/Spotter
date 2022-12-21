@@ -562,7 +562,7 @@ class Parser(object):
             if ten_product_decada_profit < self.profit_ten_top:
                 calc['profit_ten_top'] = False
             # Количество товаров с продажами: не меньше 20%
-            if products_with_sales / query_products_count < 1/5:
+            if products_with_sales / products.count() < 1/5:
                 calc['products_with_sales'] = False
             # Средний чек в категории месяц назад и сейчас
             # отличается не более чем на +/- 10%
