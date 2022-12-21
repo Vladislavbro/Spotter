@@ -53,6 +53,24 @@ class Categories(Document):
     start_parsing_at = DateTimeField()
     current_parsing_id = IntField()
     updated_at = DateTimeField()
+    profit_period = IntField()
+    first_product_price = IntField()
+    first_product_decada_sales = IntField()
+    first_product_decada_profit = IntField()
+    ten_product_price = IntField()
+    ten_product_decada_sales = IntField()
+    ten_product_decada_profit = IntField()
+    products_count = IntField()
+    products_with_sales = IntField()
+    sales_period = IntField()
+    sellers = IntField()
+    sellers_with_sales = IntField()
+    rel_sellers = IntField()
+    rel_sales = IntField()
+    avg_price_prev_period = IntField()
+    avg_price_period = IntField()
+    top = BooleanField()
+
     meta = {
         'indexes': [
             'parsed_at',

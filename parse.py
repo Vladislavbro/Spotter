@@ -41,8 +41,8 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.product_unique()
-        self.start_parsing()
-        # self.get_categories()
+        # self.start_parsing()
+        self.calculate()
         # self.create_queries()
 
     def get_url(self, url):
@@ -75,14 +75,13 @@ class Parser(object):
             self.get_category()
 
     def create_queries(self):
-        # Queries.objects().delete()
         categories = Categories.objects(parse=True)
         for category in categories:
             self.category = category
             products = Products.objects(categories__in=[self.category.wb_id])
-            # top_products = products.filter(last_decada_profit__gte=profit_last_decada).order_by('-current_decada_sales')[0:50]
             top_products = products.filter(
-                current_decada_sales__gt=0).order_by('-current_decada_sales')[0:50]
+                current_decada_sales__gt=0
+            ).order_by('-current_decada_sales')[0:50]
             for top in top_products:
                 features = top.features
                 features.sort()
@@ -503,9 +502,97 @@ class Parser(object):
     def caclulate(self):
         self.notify('Расчёт начался')
         queries = Queries.objects(
-            current_parsing_id=self.config.current_parsing_id)
+            current_parsing_id=1)
+        # current_parsing_id=self.config.current_parsing_id)
         for query in queries:
             self.calculate_query(query)
+        Categories.objects(parse=True).update(top=False)
+        categories = Categories.objects(parse=True)
+        for category in categories:
+            self.calculate_category(category)
+
+    def calculate_category(self, category):
+        # Путь 1 (товары с высоким оборотом):
+        # 1. В каждой категории нижнего уровня отбираются топ 50 товаров по
+        # обороту с сортировкой от большего к меньшему
+        # Условия отбора:
+        # - Оборот первого товара не меньше 500к, оборот десятого товара не
+        # меньше 100к
+        # - Количество товаров в категории: не более 300
+        # - Количество товаров с продажами: не меньше 20%
+        # - Средний чек в категории месяц назад и сейчас отличается не более
+        # чем на +-10%
+        # - Оборот в категории месяц назад и сейчас отличается
+        # не более чем на +-10%
+        # Если все условия пройдены - то информация о нише и топ 50 товарах
+        # отправляются в раздел ""топ категории"" для декады делим месяц на три
+        profit_first_top = 500000 / 3
+        profit_ten_top = 100000 / 3
+        end_prev_period = (datetime.now() - timedelta(days=10)).replace(
+            hour=0, minute=0, second=0, microsecond=0)
+        start_prev_period = end_prev_period - timedelta(days=10)
+        products = Products.objects(categories__in=[category.wb_id])
+        _count = products.count()
+        # print(category.name, _count)
+        if _count <= 300 and _count > 10:
+            top_products = products.order_by('-current_decada_sales')[0:50]
+            products_with_sales = products.filter(
+                current_decada_sales__gt=0).count()
+            profit_period = self.get_sum([
+                [s.profit or ((s.sales or 0) * (s.price or p.price or 0))
+                 for s in p.sizes if s.date >= end_prev_period]
+                for p in products])
+
+            sellers = len(list(set([p.brand_id for p in products])))
+            sellers_with_sales = len(list(set([
+                p.brand_id for p
+                in products.filter(current_decada_sales__gt=0)])))
+            avg_price_prev_period = self.get_avg([
+                [s.price for s in p.sizes
+                 if s.price and s.date >= start_prev_period and
+                 s.date < end_prev_period] for p in products])
+            avg_price_period = self.get_avg([
+                [s.price for s in p.sizes
+                 if s.price and s.date >= end_prev_period] for p in products])
+            sales_period = self.get_sum([
+                [(s.sales or 0) for s in p.sizes
+                 if s.date >= end_prev_period] for p in products])
+
+            category.profit_period = profit_period
+            category.first_product_price = top_products[0].price
+            category.first_product_decada_sales = top_products[0].current_decada_sales
+            category.first_product_decada_profit = (
+                (top_products[0].current_decada_sales or 0)
+                *
+                (top_products[0].price or 0)
+            )
+            category.ten_product_price = top_products[9].price
+            category.ten_product_decada_sales = top_products[9].current_decada_sales
+            category.ten_product_decada_profit = (
+                (top_products[9].current_decada_sales or 0)
+                *
+                (top_products[9].price or 0)
+            ),
+            category.products_count = _count
+            category.products_with_sales = products_with_sales
+            category.sales_period = sales_period
+            category.sellers = sellers
+            category.sellers_with_sales = sellers_with_sales
+            category.rel_sellers = sellers_with_sales / sellers
+            category.rel_sales = products_with_sales / _count
+            category.avg_price_prev_period = avg_price_prev_period
+            category.avg_price_period = avg_price_period
+            if (
+                    category.first_product_decada_profit >= profit_first_top and
+                    category.ten_product_decada_profit >= profit_ten_top and
+                    category.rel_sales >= 1/5 and
+                    category.avg_price_prev_period > 0 and
+                    category.avg_price_period > 0 and
+                    category.avg_price_period >= category.avg_price_prev_period * 0.9 and
+                    category.avg_price_period <= category.avg_price_prev_period * 1.1):
+                category.top = True
+            category.save()
+            print(category.to_json())
 
     def calculate_query(self, query):
         products = Products.objects(articul__in=query.articuls)
@@ -546,14 +633,14 @@ class Parser(object):
                   for s in p.sizes if s.date >= self.end_prev_period]
                  for p in products]
             )
-            sellers = len(list(set([p.brand_id for p in products])))
-            sellers_with_sales = len(list(set(
-                [p.brand_id for p
-                 in products.filter(current_decada_sales__gt=0)]
-            )))
-            sales_period = self.get_sum(
-                [[(s.sales or 0) for s in p.sizes
-                  if s.date >= self.end_prev_period] for p in products])
+            # sellers = len(list(set([p.brand_id for p in products])))
+            # sellers_with_sales = len(list(set(
+            #     [p.brand_id for p
+            #      in products.filter(current_decada_sales__gt=0)]
+            # )))
+            # sales_period = self.get_sum(
+            #     [[(s.sales or 0) for s in p.sizes
+            #       if s.date >= self.end_prev_period] for p in products])
             calc = dict()
             # Оборот первого не меньше 500к
             if first_product_decada_profit < self.profit_first_top:
@@ -578,6 +665,7 @@ class Parser(object):
                 calc['profit_period'] = False
             query.params = calc
             query.save()
+            print(query.to_json())
 
 
 parser = Parser()
