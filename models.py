@@ -26,7 +26,7 @@ class Queries(Document):
     articuls = ListField(default=[])
     root = StringField()
     features = ListField(default=[])
-    query_products_count = IntField()
+    products_count = IntField()
     first_product_decada_profit = IntField()
     ten_product_decada_profit = IntField()
     products_with_sales = IntField()
