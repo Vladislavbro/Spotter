@@ -48,9 +48,9 @@ class Parser(object):
         self.end_prev_period = (datetime.now() - timedelta(days=10)).replace(
             hour=0, minute=0, second=0, microsecond=0)
         self.start_prev_period = self.end_prev_period - timedelta(days=10)
-        self.calculate()
+        # self.calculate()
         # self.create_queries()
-        # self.start_parsing()
+        self.start_parsing()
 
     def get_url(self, url):
         try:
@@ -73,11 +73,11 @@ class Parser(object):
         elif self.config.queries_done is not True:
             self.get_query()
         elif self.config.current_parsing_date.date() != datetime.utcnow().date():
-            self.config.parsing_done = False
-            self.config.queries_done = False
             date = datetime.utcnow()
-            self.config.current_parsing_date = date
-            self.config.current_parsing_id = int(date.timestamp())
+            self.config = Config(
+                current_parsing_date=date,
+                current_parsing_id=int(date.timestamp()),
+            )
             self.config.save()
             self.get_category()
 
@@ -517,14 +517,8 @@ class Parser(object):
 
     def calculate(self):
         self.notify('Расчёт начался')
-        queries = Queries.objects(current_parsing_id=1671570010)
-        # current_parsing_id=self.config.current_parsing_id)
-        for query in queries:
-            self.calculate_query(query)
-        Categories.objects(parse=True).update(top=False)
-        categories = Categories.objects(parse=True)
-        for category in categories:
-            self.calculate_category(category)
+        self.calculate_queries()
+        self.calculate_categories()
 
     def calculate_category(self, category):
         # Путь 1 (товары с высоким оборотом):
@@ -605,6 +599,24 @@ class Parser(object):
             category.save()
             print(category.to_json())
 
+    def calculate_queries(self):
+        query = Queries.objects(
+            current_parsing_id=self.config.current_parsing_id,
+            calculated__ne=True,
+        ).first()
+        while query:
+            self.calculate_query(query)
+            query = Queries.objects(
+                current_parsing_id=self.config.current_parsing_id,
+                calculated__ne=True,
+            ).first()
+
+    def calculate_categories(self):
+        Categories.objects(parse=True).update(top=False)
+        categories = Categories.objects(parse=True)
+        for category in categories:
+            self.calculate_category(category)
+
     def calculate_query(self, query):
         products = Products.objects(
             articul__in=query.articuls).order_by('-current_decada_sales')
@@ -678,8 +690,9 @@ class Parser(object):
             query.params = calc
             if False not in calc.values():
                 query.top = True
-            query.save()
-            print(query.to_json())
+        query.calculated = True
+        query.save()
+        print(query.to_json())
 
 
 parser = Parser()

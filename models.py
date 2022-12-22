@@ -14,6 +14,11 @@ class Config(Document):
     current_parsing_id = IntField()
     parsing_done = BooleanField()
     queries_done = BooleanField()
+    queries_calculated = BooleanField()
+    categories_calculated = BooleanField()
+    meta = {
+        'ordering': ['-current_parsing_id']
+    }
 
 
 class Queries(Document):
@@ -37,6 +42,7 @@ class Queries(Document):
     current_parsing_id = IntField()
     params = DictField(default={})
     top = BooleanField()
+    calculated = BooleanField()
 
 
 class Categories(Document):
