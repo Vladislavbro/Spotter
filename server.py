@@ -33,13 +33,16 @@ def categories_list():
 
 @app.route('/api/top')
 def categories_top():
+    model = request.args.get('model')
+    page = int(request.args.get('page'))
     # config = Config.objects(queries_done=True).first()
     # queries = Queries.objects(current_parsing_id=config.current_parsing_id)
-    queries = Queries.objects(current_parsing_id=1671570010)
-    categories = Categories.objects.all()
+    if model == 'queries':
+        items = Queries.objects(current_parsing_id=1671570010)
+    elif model == 'categories':
+        items = Categories.objects.all()
     return {
-        'queries': json.loads(queries.to_json()),
-        'categories': json.loads(categories.to_json()),
+        'items': json.loads(items[(page - 1 * 100):page * 100].to_json()),
     }
 
 
