@@ -638,7 +638,8 @@ class Parser(object):
         products = Products.objects(
             articul__in=query.articuls
         ).order_by('-current_decada_sales')
-        if products.count() >= 10:
+        query.products_count = products.count()
+        if query.products_count >= 10:
             query.first_product_decada_profit = (
                 (products[0].current_decada_sales or 0)
                 *
