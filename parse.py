@@ -48,9 +48,9 @@ class Parser(object):
         self.end_prev_period = (datetime.now() - timedelta(days=10)).replace(
             hour=0, minute=0, second=0, microsecond=0)
         self.start_prev_period = self.end_prev_period - timedelta(days=10)
-        self.calculate()
+        # self.calculate()
         # self.create_queries()
-        # self.start_parsing()
+        self.start_parsing()
 
     def get_url(self, url):
         try:
