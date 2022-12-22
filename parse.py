@@ -639,28 +639,28 @@ class Parser(object):
             articul__in=query.articuls
         ).order_by('-current_decada_sales')
         if products.count() >= 10:
-            first_product_decada_profit = (
+            query.first_product_decada_profit = (
                 (products[0].current_decada_sales or 0)
                 *
                 (products[0].price or 0)
             )
-            ten_product_decada_profit = (
+            query.ten_product_decada_profit = (
                 (products[9].current_decada_sales or 0)
                 *
                 (products[9].price or 0)
             )
             query.products_with_sales = products.filter(
                 current_decada_sales__gt=0).count()
-            avg_price_prev_period = self.get_avg(
+            query.avg_price_prev_period = self.get_avg(
                 [[s.price for s in p.sizes if s.price
                   and s.date >= self.start_prev_period
                   and s.date < self.end_prev_period] for p in products]
             )
-            avg_price_period = self.get_avg(
+            query.avg_price_period = self.get_avg(
                 [[s.price for s in p.sizes if s.price
                   and s.date >= self.end_prev_period] for p in products]
             )
-            profit_prev_period = self.get_sum(
+            query.profit_prev_period = self.get_sum(
                 [[s.profit or ((s.sales or 0) *
                                (s.price or p.price or 0))
                   for s in p.sizes
@@ -669,32 +669,34 @@ class Parser(object):
                   ]
                  for p in products]
             )
-            profit_period = self.get_sum(
+            query.profit_period = self.get_sum(
                 [[s.profit or ((s.sales or 0) *
                                (s.price or p.price or 0))
                   for s in p.sizes if s.date >= self.end_prev_period]
                  for p in products]
             )
             # Оборот первого не меньше 500к
-            if first_product_decada_profit >= self.profit_first_top:
+            if query.first_product_decada_profit >= self.profit_first_top:
                 query.first_product_profit_top = True
             # оборот десятого не меньше 100к
-            if ten_product_decada_profit >= self.profit_ten_top:
+            if query.ten_product_decada_profit >= self.profit_ten_top:
                 query.ten_product_profit_top = True
             # Количество товаров с продажами: не меньше 20%
-            if query.products_with_sales / products.count() >= 1/5:
+            if query.query.products_with_sales / products.count() >= 1/5:
                 query.products_with_sales_top = True
             # Средний чек в категории месяц назад и сейчас
             # отличается не более чем на +/- 10%
             if (
-                    avg_price_period >= avg_price_prev_period * 0.9 and
-                    avg_price_period <= avg_price_prev_period * 1.1):
+                    query.avg_price_period >=
+                    query.avg_price_prev_period * 0.9 and
+                    query.avg_price_period <=
+                    query.avg_price_prev_period * 1.1):
                 query.avg_price_top = True
             # Оборот в категории месяц назад и сейчас отличается
             # не более чем на +/- 10%
             if (
-                    profit_period >= profit_prev_period * 0.9 and
-                    profit_period <= profit_prev_period * 1.1):
+                    query.profit_period >= query.profit_prev_period * 0.9 and
+                    query.profit_period <= query.profit_prev_period * 1.1):
                 query.profit_top = True
             if (
                     query.first_product_profit_top and
