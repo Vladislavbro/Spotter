@@ -517,8 +517,7 @@ class Parser(object):
 
     def calculate(self):
         self.notify('Расчёт начался')
-        queries = Queries.objects(
-            current_parsing_id=1671656410)
+        queries = Queries.objects(current_parsing_id=1671570010)
         # current_parsing_id=self.config.current_parsing_id)
         for query in queries:
             self.calculate_query(query)
