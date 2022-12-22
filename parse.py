@@ -616,13 +616,15 @@ class Parser(object):
 
     def calculate_queries(self):
         query = Queries.objects(
-            current_parsing_id=self.config.current_parsing_id,
+            # current_parsing_id=self.config.current_parsing_id,
+            current_parsing_id=1671570010,
             calculated__ne=True,
         ).first()
         while query:
             self.calculate_query(query)
             query = Queries.objects(
-                current_parsing_id=self.config.current_parsing_id,
+                # current_parsing_id=self.config.current_parsing_id,
+                current_parsing_id=1671570010,
                 calculated__ne=True,
             ).first()
 
