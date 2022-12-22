@@ -42,7 +42,7 @@ def categories_top():
     elif model == 'categories':
         items = Categories.objects.all()
     return {
-        'items': json.loads(items[(page - 1 * 100):page * 100].to_json()),
+        'items': json.loads(items[((page - 1) * 100):page * 100].to_json()),
     }
 
 
