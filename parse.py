@@ -48,9 +48,9 @@ class Parser(object):
         self.end_prev_period = (datetime.now() - timedelta(days=10)).replace(
             hour=0, minute=0, second=0, microsecond=0)
         self.start_prev_period = self.end_prev_period - timedelta(days=10)
-        # self.calculate()
+        self.calculate()
         # self.create_queries()
-        self.start_parsing()
+        # self.start_parsing()
 
     def get_url(self, url):
         try:
@@ -166,7 +166,7 @@ class Parser(object):
             self.notify('Парсинг запросов закончился')
             self.config.queries_done = True
             self.config.save()
-            return self.caclulate()
+            return self.calculate()
         else:
             self.category = self.query.category_id
             if self.query.last_parsed_page and self.query.last_parsed_page < 5:
@@ -518,7 +518,8 @@ class Parser(object):
     def calculate(self):
         self.notify('Расчёт начался')
         queries = Queries.objects(
-            current_parsing_id=self.config.current_parsing_id)
+            current_parsing_id=1671656410)
+        # current_parsing_id=self.config.current_parsing_id)
         for query in queries:
             self.calculate_query(query)
         Categories.objects(parse=True).update(top=False)
@@ -606,7 +607,8 @@ class Parser(object):
             print(category.to_json())
 
     def calculate_query(self, query):
-        products = Products.objects(articul__in=query.articuls)
+        products = Products.objects(
+            articul__in=query.articuls).order_by('-current_decada_sales')
         if products.count() >= 10:
             first_product_decada_profit = (
                 (products[0].current_decada_sales or 0)
