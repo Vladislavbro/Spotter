@@ -682,7 +682,7 @@ class Parser(object):
             if query.ten_product_decada_profit >= self.profit_ten_top:
                 query.ten_product_profit_top = True
             # Количество товаров с продажами: не меньше 20%
-            if query.query.products_with_sales / products.count() >= 1/5:
+            if query.products_with_sales / products.count() >= 1/5:
                 query.products_with_sales_top = True
             # Средний чек в категории месяц назад и сейчас
             # отличается не более чем на +/- 10%
