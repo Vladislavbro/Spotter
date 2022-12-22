@@ -40,9 +40,14 @@ class Queries(Document):
     parsed_at = DateTimeField()
     last_parsed_page = IntField()
     current_parsing_id = IntField()
-    params = DictField(default={})
-    top = BooleanField()
     calculated = BooleanField()
+    top = BooleanField()
+    ten_product_profit_top = BooleanField()
+    first_product_profit_top = BooleanField()
+    products_with_sales_top = BooleanField()
+    profit_top = BooleanField()
+    avg_price_top = BooleanField()
+    rel_sales_top = BooleanField()
 
 
 class Categories(Document):
@@ -61,6 +66,7 @@ class Categories(Document):
     current_parsing_id = IntField()
     updated_at = DateTimeField()
     profit_period = IntField()
+    profit_prev_period = IntField()
     first_product_price = IntField()
     first_product_decada_sales = IntField()
     first_product_decada_profit = IntField()
@@ -77,6 +83,11 @@ class Categories(Document):
     avg_price_prev_period = IntField()
     avg_price_period = IntField()
     top = BooleanField()
+    ten_product_profit_top = BooleanField()
+    first_product_profit_top = BooleanField()
+    profit_top = BooleanField()
+    avg_price_top = BooleanField()
+    rel_sales_top = BooleanField()
 
     meta = {
         'indexes': [

@@ -48,9 +48,9 @@ class Parser(object):
         self.end_prev_period = (datetime.now() - timedelta(days=10)).replace(
             hour=0, minute=0, second=0, microsecond=0)
         self.start_prev_period = self.end_prev_period - timedelta(days=10)
-        # self.calculate()
+        self.calculate()
         # self.create_queries()
-        self.start_parsing()
+        # self.start_parsing()
 
     def get_url(self, url):
         try:
@@ -87,6 +87,7 @@ class Parser(object):
             self.category = category
             products = Products.objects(categories__in=[self.category.wb_id])
             top_products = products.filter(
+                last_decada_profit__gte=10000/3,
                 current_decada_sales__gt=0
             ).order_by('-current_decada_sales')[0:50]
             for top in top_products:
@@ -536,34 +537,38 @@ class Parser(object):
         # Если все условия пройдены - то информация о нише и топ 50 товарах
         # отправляются в раздел ""топ категории"" для декады делим месяц на три
         products = Products.objects(categories__in=[category.wb_id])
-        _count = products.count()
-        print(category.name, _count)
-        if _count <= 300 and _count > 10:
+        category.products_count = products.count()
+        print(category.name, category.products_count)
+        if category.products_count > 10:
             top_products = products.order_by('-current_decada_sales')[0:50]
-            products_with_sales = products.filter(
+            category.products_with_sales = products.filter(
                 current_decada_sales__gt=0).count()
-            profit_period = self.get_sum([
+            category.profit_period = self.get_sum([
                 [s.profit or ((s.sales or 0) * (s.price or p.price or 0))
                  for s in p.sizes if s.date >= self.end_prev_period]
                 for p in products])
+            category.profit_prev_period = self.get_sum([
+                [s.profit or ((s.sales or 0) * (s.price or p.price or 0))
+                 for s in p.sizes if s.date >= self.start_prev_period and
+                 s.date < self.end_prev_period]
+                for p in products])
 
-            sellers = len(list(set([p.brand_id for p in products])))
-            sellers_with_sales = len(list(set([
+            category.sellers = len(list(set([p.brand_id for p in products])))
+            category.sellers_with_sales = len(list(set([
                 p.brand_id for p
                 in products.filter(current_decada_sales__gt=0)])))
-            avg_price_prev_period = self.get_avg([
+            category.avg_price_prev_period = self.get_avg([
                 [s.price for s in p.sizes
                  if s.price and s.date >= self.start_prev_period and
                  s.date < self.end_prev_period] for p in products])
-            avg_price_period = self.get_avg([
+            category.avg_price_period = self.get_avg([
                 [s.price for s in p.sizes
                  if s.price and s.date >= self.end_prev_period]
                 for p in products])
-            sales_period = self.get_sum([
+            category.sales_period = self.get_sum([
                 [(s.sales or 0) for s in p.sizes
                  if s.date >= self.end_prev_period] for p in products])
 
-            category.profit_period = profit_period
             category.first_product_price = top_products[0].price
             category.first_product_decada_sales = top_products[0].current_decada_sales
             category.first_product_decada_profit = (
@@ -578,23 +583,33 @@ class Parser(object):
                 *
                 (top_products[9].price or 0)
             )
-            category.products_count = _count
-            category.products_with_sales = products_with_sales
-            category.sales_period = sales_period
-            category.sellers = sellers
-            category.sellers_with_sales = sellers_with_sales
-            category.rel_sellers = sellers_with_sales / sellers
-            category.rel_sales = products_with_sales / _count
-            category.avg_price_prev_period = avg_price_prev_period
-            category.avg_price_period = avg_price_period
+            category.rel_sellers = category.sellers_with_sales / category.sellers
+            category.rel_sales = category.products_with_sales / category.products_count
+
+            if category.first_product_decada_profit >= self.profit_first_top:
+                category.first_product_profit_top = True
+            if category.ten_product_decada_profit >= self.profit_ten_top:
+                category.ten_product_profit_top = True
+            if category.rel_sales >= 1/5:
+                category.rel_sales_top = True
             if (
-                    category.first_product_decada_profit >= self.profit_first_top and
-                    category.ten_product_decada_profit >= self.profit_ten_top and
-                    category.rel_sales >= 1/5 and
-                    category.avg_price_prev_period > 0 and
-                    category.avg_price_period > 0 and
-                    category.avg_price_period >= category.avg_price_prev_period * 0.9 and
-                    category.avg_price_period <= category.avg_price_prev_period * 1.1):
+                    category.avg_price_period >=
+                    category.avg_price_prev_period * 0.9 and
+                    category.avg_price_period <=
+                    category.avg_price_prev_period * 1.1):
+                category.avg_price_top = True
+            if (
+                    category.profit_period >=
+                    category.profit_prev_period * 0.9 and
+                    category.profit_period <=
+                    category.profit_prev_period * 1.1):
+                category.profit_top = True
+            if (
+                    category.first_product_profit_top and
+                    category.ten_product_profit_top and
+                    category.rel_sales_top and
+                    category.avg_price_top and
+                    category.profit_top):
                 category.top = True
             category.save()
             print(category.to_json())
@@ -619,7 +634,8 @@ class Parser(object):
 
     def calculate_query(self, query):
         products = Products.objects(
-            articul__in=query.articuls).order_by('-current_decada_sales')
+            articul__in=query.articuls
+        ).order_by('-current_decada_sales')
         if products.count() >= 10:
             first_product_decada_profit = (
                 (products[0].current_decada_sales or 0)
@@ -631,7 +647,7 @@ class Parser(object):
                 *
                 (products[9].price or 0)
             )
-            products_with_sales = products.filter(
+            query.products_with_sales = products.filter(
                 current_decada_sales__gt=0).count()
             avg_price_prev_period = self.get_avg(
                 [[s.price for s in p.sizes if s.price
@@ -657,38 +673,33 @@ class Parser(object):
                   for s in p.sizes if s.date >= self.end_prev_period]
                  for p in products]
             )
-            # sellers = len(list(set([p.brand_id for p in products])))
-            # sellers_with_sales = len(list(set(
-            #     [p.brand_id for p
-            #      in products.filter(current_decada_sales__gt=0)]
-            # )))
-            # sales_period = self.get_sum(
-            #     [[(s.sales or 0) for s in p.sizes
-            #       if s.date >= self.end_prev_period] for p in products])
-            calc = dict()
             # Оборот первого не меньше 500к
-            if first_product_decada_profit < self.profit_first_top:
-                calc['profit_first_top'] = False
+            if first_product_decada_profit >= self.profit_first_top:
+                query.first_product_profit_top = True
             # оборот десятого не меньше 100к
-            if ten_product_decada_profit < self.profit_ten_top:
-                calc['profit_ten_top'] = False
+            if ten_product_decada_profit >= self.profit_ten_top:
+                query.ten_product_profit_top = True
             # Количество товаров с продажами: не меньше 20%
-            if products_with_sales / products.count() < 1/5:
-                calc['products_with_sales'] = False
+            if query.products_with_sales / products.count() >= 1/5:
+                query.products_with_sales_top = True
             # Средний чек в категории месяц назад и сейчас
             # отличается не более чем на +/- 10%
-            if avg_price_period < avg_price_prev_period * 0.9:
-                calc['avg_price_diff'] = False
-            if avg_price_period > avg_price_prev_period * 1.1:
-                calc['avg_price_diff'] = False
+            if (
+                    avg_price_period >= avg_price_prev_period * 0.9 and
+                    avg_price_period <= avg_price_prev_period * 1.1):
+                query.avg_price_top = True
             # Оборот в категории месяц назад и сейчас отличается
             # не более чем на +/- 10%
-            if profit_period < profit_prev_period * 0.9:
-                calc['profit_period'] = False
-            if profit_period > profit_prev_period * 1.1:
-                calc['profit_period'] = False
-            query.params = calc
-            if False not in calc.values():
+            if (
+                    profit_period >= profit_prev_period * 0.9 and
+                    profit_period <= profit_prev_period * 1.1):
+                query.profit_top = True
+            if (
+                    query.first_product_profit_top and
+                    query.ten_product_profit_top and
+                    query.products_with_sales_top and
+                    query.avg_price_top and
+                    query.profit_top):
                 query.top = True
         query.calculated = True
         query.save()

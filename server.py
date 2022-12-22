@@ -41,9 +41,64 @@ def categories_top():
         items = Queries.objects(current_parsing_id=1671570010)
     elif model == 'categories':
         items = Categories.objects.all()
-    return {
-        'items': json.loads(items[((page - 1) * 100):page * 100].to_json()),
-    }
+    items = items[((page - 1) * 100):page * 100]
+    if model == 'queries':
+        return {
+            'items': [{
+                'id': str(i.id),
+                'name': i.root + ' ' + ' '.join(i.features),
+                'products_count': i.query_products_count,
+                'first_product_decada_profit': i.first_product_decada_profit,
+                'ten_product_decada_profit': i.ten_product_decada_profit,
+                'products_with_sales': i.products_with_sales,
+                'avg_price_prev_period': i.avg_price_prev_period,
+                'avg_price_period': i.avg_price_period,
+                'profit_prev_period': i.profit_prev_period,
+                'profit_period': i.profit_period,
+                'sellers': i.sellers,
+                'sellers_with_sales': i.sellers_with_sales,
+                'sales_period': i.sales_period,
+                'last_parsed_page': i.last_parsed_page,
+                'current_parsing_id': i.current_parsing_id,
+                'top': i.top,
+                'ten_product_profit_top': i.ten_product_profit_top,
+                'first_product_profit_top': i.first_product_profit_top,
+                'products_with_sales_top': i.products_with_sales_top,
+                'profit_top': i.profit_top,
+                'avg_price_top': i.avg_price_top,
+                'rel_sales_top': i.rel_sales_top,
+            } for i in items]
+        }
+    elif model == 'categories':
+        return {
+            'items': [{
+                'id': str(i.id),
+                'name': i.name,
+                'profit_period': i.profit_period,
+                'profit_prev_period': i.profit_prev_period,
+                'first_product_price': i.first_product_price,
+                'first_product_decada_sales': i.first_product_decada_sales,
+                'first_product_decada_profit': i.first_product_decada_profit,
+                'ten_product_price': i.ten_product_price,
+                'ten_product_decada_sales': i.ten_product_decada_sales,
+                'ten_product_decada_profit': i.ten_product_decada_profit,
+                'products_count': i.products_count,
+                'products_with_sales': i.products_with_sales,
+                'sales_period': i.sales_period,
+                'sellers': i.sellers,
+                'sellers_with_sales': i.sellers_with_sales,
+                'rel_sellers': i.rel_sellers,
+                'rel_sales': i.rel_sales,
+                'avg_price_prev_period': i.avg_price_prev_period,
+                'avg_price_period': i.avg_price_period,
+                'top': i.top,
+                'ten_product_profit_top': i.ten_product_profit_top,
+                'first_product_profit_top': i.first_product_profit_top,
+                'profit_top': i.profit_top,
+                'avg_price_top': i.avg_price_top,
+                'rel_sales_top': i.rel_sales_top,
+            } for i in items],
+        }
 
 
 def get_category_stat(category):
