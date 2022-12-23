@@ -1,4 +1,5 @@
-const back = 'http://0.0.0.0:5000/' // 'http://wb.nio.design'
+// const back = 'http://0.0.0.0:5000/'
+const back = 'http://wb.nio.design'
 module.exports = {
   devServer: {
     proxy: {

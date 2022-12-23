@@ -1,8 +1,34 @@
 <template lang="html">
   <div class="container-xl">
-    <div class="d-flex my-4">
+    <div class="d-flex py-3">
       <div class="me-auto">
         <h3>Топ категорий</h3>
+      </div>
+      <div class="form-check me-3">
+        <input
+          @change="$store.dispatch('getTopCategories')"
+          value="queries"
+          v-model="$store.state.topCategoriesParams.model"
+          class="form-check-input"
+          type="radio"
+          name="model"
+          id="flexRadioDefault1">
+        <label class="form-check-label" for="flexRadioDefault1">
+          Ниши
+        </label>
+      </div>
+      <div class="form-check">
+        <input
+          @change="$store.dispatch('getTopCategories')"
+          value="categories"
+          v-model="$store.state.topCategoriesParams.model"
+          class="form-check-input"
+          type="radio"
+          name="model"
+          id="flexRadioDefault2">
+        <label class="form-check-label" for="flexRadioDefault2">
+          Категории
+        </label>
       </div>
     </div>
 
@@ -28,7 +54,7 @@
       <tbody>
         <tr
           v-for="category in $store.state.topCategories"
-          :key="category._id.$oid">
+          :key="category.id">
           <td>
             <a :href="'https://www.wildberries.ru' + category.url" target="_blank">{{ category.name }}</a>
           </td>
@@ -46,6 +72,21 @@
         </tr>
       </tbody>
     </table>
+
+    <pagination
+      v-model="$store.state.topCategoriesParams.page"
+      :records="$store.state.total"
+      :per-page="100"
+      :options="{
+        theme: 'bootstrap3',
+        texts: {
+          count: 'Показано с {from} до {to} из {count} записей|{count} запись|Одна запись',
+          first: 'Первая',
+          last: 'Последняя',
+        }
+      }"
+      @paginate="$store.dispatch('getTopCategories')"
+    />
 
     <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -73,11 +114,11 @@
 </template>
 
 <script>
-
+import Pagination from 'v-pagination-3'
 export default {
-  name: 'Brands',
+  name: 'Index',
   components: {
-
+    Pagination,
   },
   computed: {
     getBrands () {

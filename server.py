@@ -37,16 +37,19 @@ def categories_top():
     page = int(request.args.get('page'))
     sort = request.args.get('sort')
     # config = Config.objects(queries_done=True).first()
+    config = Config.objects.first()
     # queries = Queries.objects(current_parsing_id=config.current_parsing_id)
     if model == 'queries':
-        items = Queries.objects(current_parsing_id=1671570010)
+        items = Queries.objects(current_parsing_id=config.current_parsing_id)
     elif model == 'categories':
         items = Categories.objects.all()
+    total = items.count()
     if sort:
         items = items.order_by(f'-{sort}')
     items = items[((page - 1) * 100):page * 100]
     if model == 'queries':
         return {
+            'total': total,
             'items': [{
                 'id': str(i.id),
                 'name': i.root + ' ' + ' '.join(i.features),
@@ -74,6 +77,7 @@ def categories_top():
         }
     elif model == 'categories':
         return {
+            'total': total,
             'items': [{
                 'id': str(i.id),
                 'name': i.name,
