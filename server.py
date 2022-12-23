@@ -35,12 +35,15 @@ def categories_list():
 def categories_top():
     model = request.args.get('model')
     page = int(request.args.get('page'))
+    sort = request.args.get('sort')
     # config = Config.objects(queries_done=True).first()
     # queries = Queries.objects(current_parsing_id=config.current_parsing_id)
     if model == 'queries':
         items = Queries.objects(current_parsing_id=1671570010)
     elif model == 'categories':
         items = Categories.objects.all()
+    if sort:
+        items = items.order_by(f'-{sort}')
     items = items[((page - 1) * 100):page * 100]
     if model == 'queries':
         return {
