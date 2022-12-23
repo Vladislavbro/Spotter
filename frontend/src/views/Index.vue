@@ -63,12 +63,48 @@
               Продавцов
             </button>
           </th>
-          <th>Оборот пред. период</th>
-          <th>Оборот</th>
-          <th>Средняя цена</th>
-          <th>Продавцы с продажами</th>
-          <th>Товары с продажами</th>
-          <th>Продаж</th>
+          <th>
+            <button
+              class="btn btn-link"
+              @click="sortItems('profit_prev_period')">
+              Оборот пред. период
+            </button>
+          </th>
+          <th>
+            <button
+              class="btn btn-link"
+              @click="sortItems('profit_period')">
+              Оборот
+            </button>
+          </th>
+          <th>
+            <button
+              class="btn btn-link"
+              @click="sortItems('avg_price_period')">
+              Средняя цена
+            </button>
+          </th>
+          <th>
+            <button
+              class="btn btn-link"
+              @click="sortItems('sellers_with_sales')">
+              Продавцы с продажами
+            </button>
+          </th>
+          <th>
+            <button
+              class="btn btn-link"
+              @click="sortItems('products_with_sales')">
+              Товары с продажами
+            </button>
+          </th>
+          <th>
+            <button
+              class="btn btn-link"
+              @click="sortItems('sales_period')">
+              Продаж
+            </button>
+          </th>
         </tr>
       </thead>
       <tbody>
