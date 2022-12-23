@@ -43,10 +43,26 @@
         <tr>
           <th>Название</th>
           <th>
-            <button type="button" name="button"></button>
-            Топ</th>
-          <th>Товаров</th>
-          <th>Продавцов</th>
+            <button
+              class="btn btn-link"
+              @click="sortItems('top')">
+              Топ
+            </button>
+          </th>
+          <th>
+            <button
+              class="btn btn-link"
+              @click="sortItems('products_count')">
+              Товаров
+            </button>
+          </th>
+          <th>
+            <button
+              class="btn btn-link"
+              @click="sortItems('sellers')">
+              Продавцов
+            </button>
+          </th>
           <th>Оборот пред. период</th>
           <th>Оборот</th>
           <th>Средняя цена</th>
@@ -139,11 +155,20 @@ export default {
   },
 
   methods: {
+    sortItems (sort) {
+      this.$store.commit('mergeStore', {
+        topCategoriesParams: {
+          ...this.$store.state.topCategoriesParams,
+          sort
+        }
+      })
+      this.$store.dispatch('getTopCategories')
+    },
     getData () {
       this.$store.commit('mergeStore', {
         topCategoriesParams: {
+          ...this.$store.state.topCategoriesParams,
           page: 1,
-          model: this.$store.state.topCategoriesParams.model
         }
       })
       this.$store.dispatch('getTopCategories')

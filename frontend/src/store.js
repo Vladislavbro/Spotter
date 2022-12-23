@@ -6,7 +6,7 @@ const store = new Vuex.Store({
     topCategoriesParams: {
       model: 'queries',
       page: 1,
-      // sort: 'ten_product_decada_profit'
+      sort: null
     },
     total: 0,
     topCategories: [],
