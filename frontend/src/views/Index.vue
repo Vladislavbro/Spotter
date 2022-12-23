@@ -6,7 +6,7 @@
       </div>
       <div class="form-check me-3">
         <input
-          @change="$store.dispatch('getTopCategories')"
+          @change="getData"
           value="queries"
           v-model="$store.state.topCategoriesParams.model"
           class="form-check-input"
@@ -19,7 +19,7 @@
       </div>
       <div class="form-check">
         <input
-          @change="$store.dispatch('getTopCategories')"
+          @change="getData"
           value="categories"
           v-model="$store.state.topCategoriesParams.model"
           class="form-check-input"
@@ -42,8 +42,12 @@
       <thead>
         <tr>
           <th>Название</th>
+          <th>
+            <button type="button" name="button"></button>
+            Топ</th>
           <th>Товаров</th>
           <th>Продавцов</th>
+          <th>Оборот пред. период</th>
           <th>Оборот</th>
           <th>Средняя цена</th>
           <th>Продавцы с продажами</th>
@@ -58,8 +62,12 @@
           <td>
             <a :href="'https://www.wildberries.ru' + category.url" target="_blank">{{ category.name }}</a>
           </td>
+          <td>{{ category.top }}</td>
           <td>{{ category.products_count }}</td>
           <td>{{ category.sellers }}</td>
+          <td>
+            {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_prev_period) }}
+          </td>
           <td>
             {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_period) }}
           </td>
@@ -131,6 +139,15 @@ export default {
   },
 
   methods: {
+    getData () {
+      this.$store.commit('mergeStore', {
+        topCategoriesParams: {
+          page: 1,
+          model: this.$store.state.topCategoriesParams.model
+        }
+      })
+      this.$store.dispatch('getTopCategories')
+    },
     deleteCategory (category) {
       if (confirm('Удалить категорию?')) {
         this.$store.commit('setData', {attr: 'category', value: category})

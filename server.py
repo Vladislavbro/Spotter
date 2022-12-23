@@ -36,8 +36,8 @@ def categories_top():
     model = request.args.get('model')
     page = int(request.args.get('page'))
     sort = request.args.get('sort')
-    # config = Config.objects(queries_done=True).first()
-    config = Config.objects.first()
+    config = Config.objects(queries_done=True).first()
+    # config = Config.objects.first()
     # queries = Queries.objects(current_parsing_id=config.current_parsing_id)
     if model == 'queries':
         items = Queries.objects(
