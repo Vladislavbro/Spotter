@@ -40,7 +40,10 @@ def categories_top():
     config = Config.objects.first()
     # queries = Queries.objects(current_parsing_id=config.current_parsing_id)
     if model == 'queries':
-        items = Queries.objects(current_parsing_id=config.current_parsing_id)
+        items = Queries.objects(
+            current_parsing_id=config.current_parsing_id,
+            root__ne=None
+        )
     elif model == 'categories':
         items = Categories.objects.all()
     total = items.count()
