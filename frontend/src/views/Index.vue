@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="container-xl">
+  <div class="container-fluid">
     <div class="d-flex py-3">
       <div class="me-auto">
         <h3>Топ категорий</h3>
@@ -38,100 +38,119 @@
     9. Среднее количество продаж на один товар
     10. Среднее количество продаж на одного продавца" -->
 
-    <table class="table table-bordered table-hover">
-      <thead>
-        <tr>
-          <th>Название</th>
-          <th>
-            <button
-              class="btn btn-link"
-              @click="sortItems('top')">
-              Топ
-            </button>
-          </th>
-          <th>
-            <button
-              class="btn btn-link"
-              @click="sortItems('products_count')">
-              Товаров
-            </button>
-          </th>
-          <th>
-            <button
-              class="btn btn-link"
-              @click="sortItems('sellers')">
-              Продавцов
-            </button>
-          </th>
-          <th>
-            <button
-              class="btn btn-link"
-              @click="sortItems('profit_prev_period')">
-              Оборот пред. период
-            </button>
-          </th>
-          <th>
-            <button
-              class="btn btn-link"
-              @click="sortItems('profit_period')">
-              Оборот
-            </button>
-          </th>
-          <th>
-            <button
-              class="btn btn-link"
-              @click="sortItems('avg_price_period')">
-              Средняя цена
-            </button>
-          </th>
-          <th>
-            <button
-              class="btn btn-link"
-              @click="sortItems('sellers_with_sales')">
-              Продавцы с продажами
-            </button>
-          </th>
-          <th>
-            <button
-              class="btn btn-link"
-              @click="sortItems('products_with_sales')">
-              Товары с продажами
-            </button>
-          </th>
-          <th>
-            <button
-              class="btn btn-link"
-              @click="sortItems('sales_period')">
-              Продаж
-            </button>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="category in $store.state.topCategories"
-          :key="category.id">
-          <td>
-            <a :href="'https://www.wildberries.ru' + category.url" target="_blank">{{ category.name }}</a>
-          </td>
-          <td>{{ category.top }}</td>
-          <td>{{ category.products_count }}</td>
-          <td>{{ category.sellers }}</td>
-          <td>
-            {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_prev_period) }}
-          </td>
-          <td>
-            {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_period) }}
-          </td>
-          <td>
-            {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.avg_price_period) }}
-          </td>
-          <td>{{ (category.rel_sellers * 100).toFixed() }}<small class="text-black-50"> %</small></td>
-          <td>{{ (category.rel_sales * 100).toFixed() }}<small class="text-black-50"> %</small></td>
-          <td>{{ category.sales_period }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Название</th>
+            <th>
+              <button
+                class="btn btn-link"
+                @click="sortItems('top')">
+                Топ
+              </button>
+            </th>
+            <th v-if="params.model == 'categories'">
+              <button
+                class="btn btn-link"
+                @click="sortItems('products_count')">
+                Товаров
+              </button>
+            </th>
+            <th v-if="params.model == 'categories'">
+              <button
+                class="btn btn-link"
+                @click="sortItems('sellers')">
+                Продавцов
+              </button>
+            </th>
+            <th>
+              <button
+                class="btn btn-link"
+                @click="sortItems('profit_prev_period')">
+                Оборот пред. период
+              </button>
+            </th>
+            <th>
+              <button
+                class="btn btn-link"
+                @click="sortItems('profit_period')">
+                Оборот
+              </button>
+            </th>
+            <th>
+              <button
+                class="btn btn-link"
+                @click="sortItems('first_product_decada_profit')">
+                Оборот 1-го
+              </button>
+            </th>
+            <th>
+              <button
+                class="btn btn-link"
+                @click="sortItems('ten_product_decada_profit')">
+                Оборот 10-го
+              </button>
+            </th>
+            <th>
+              <button
+                class="btn btn-link"
+                @click="sortItems('avg_price_period')">
+                Средняя цена
+              </button>
+            </th>
+            <th v-if="params.model == 'categories'">
+              <button
+                class="btn btn-link"
+                @click="sortItems('sellers_with_sales')">
+                Продавцы с продажами
+              </button>
+            </th>
+            <th>
+              <button
+                class="btn btn-link"
+                @click="sortItems('products_with_sales')">
+                Товары с продажами
+              </button>
+            </th>
+            <th v-if="params.model == 'categories'">
+              <button
+                class="btn btn-link"
+                @click="sortItems('sales_period')">
+                Продаж
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="category in $store.state.topCategories"
+            :class="{
+              'table-success': category.top
+            }"
+            :key="category.id">
+            <td>
+              <a :href="'https://www.wildberries.ru' + category.url" target="_blank">{{ category.name }}</a>
+            </td>
+            <td>{{ category.top }}</td>
+            <td v-if="params.model == 'categories'">{{ category.products_count }}</td>
+            <td v-if="params.model == 'categories'">{{ category.sellers }}</td>
+            <td>
+              {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_prev_period) }}
+            </td>
+            <td>{{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_period) }}</td>
+            <td>{{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.first_product_decada_profit) }}</td>
+            <td>{{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.ten_product_decada_profit) }}</td>
+            <td>
+              {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.avg_price_period) }}
+            </td>
+            <td v-if="params.model == 'categories'">{{ category.sellers_with_sales }}</td>
+            <td>{{ category.products_with_sales }}</td>
+            <td v-if="params.model == 'categories'">{{ category.sales_period }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <pagination
       v-model="$store.state.topCategoriesParams.page"
@@ -181,12 +200,8 @@ export default {
     Pagination,
   },
   computed: {
-    getBrands () {
-      return this.$store.state.brands.filter(b => !b.exclude)
-    },
-
-    getExcludeBrands () {
-      return this.$store.state.brands.filter(b => b.exclude)
+    params () {
+      return this.$store.state.topCategoriesParams
     },
   },
 
