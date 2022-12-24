@@ -138,14 +138,32 @@
             <td>
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_prev_period) }}
             </td>
-            <td>{{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_period) }}</td>
-            <td>{{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.first_product_decada_profit) }}</td>
-            <td>{{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.ten_product_decada_profit) }}</td>
-            <td>
+            <td :class="{
+              'table-primary': category.profit_top
+            }">
+              {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_period) }}
+            </td>
+            <td :class="{
+              'table-primary': category.first_product_profit_top
+            }">
+              {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.first_product_decada_profit) }}
+            </td>
+            <td :class="{
+              'table-primary': category.ten_product_profit_top
+            }">
+              {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.ten_product_decada_profit) }}
+            </td>
+            <td :class="{
+              'table-primary': category.avg_price_top
+            }">
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.avg_price_period) }}
             </td>
             <td v-if="params.model == 'categories'">{{ category.sellers_with_sales }}</td>
-            <td>{{ category.products_with_sales }}</td>
+            <td :class="{
+              'table-primary': category.rel_sales_top
+            }">
+              {{ category.products_with_sales }}
+            </td>
             <td v-if="params.model == 'categories'">{{ category.sales_period }}</td>
           </tr>
         </tbody>

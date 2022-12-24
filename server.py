@@ -1,12 +1,13 @@
 # import os
 # os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from models import Categories, Products, Config, Queries
 import json
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 # import spacy
 from collections import Counter
+import csv
 
 app = Flask(__name__)
 # nlp = spacy.load('ru_core_news_md')
@@ -111,8 +112,82 @@ def categories_top():
         }
 
 
-def get_category_stat(category):
-    pass
+@app.route('/api/export/queries')
+def export_queries():
+    config = Config.objects(queries_done=True).first()
+    items = Queries.objects(
+        current_parsing_id=config.current_parsing_id,
+        root__ne=None
+    )
+    fields = ['root', 'features', 'products_count', 'first_product_decada_profit',
+              'ten_product_decada_profit', 'products_with_sales',
+              'avg_price_prev_period', 'avg_price_period',
+              'profit_prev_period', 'profit_period', 'sellers',
+              'sellers_with_sales', 'sales_period', 'top',
+              'ten_product_profit_top', 'first_product_profit_top',
+              'products_with_sales_top', 'profit_top', 'avg_price_top',
+              'rel_sales_top']
+    rows = [
+        [i.root, i.features, i.products_count, i.first_product_decada_profit,
+         i.ten_product_decada_profit, i.products_with_sales,
+         i.avg_price_prev_period, i.avg_price_period,  i.profit_prev_period,
+         i.profit_period, i.sellers, i.sellers_with_sales, i.sales_period,
+         i.top, i.ten_product_profit_top, i.first_product_profit_top,
+         i.products_with_sales_top, i.profit_top, i.avg_price_top,
+         i.rel_sales_top] for i in items
+    ]
+    filename = f'{config.current_parsing_id}-queries.csv'
+    file_path = f'export/{filename}'
+    with open(file_path, 'w') as f:
+        write = csv.writer(f)
+        write.writerow(fields)
+        write.writerows(rows)
+    f = open(file_path, 'r')
+    content = f.read()
+    return Response(
+        content,
+        mimetype="text/csv",
+        headers={
+            "Content-disposition":
+            f"attachment; filename={filename}"})
+
+
+@app.route('/api/export/categories')
+def export_categories():
+    config = Config.objects(queries_done=True).first()
+    items = Categories.objects.all()
+    fields = ['name', 'profit_period', 'profit_prev_period',
+              'first_product_price', 'first_product_decada_sales',
+              'first_product_decada_profit', 'ten_product_price',
+              'ten_product_decada_sales', 'ten_product_decada_profit',
+              'products_count', 'products_with_sales', 'sales_period',
+              'sellers', 'sellers_with_sales', 'rel_sellers', 'rel_sales',
+              'avg_price_prev_period', 'avg_price_period', 'top',
+              'ten_product_profit_top', 'first_product_profit_top',
+              'profit_top', 'avg_price_top', 'rel_sales_top']
+    rows = [
+        [i.name, i.profit_period, i.profit_prev_period, i.first_product_price,
+         i.first_product_decada_sales, i.first_product_decada_profit,
+         i.ten_product_price, i.ten_product_decada_sales,
+         i.ten_product_decada_profit, i.products_count, i.products_with_sales,
+         i.sales_period, i.sellers, i.sellers_with_sales, i.rel_sellers,
+         i.rel_sales, i.avg_price_prev_period, i.avg_price_period, i.top,
+         i.ten_product_profit_top, i.first_product_profit_top, i.profit_top,
+         i.avg_price_top, i.rel_sales_top] for i in items]
+    filename = f'{config.current_parsing_id}-categories.csv'
+    file_path = f'export/{filename}'
+    with open(file_path, 'w') as f:
+        write = csv.writer(f)
+        write.writerow(fields)
+        write.writerows(rows)
+    f = open(file_path, 'r')
+    content = f.read()
+    return Response(
+        content,
+        mimetype="text/csv",
+        headers={
+            "Content-disposition":
+            f"attachment; filename={filename}"})
 
 
 def get_child_ids(category, ids):

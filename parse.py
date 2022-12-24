@@ -520,6 +520,9 @@ class Parser(object):
         self.notify('Расчёт начался')
         self.calculate_queries()
         self.calculate_categories()
+        self.notify('Расчёт закончился')
+        self.config.calculated = True
+        self.config.save()
 
     def calculate_category(self, category):
         # Путь 1 (товары с высоким оборотом):
