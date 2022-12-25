@@ -7,7 +7,7 @@ module.exports = {
     },
     {
       script: 'bot.py',
-      interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
+      interpreter: '/home/deploy/apps/goods_hunter/botvenv/bin/python',
     },
   ],
 
