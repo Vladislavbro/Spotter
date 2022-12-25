@@ -115,7 +115,7 @@ def categories_top():
 
 @app.route('/api/export/queries')
 def export_queries():
-    config = Config.objects(queries_done=True).first()
+    config = Config.objects(calculated=True).first()
     items = Queries.objects(
         current_parsing_id=config.current_parsing_id,
         root__ne=None
@@ -155,7 +155,7 @@ def export_queries():
 
 @app.route('/api/export/categories')
 def export_categories():
-    config = Config.objects(queries_done=True).first()
+    config = Config.objects(calculated=True).first()
     items = Categories.objects.all()
     fields = ['name', 'profit_period', 'profit_prev_period',
               'first_product_price', 'first_product_decada_sales',
