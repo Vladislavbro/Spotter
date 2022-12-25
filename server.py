@@ -156,7 +156,7 @@ def export_queries():
 @app.route('/api/export/categories')
 def export_categories():
     config = Config.objects(calculated=True).first()
-    items = Categories.objects.all()
+    items = Categories.objects(parse=True).all()
     fields = ['name', 'profit_period', 'profit_prev_period',
               'first_product_price', 'first_product_decada_sales',
               'first_product_decada_profit', 'ten_product_price',
