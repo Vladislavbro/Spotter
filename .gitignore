@@ -5,3 +5,4 @@ model/*
 data/*.csv
 data/*.hdf
 node_modules
+bot.pkl

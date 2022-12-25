@@ -84,6 +84,7 @@ def categories_top():
             'total': total,
             'items': [{
                 'id': str(i.id),
+                'url': i.url,
                 'name': i.name,
                 'profit_period': i.profit_period,
                 'profit_prev_period': i.profit_prev_period,

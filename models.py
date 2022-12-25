@@ -95,6 +95,14 @@ class Categories(Document):
     }
 
 
+class Users(Document):
+    telegram_id = IntField()
+    last_name = StringField()
+    first_name = StringField()
+    username = StringField()
+    created_at = DateTimeField()
+
+
 class Sizes(EmbeddedDocument):
     quantity = IntField(required=True)
     sales = IntField()

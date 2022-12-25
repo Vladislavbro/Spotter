@@ -5,6 +5,10 @@ module.exports = {
       script: 'server.py',
       interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
     },
+    {
+      script: 'bot.py',
+      interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
+    },
   ],
 
   deploy : {
@@ -14,9 +18,6 @@ module.exports = {
       ref  : 'origin/master',
       repo : 'git@github.com:Vladislavbro/goods_hunter.git',
       path : '/home/deploy/apps/goods_hunter',
-      // 'pre-deploy-local': '',
-      // 'post-deploy' : 'cd frontend && npm install && npm run build && cd .. && pm2 reload ecosystem.config.js --env production',
-      // 'pre-setup': ''
     },
     production : {
       user : 'deploy',

@@ -146,7 +146,18 @@
             }"
             :key="category.id">
             <td>
-              <a :href="'https://www.wildberries.ru' + category.url" target="_blank">{{ category.name }}</a>
+              <a
+                v-if="category.url"
+                :href="'https://www.wildberries.ru' + category.url"
+                target="_blank">
+                {{ category.name }}
+              </a>
+              <a
+                v-else
+                :href="getQueryUrl(category)"
+                target="_blank">
+                {{ category.name }}
+              </a>
             </td>
             <td>{{ category.top }}</td>
             <td v-if="params.model == 'categories'">{{ category.products_count }}</td>
@@ -240,6 +251,9 @@ export default {
   },
 
   methods: {
+    getQueryUrl (query) {
+      return 'https://www.wildberries.ru/catalog/0/search.aspx?sort=popular&search=' + query.name.replaceAll(' ', '+')
+    },
     sortItems (sort) {
       this.$store.commit('mergeStore', {
         topCategoriesParams: {
