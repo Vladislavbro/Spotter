@@ -47,6 +47,11 @@ class Queries(Document):
     profit_top = BooleanField()
     avg_price_top = BooleanField()
     rel_sales_top = BooleanField()
+    meta = {
+        'indexes': [
+            'current_parsing_id',
+        ],
+    }
 
 
 class Categories(Document):
