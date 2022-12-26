@@ -77,7 +77,7 @@ class Parser(object):
             self.calculate_queries()
         elif self.config.categories_calculated is not True:
             self.notify('Расчет категорий начался')
-            self.categories_queries()
+            self.calculate_categories()
         elif (
                 self.config.current_parsing_date.date() !=
                 datetime.utcnow().date()):
