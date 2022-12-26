@@ -46,7 +46,7 @@ def categories_top():
             root__ne=None
         )
     elif model == 'categories':
-        items = Categories.objects.all()
+        items = Categories.objects(parse=True).all()
     total = items.count()
     if sort:
         items = items.order_by(f'-{sort}')
