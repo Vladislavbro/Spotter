@@ -48,9 +48,7 @@ class Parser(object):
         self.end_prev_period = (datetime.now() - timedelta(days=10)).replace(
             hour=0, minute=0, second=0, microsecond=0)
         self.start_prev_period = self.end_prev_period - timedelta(days=10)
-        # self.calculate()
-        # self.create_queries()
-        self.start_parsing()
+        self.processing()
 
     def get_url(self, url):
         try:
@@ -67,18 +65,31 @@ class Parser(object):
             print('get_url except', proxy)
             return self.get_url(url)
 
-    def start_parsing(self):
+    def processing(self):
         if self.config.parsing_done is not True:
+            self.notify('Парсинг категорий начался')
             self.get_category()
         elif self.config.queries_done is not True:
+            self.notify('Парсинг запросов начался')
             self.get_query()
-        elif self.config.current_parsing_date.date() != datetime.utcnow().date():
+        elif self.config.queries_calculated is not True:
+            self.notify('Расчет запросов начался')
+            self.calculate_queries()
+        elif self.config.categories_calculated is not True:
+            self.notify('Расчет категорий начался')
+            self.categories_queries()
+        elif (
+                self.config.current_parsing_date.date() !=
+                datetime.utcnow().date()):
+            self.config.calculated = True
+            self.config.save()
             date = datetime.utcnow()
             self.config = Config(
                 current_parsing_date=date,
                 current_parsing_id=int(date.timestamp()),
             )
             self.config.save()
+            self.notify('Новый цикл начался')
             self.get_category()
 
     def create_queries(self):
@@ -167,7 +178,7 @@ class Parser(object):
             self.notify('Парсинг запросов закончился')
             self.config.queries_done = True
             self.config.save()
-            return self.calculate()
+            return self.processing()
         else:
             self.category = self.query.category_id
             if self.query.last_parsed_page and self.query.last_parsed_page < 5:
@@ -182,6 +193,7 @@ class Parser(object):
         if self.category is None:
             self.notify('Парсинг категорий закончился')
             Categories.objects(parse=True).update(
+                calculated=False,
                 parsed_at=None,
                 last_parsed_page=None,
                 last_parsed_page_at=None,
@@ -516,14 +528,6 @@ class Parser(object):
     def get_sum(self, values):
         return sum([sum(value) for value in values])
 
-    def calculate(self):
-        self.notify('Расчёт начался')
-        self.calculate_queries()
-        self.calculate_categories()
-        self.notify('Расчёт закончился')
-        self.config.calculated = True
-        self.config.save()
-
     def calculate_category(self, category):
         # Путь 1 (товары с высоким оборотом):
         # 1. В каждой категории нижнего уровня отбираются топ 50 товаров по
@@ -614,6 +618,7 @@ class Parser(object):
                     category.avg_price_top and
                     category.profit_top):
                 category.top = True
+            category.calculated = True
             category.save()
             print(category.to_json())
 
@@ -630,10 +635,14 @@ class Parser(object):
             ).first()
 
     def calculate_categories(self):
-        Categories.objects(parse=True).update(top=False)
-        categories = Categories.objects(parse=True)
-        for category in categories:
+        category = Categories.objects(
+            calculated__ne=True,
+        ).first()
+        while category:
             self.calculate_category(category)
+            category = Categories.objects(
+                calculated__ne=True,
+            ).first()
 
     def calculate_query(self, query):
         products = Products.objects(

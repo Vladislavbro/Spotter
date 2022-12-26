@@ -14,6 +14,8 @@ class Config(Document):
     current_parsing_id = IntField()
     parsing_done = BooleanField()
     queries_done = BooleanField()
+    queries_calculated = BooleanField()
+    categories_calculated = BooleanField()
     calculated = BooleanField()
     meta = {
         'ordering': ['-current_parsing_id']
@@ -92,6 +94,7 @@ class Categories(Document):
     profit_top = BooleanField()
     avg_price_top = BooleanField()
     rel_sales_top = BooleanField()
+    calculated = BooleanField()
 
     meta = {
         'indexes': [
