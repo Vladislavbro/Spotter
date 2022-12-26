@@ -185,6 +185,7 @@ class Parser(object):
             if self.query.last_parsed_page and self.query.last_parsed_page < 5:
                 self.page = self.query.last_parsed_page + 1
             else:
+                self.get_query_detail()
                 self.page = 1
             return self.query_crawl()
 
@@ -213,6 +214,29 @@ class Parser(object):
                 self.page = 1
             return self.crawl()
 
+    def get_query_detail(self):
+        query = self.query.root + ' ' + ' '.join(self.query.features)
+        url = (
+            'https://search.wb.ru/exactmatch/ru/common/v4/search?appType=1&'
+            f'couponsGeo={self.couponsGeo}&curr=rub&dest={self.dest}&'
+            f'emp=0&lang=ru&locale=ru&pricemarginCoeff=1.0&'
+            f'query={query}&reg=1&regions={self.regions}&resultset=filters&'
+            'sort=popular&spp=32&sppFixGeo=4&suppressSpellcheck=false'
+        )
+        response = self.get_url(url)
+        if response.status_code == 200 and response.text != '':
+            try:
+                data = json.loads(r"{}".format(response.text))
+                self.query.products_count = data.get('data', {}).get('total', 0)
+                self.query.save()
+            except JSONDecodeError as e:
+                self.notify('get_query_detail JSONDecodeError ' + query)
+                print('get_query_detail JSONDecodeError', e, url)
+            except Exception as e:
+                print('except', str(e))
+        else:
+            self.notify(f'get_query_detail {response.status_code} {query}')
+
     def query_crawl(self):
         query = self.query.root + ' ' + ' '.join(self.query.features)
         url = (
@@ -223,13 +247,6 @@ class Parser(object):
             'resultset=catalog&sort=popular&spp=32&sppFixGeo=4&'
             'suppressSpellcheck=false'
         )
-        # url2 = (
-        #     'https://search.wb.ru/exactmatch/ru/common/v4/search?appType=1&'
-        #     f'couponsGeo={self.couponsGeo}&curr=rub&dest={self.dest}&'
-        #     f'emp=0&lang=ru&locale=ru&page={self.page}&pricemarginCoeff=1.0&'
-        #     f'query={query}&reg=1&regions={self.regions}&resultset=filters&'
-        #     'sort=popular&spp=32&sppFixGeo=4&suppressSpellcheck=false'
-        # )
         print(query)
         response = self.get_url(url)
         if response.status_code == 200:
@@ -619,9 +636,9 @@ class Parser(object):
                     category.avg_price_top and
                     category.profit_top):
                 category.top = True
-            category.calculated = True
-            category.save()
-            print(category.to_json())
+        category.calculated = True
+        category.save()
+        print(category.to_json())
 
     def calculate_queries(self):
         query = Queries.objects(
@@ -655,8 +672,8 @@ class Parser(object):
         products = Products.objects(
             articul__in=query.articuls
         ).order_by('-current_decada_sales')
-        query.products_count = products.count()
-        if query.products_count >= 10:
+        products_count = products.count()
+        if products_count >= 10:
             query.first_product_decada_profit = (
                 (products[0].current_decada_sales or 0)
                 *

@@ -8,14 +8,14 @@ profit_first_top = 500000 / 3
 profit_ten_top = 100000 / 3
 
 
-def get_avg(self, values):
+def get_avg(values):
     if len(values):
         return sum([sum(value) / len(value) for value in values if len(value)]) / len(values)
     else:
         return 0
 
 
-def get_sum(self, values):
+def get_sum(values):
     return sum([sum(value) for value in values])
 
 
