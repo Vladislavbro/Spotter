@@ -99,7 +99,8 @@ class Parser(object):
             products = Products.objects(categories__in=[self.category.wb_id])
             top_products = products.filter(
                 last_decada_profit__gte=10000/3,
-                current_decada_sales__gt=0
+                current_decada_sales__gt=0,
+                root__ne=None
             ).order_by('-current_decada_sales')[0:50]
             for top in top_products:
                 features = top.features
@@ -633,6 +634,9 @@ class Parser(object):
                 current_parsing_id=self.config.current_parsing_id,
                 calculated__ne=True,
             ).first()
+        self.config.queries_calculated = True
+        self.config.save()
+        self.processing()
 
     def calculate_categories(self):
         category = Categories.objects(
@@ -643,6 +647,9 @@ class Parser(object):
             category = Categories.objects(
                 calculated__ne=True,
             ).first()
+        self.config.categories_calculated = True
+        self.config.save()
+        self.processing()
 
     def calculate_query(self, query):
         products = Products.objects(
