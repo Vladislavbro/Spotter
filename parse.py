@@ -658,11 +658,13 @@ class Parser(object):
     def calculate_categories(self):
         category = Categories.objects(
             calculated__ne=True,
+            parse=True,
         ).first()
         while category:
             self.calculate_category(category)
             category = Categories.objects(
                 calculated__ne=True,
+                parse=True,
             ).first()
         self.config.categories_calculated = True
         self.config.save()
