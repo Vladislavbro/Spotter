@@ -66,11 +66,18 @@
                 Топ
               </button>
             </th>
-            <th v-if="params.model == 'categories'">
+            <th>
               <button
                 class="btn btn-link"
                 @click="sortItems('products_count')">
                 Товаров
+              </button>
+            </th>
+            <th>
+              <button
+                class="btn btn-link"
+                @click="sortItems('products_with_sales')">
+                Товары с продажами
               </button>
             </th>
             <th v-if="params.model == 'categories'">
@@ -95,6 +102,9 @@
               </button>
             </th>
             <th>
+              Изменение оборота
+            </th>
+            <th>
               <button
                 class="btn btn-link"
                 @click="sortItems('first_product_decada_profit')">
@@ -115,18 +125,12 @@
                 Средняя цена
               </button>
             </th>
+            <th>Изм средней цены</th>
             <th v-if="params.model == 'categories'">
               <button
                 class="btn btn-link"
                 @click="sortItems('sellers_with_sales')">
                 Продавцы с продажами
-              </button>
-            </th>
-            <th>
-              <button
-                class="btn btn-link"
-                @click="sortItems('products_with_sales')">
-                Товары с продажами
               </button>
             </th>
             <th v-if="params.model == 'categories'">
@@ -160,7 +164,12 @@
               </a>
             </td>
             <td>{{ category.top }}</td>
-            <td v-if="params.model == 'categories'">{{ category.products_count }}</td>
+            <td>{{ category.products_count }}</td>
+            <td :class="{
+              'table-primary': category.rel_sales_top
+            }">
+              {{ category.products_with_sales }}
+            </td>
             <td v-if="params.model == 'categories'">{{ category.sellers }}</td>
             <td>
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_prev_period) }}
@@ -169,6 +178,9 @@
               'table-primary': category.profit_top
             }">
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_period) }}
+            </td>
+            <td>
+              <span v-if="category.profit_prev_period">{{ (category.profit_period * 100 / category.profit_prev_period).toFixed() }} %</span>
             </td>
             <td :class="{
               'table-primary': category.first_product_profit_top
@@ -185,12 +197,10 @@
             }">
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.avg_price_period) }}
             </td>
-            <td v-if="params.model == 'categories'">{{ category.sellers_with_sales }}</td>
-            <td :class="{
-              'table-primary': category.rel_sales_top
-            }">
-              {{ category.products_with_sales }}
+            <td>
+              <span v-if="category.avg_price_prev_period">{{ (category.avg_price_period * 100 / category.avg_price_prev_period).toFixed() }} %</span>
             </td>
+            <td v-if="params.model == 'categories'">{{ category.sellers_with_sales }}</td>
             <td v-if="params.model == 'categories'">{{ category.sales_period }}</td>
           </tr>
         </tbody>
