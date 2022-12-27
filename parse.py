@@ -229,6 +229,8 @@ class Parser(object):
                 data = json.loads(r"{}".format(response.text))
                 self.query.products_count = data.get('data', {}).get('total', 0)
                 self.query.save()
+                print('self.query.products_count', self.query.id,
+                      self.query.products_count)
             except JSONDecodeError as e:
                 self.notify('get_query_detail JSONDecodeError ' + query)
                 print('get_query_detail JSONDecodeError', e, url)
