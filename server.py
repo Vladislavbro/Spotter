@@ -118,7 +118,8 @@ def categories_top():
 def export_queries():
     config = Config.objects(calculated=True).first()
     items = Queries.objects(
-        current_parsing_id=config.current_parsing_id,
+        # current_parsing_id=config.current_parsing_id,
+        current_parsing_id=1672043096,
         root__ne=None
     )
     fields = ['root', 'features', 'products_count', 'first_product_decada_profit',
