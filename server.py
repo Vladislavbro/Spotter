@@ -57,7 +57,7 @@ def categories_top():
             'total': total,
             'items': [{
                 'id': str(i.id),
-                # 'name': i.root + ' ' + ' '.join(i.features),
+                'name': i.root + ' ' + ' '.join(i.features),
                 'root': i.root,
                 'features': ' '.join(i.features),
                 'products_count': i.products_count,
