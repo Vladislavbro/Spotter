@@ -57,7 +57,9 @@ def categories_top():
             'total': total,
             'items': [{
                 'id': str(i.id),
-                'name': i.root + ' ' + ' '.join(i.features),
+                # 'name': i.root + ' ' + ' '.join(i.features),
+                'root': i.root,
+                'features': ' '.join(i.features),
                 'products_count': i.products_count,
                 'first_product_decada_profit': i.first_product_decada_profit,
                 'ten_product_decada_profit': i.ten_product_decada_profit,
@@ -122,22 +124,48 @@ def export_queries():
         current_parsing_id=1672043096,
         root__ne=None
     )
-    fields = ['root', 'features', 'products_count', 'first_product_decada_profit',
-              'ten_product_decada_profit', 'products_with_sales',
-              'avg_price_prev_period', 'avg_price_period',
-              'profit_prev_period', 'profit_period', 'sellers',
-              'sellers_with_sales', 'sales_period', 'top',
-              'ten_product_profit_top', 'first_product_profit_top',
-              'products_with_sales_top', 'profit_top', 'avg_price_top',
-              'rel_sales_top']
+
+    # - Корень
+    # - Характеристика
+    # - Количество товаров
+    # - Товары с продажами
+    # - Товары с продажами (в процентах, округление до целых)
+    # - Оборот первого товара
+    # - Оборот десятого товара
+    # - Средняя цена пред
+    # - Средняя цена тек
+    # - Изм средней цены (в процентах, округление до целых)
+    # - Оборот пред
+    # - Оброт тек
+    # - Изменение оборота (в процентах, округление до целых)
+    # - Количество продавцов
+    # - Продавцы с продажами
+    # - Продавцы с продажами (в процентах, округление до целых)
+    # - Топ
+    # - Топ товар 1
+    # - Топ товар 10
+    # - Топ товары с продажами
+    # - Топ средний чек
+    # - Топ оборот
+
+    fields = ['Корень', 'Характеристики', 'Кол-во товаров',
+              'Товары с продажами', 'Товары с продажами',
+              'Оборот первого товара', 'Оборот десятого товара',
+              'Средняя цена пред', 'Средняя цена тек', 'Изменение оборота',
+              'Количество продавцов', 'Продавцы с продажами',
+              'Продавцы с продажами', 'Топ', 'Топ товар 1', 'Топ товар 10',
+              'Топ товары с продажами', 'Топ средний чек', 'Топ оборот']
     rows = [
-        [i.root, i.features, i.products_count, i.first_product_decada_profit,
-         i.ten_product_decada_profit, i.products_with_sales,
-         i.avg_price_prev_period, i.avg_price_period,  i.profit_prev_period,
-         i.profit_period, i.sellers, i.sellers_with_sales, i.sales_period,
-         i.top, i.ten_product_profit_top, i.first_product_profit_top,
-         i.products_with_sales_top, i.profit_top, i.avg_price_top,
-         i.rel_sales_top] for i in items
+        [i.root, i.features, i.products_count, i.products_with_sales,
+         int(i.products_with_sales * 100 / i.products_count) if i.products_count else 0,
+         i.first_product_decada_profit, i.ten_product_decada_profit,
+         i.avg_price_prev_period, i.avg_price_period,
+         int(i.avg_price_period * 100 / i.avg_price_prev_period),
+         i.sellers, i.sellers_with_sales,
+         int(i.sellers_with_sales * 100 / i.sellers),
+         i.top, i.first_product_profit_top, i.ten_product_profit_top,
+         i.products_with_sales_top, i.avg_price_top, i.profit_top]
+        for i in items
     ]
     filename = f'{config.current_parsing_id}-queries.csv'
     file_path = f'export/{filename}'
@@ -159,24 +187,43 @@ def export_queries():
 def export_categories():
     config = Config.objects(calculated=True).first()
     items = Categories.objects(parse=True).all()
-    fields = ['name', 'profit_period', 'profit_prev_period',
-              'first_product_price', 'first_product_decada_sales',
-              'first_product_decada_profit', 'ten_product_price',
-              'ten_product_decada_sales', 'ten_product_decada_profit',
-              'products_count', 'products_with_sales', 'sales_period',
-              'sellers', 'sellers_with_sales', 'rel_sellers', 'rel_sales',
-              'avg_price_prev_period', 'avg_price_period', 'top',
-              'ten_product_profit_top', 'first_product_profit_top',
-              'profit_top', 'avg_price_top', 'rel_sales_top']
+    # fields = ['name', 'profit_period', 'profit_prev_period',
+    #           'first_product_price', 'first_product_decada_sales',
+    #           'first_product_decada_profit', 'ten_product_price',
+    #           'ten_product_decada_sales', 'ten_product_decada_profit',
+    #           'products_count', 'products_with_sales', 'sales_period',
+    #           'sellers', 'sellers_with_sales', 'rel_sellers', 'rel_sales',
+    #           'avg_price_prev_period', 'avg_price_period', 'top',
+    #           'ten_product_profit_top', 'first_product_profit_top',
+    #           'profit_top', 'avg_price_top', 'rel_sales_top']
+    # rows = [
+    #     [i.name, i.profit_period, i.profit_prev_period, i.first_product_price,
+    #      i.first_product_decada_sales, i.first_product_decada_profit,
+    #      i.ten_product_price, i.ten_product_decada_sales,
+    #      i.ten_product_decada_profit, i.products_count, i.products_with_sales,
+    #      i.sales_period, i.sellers, i.sellers_with_sales, i.rel_sellers,
+    #      i.rel_sales, i.avg_price_prev_period, i.avg_price_period, i.top,
+    #      i.ten_product_profit_top, i.first_product_profit_top, i.profit_top,
+    #      i.avg_price_top, i.rel_sales_top] for i in items]
+    fields = ['Наименование', 'Кол-во товаров',
+              'Товары с продажами', 'Товары с продажами',
+              'Оборот первого товара', 'Оборот десятого товара',
+              'Средняя цена пред', 'Средняя цена тек', 'Изменение оборота',
+              'Количество продавцов', 'Продавцы с продажами',
+              'Продавцы с продажами', 'Топ', 'Топ товар 1', 'Топ товар 10',
+              'Топ товары с продажами', 'Топ средний чек', 'Топ оборот']
     rows = [
-        [i.name, i.profit_period, i.profit_prev_period, i.first_product_price,
-         i.first_product_decada_sales, i.first_product_decada_profit,
-         i.ten_product_price, i.ten_product_decada_sales,
-         i.ten_product_decada_profit, i.products_count, i.products_with_sales,
-         i.sales_period, i.sellers, i.sellers_with_sales, i.rel_sellers,
-         i.rel_sales, i.avg_price_prev_period, i.avg_price_period, i.top,
-         i.ten_product_profit_top, i.first_product_profit_top, i.profit_top,
-         i.avg_price_top, i.rel_sales_top] for i in items]
+        [i.name, i.products_count, i.products_with_sales,
+         int(i.products_with_sales * 100 / i.products_count) if i.products_count else 0,
+         i.first_product_decada_profit, i.ten_product_decada_profit,
+         i.avg_price_prev_period, i.avg_price_period,
+         int(i.avg_price_period * 100 / i.avg_price_prev_period),
+         i.sellers, i.sellers_with_sales,
+         int(i.sellers_with_sales * 100 / i.sellers),
+         i.top, i.first_product_profit_top, i.ten_product_profit_top,
+         i.products_with_sales_top, i.avg_price_top, i.profit_top]
+        for i in items
+    ]
     filename = f'{config.current_parsing_id}-categories.csv'
     file_path = f'export/{filename}'
     with open(file_path, 'w') as f:

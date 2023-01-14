@@ -712,28 +712,28 @@ class Parser(object):
                   for s in p.sizes if s.date >= self.end_prev_period]
                  for p in products]
             )
-            # Оборот первого не меньше 500к
-            if query.first_product_decada_profit >= self.profit_first_top:
+            # Оборот первого не меньше 500к -> 300к
+            if query.first_product_decada_profit >= 100000:
                 query.first_product_profit_top = True
-            # оборот десятого не меньше 100к
-            if query.ten_product_decada_profit >= self.profit_ten_top:
+            # оборот десятого не меньше 100к -> 70к
+            if query.ten_product_decada_profit >= 70000 / 3:
                 query.ten_product_profit_top = True
             # Количество товаров с продажами: не меньше 20%
             if query.products_with_sales / products.count() >= 1/5:
                 query.products_with_sales_top = True
             # Средний чек в категории месяц назад и сейчас
-            # отличается не более чем на +/- 10%
+            # отличается не более чем на +/- 10% -> 40%
             if (
                     query.avg_price_period >=
-                    query.avg_price_prev_period * 0.9 and
+                    query.avg_price_prev_period * 0.6 and
                     query.avg_price_period <=
-                    query.avg_price_prev_period * 1.1):
+                    query.avg_price_prev_period * 1.4):
                 query.avg_price_top = True
             # Оборот в категории месяц назад и сейчас отличается
             # не более чем на +/- 10%
             if (
-                    query.profit_period >= query.profit_prev_period * 0.9 and
-                    query.profit_period <= query.profit_prev_period * 1.1):
+                    query.profit_period >= query.profit_prev_period * 0.6 and
+                    query.profit_period <= query.profit_prev_period * 1.4):
                 query.profit_top = True
             if (
                     query.first_product_profit_top and
