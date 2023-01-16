@@ -133,10 +133,10 @@ def export_queries():
               'Топ товары с продажами', 'Топ средний чек', 'Топ оборот']
     rows = [
         [i.root, i.features, i.products_count, i.products_with_sales,
-         int(i.products_with_sales * 100 / i.products_count) if i.products_count else 0,
+         int((i.products_with_sales or 0) * 100 / i.products_count) if i.products_count else 0,
          i.first_product_decada_profit, i.ten_product_decada_profit,
          i.avg_price_prev_period, i.avg_price_period,
-         int(i.avg_price_period * 100 / i.avg_price_prev_period),
+         int((i.avg_price_period or 0) * 100 / i.avg_price_prev_period),
          i.sellers, i.sellers_with_sales,
          int((i.sellers_with_sales or 0) * 100 / i.sellers) if i.sellers else 0,
          i.top, i.first_product_profit_top, i.ten_product_profit_top,
