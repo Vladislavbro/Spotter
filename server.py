@@ -138,7 +138,7 @@ def export_queries():
          i.avg_price_prev_period, i.avg_price_period,
          int(i.avg_price_period * 100 / i.avg_price_prev_period),
          i.sellers, i.sellers_with_sales,
-         int((i.sellers_with_sales or 0) * 100 / i.sellers) if i.sellers or 0,
+         int((i.sellers_with_sales or 0) * 100 / i.sellers) if i.sellers else 0,
          i.top, i.first_product_profit_top, i.ten_product_profit_top,
          i.products_with_sales_top, i.avg_price_top, i.profit_top]
         for i in items
