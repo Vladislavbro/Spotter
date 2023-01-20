@@ -509,7 +509,7 @@ class Parser(object):
                     set__current_decada_profit=current_decada_profit,
                     set__last_decada_profit=last_decada_profit,
                     set__last_hom_sales=last_hom_sales,
-                    set__last_current_hom_sales=current_hom_sales,
+                    set__current_hom_sales=current_hom_sales,
                     set__hom_sales_growth=hom_sales_growth,
                     set__last_hom_profit=last_hom_profit,
                     set__current_hom_profit=current_hom_profit,
