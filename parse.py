@@ -442,6 +442,17 @@ class Parser(object):
                 current_hom_start = (now - timedelta(days=15)).replace(
                     hour=0, minute=0, second=0, microsecond=0)
                 last_hom_start = current_hom_start - timedelta(days=15)
+                last_decada_sales = 0
+                current_decada_sales = 0
+                decada_sales_growth = 0
+                last_decada_profit = 0
+                current_decada_profit = 0
+                last_hom_sales = 0
+                current_hom_sales = 0
+                hom_sales_growth = 0
+                last_hom_profit = 0
+                current_hom_profit = 0
+                hom_profit_growth = 0
                 if len(product.sizes):
                     last_decada_data = [sales for sales in product.sizes
                                         if sales.date >= last_decada_start
@@ -490,18 +501,6 @@ class Parser(object):
                             last_hom_profit * 100)
                     else:
                         hom_profit_growth = 0
-                else:
-                    last_decada_sales = 0
-                    current_decada_sales = 0
-                    decada_sales_growth = 0
-                    last_decada_profit = 0
-                    current_decada_profit = 0
-                    last_hom_sales = 0
-                    current_hom_sales = 0
-                    hom_sales_growth = 0
-                    last_hom_profit = 0
-                    current_hom_profit = 0
-                    hom_profit_growth = 0
                 Products.objects(id=product.id).update_one(
                     set__decada_sales_growth=decada_sales_growth,
                     set__current_decada_sales=current_decada_sales,
