@@ -38,16 +38,13 @@ class Parser(object):
     config = None
     end_prev_period = None
     start_prev_period = None
-    profit_first_top = 500000 / 3
-    profit_ten_top = 100000 / 3
+    profit_first_top = 500000 / 2
+    profit_ten_top = 100000 / 2
 
     def __init__(self):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
-        # self.product_unique()
-        self.end_prev_period = (datetime.now() - timedelta(days=10)).replace(
-            hour=0, minute=0, second=0, microsecond=0)
-        self.start_prev_period = self.end_prev_period - timedelta(days=10)
+        self.set_period_dates()
         self.processing()
 
     def get_url(self, url):
@@ -78,6 +75,9 @@ class Parser(object):
         elif self.config.categories_calculated is not True:
             self.notify('Расчет категорий начался')
             self.calculate_categories()
+        elif self.config.products_calculated is not True:
+            self.notify('Расчет топ товаров начался')
+            self.calculate_products()
         else:
             self.config.calculated = True
             self.config.save()
@@ -434,11 +434,14 @@ class Parser(object):
                     )
                 product = Products.objects(
                     articul=item['id']
-                ).fields(slice__sizes=[-20, 20]).first()
+                ).fields(slice__sizes=[-30, 30]).first()
                 now = datetime.utcnow()
                 current_decada_start = (now - timedelta(days=10)).replace(
                     hour=0, minute=0, second=0, microsecond=0)
                 last_decada_start = current_decada_start - timedelta(days=10)
+                current_hom_start = (now - timedelta(days=15)).replace(
+                    hour=0, minute=0, second=0, microsecond=0)
+                last_hom_start = current_hom_start - timedelta(days=15)
                 if len(product.sizes):
                     last_decada_data = [sales for sales in product.sizes
                                         if sales.date >= last_decada_start
@@ -455,25 +458,62 @@ class Parser(object):
                         [(s.sales or 0) *
                          (s.price or product.price or 0) for
                          s in current_decada_data])
-
                     if last_decada_sales != 0:
                         decada_sales_growth = int(
                             current_decada_sales /
                             last_decada_sales * 100)
+                    # HOM
+                    last_hom_data = [sales for sales in product.sizes
+                                     if sales.date >= last_hom_start
+                                     and sales.date < current_hom_start]
+                    last_hom_sales = sum([(s.sales or 0) for s
+                                          in last_hom_data])
+                    last_hom_profit = sum([(s.sales or 0) * (s.price or product.price or 0) for s
+                                           in last_hom_data])
+                    current_hom_data = [sales for sales in product.sizes
+                                        if sales.date >= current_hom_start]
+                    current_hom_sales = sum([(s.sales or 0) for s
+                                             in current_hom_data])
+                    current_hom_profit = sum(
+                        [(s.sales or 0) *
+                         (s.price or product.price or 0) for
+                         s in current_hom_data])
+                    if last_hom_sales != 0:
+                        hom_sales_growth = int(
+                            current_hom_sales /
+                            last_hom_sales * 100)
                     else:
-                        decada_sales_growth = 0
+                        hom_sales_growth = 0
+                    if last_hom_profit != 0:
+                        hom_profit_growth = int(
+                            current_hom_profit /
+                            last_hom_profit * 100)
+                    else:
+                        hom_profit_growth = 0
                 else:
                     last_decada_sales = 0
                     current_decada_sales = 0
                     decada_sales_growth = 0
                     last_decada_profit = 0
                     current_decada_profit = 0
+                    last_hom_sales = 0
+                    current_hom_sales = 0
+                    hom_sales_growth = 0
+                    last_hom_profit = 0
+                    current_hom_profit = 0
+                    hom_profit_growth = 0
                 Products.objects(id=product.id).update_one(
                     set__decada_sales_growth=decada_sales_growth,
                     set__current_decada_sales=current_decada_sales,
                     set__last_decada_sales=last_decada_sales,
                     set__current_decada_profit=current_decada_profit,
                     set__last_decada_profit=last_decada_profit,
+                    set__last_hom_sales=last_hom_sales,
+                    set__last_current_hom_sales=current_hom_sales,
+                    set__hom_sales_growth=hom_sales_growth,
+                    set__last_hom_profit=last_hom_profit,
+                    set__current_hom_profit=current_hom_profit,
+                    set__hom_profit_growth=hom_profit_growth,
                 )
             elif detail and item['name'].strip():
                 product = Products(
@@ -546,6 +586,11 @@ class Parser(object):
     def get_sum(self, values):
         return sum([sum(value) for value in values])
 
+    def set_period_dates(self):
+        self.end_prev_period = (datetime.now() - timedelta(days=15)).replace(
+            hour=0, minute=0, second=0, microsecond=0)
+        self.start_prev_period = self.end_prev_period - timedelta(days=15)
+
     def calculate_category(self, category):
         # Путь 1 (товары с высоким оборотом):
         # 1. В каждой категории нижнего уровня отбираются топ 50 товаров по
@@ -561,7 +606,9 @@ class Parser(object):
         # не более чем на +-10%
         # Если все условия пройдены - то информация о нише и топ 50 товарах
         # отправляются в раздел ""топ категории"" для декады делим месяц на три
-        products = Products.objects(categories__in=[category.wb_id])
+        self.set_period_dates()
+        products = Products.objects(categories__in=[category.wb_id]).fields(
+            slice__sizes=[-30, 30])
         category.products_count = products.count()
         print(category.name, category.products_count)
         if category.products_count > 10:
@@ -673,7 +720,7 @@ class Parser(object):
     def calculate_query(self, query):
         products = Products.objects(
             articul__in=query.articuls
-        ).order_by('-current_decada_sales')
+        ).fields(slice__sizes=[-30, 30]).order_by('-current_decada_sales')
         products_count = products.count()
         if products_count >= 10:
             query.first_product_decada_profit = (
@@ -713,10 +760,10 @@ class Parser(object):
                  for p in products]
             )
             # Оборот первого не меньше 500к -> 300к
-            if query.first_product_decada_profit >= 100000:
+            if query.first_product_decada_profit >= 300000 / 2:
                 query.first_product_profit_top = True
             # оборот десятого не меньше 100к -> 70к
-            if query.ten_product_decada_profit >= 70000 / 3:
+            if query.ten_product_decada_profit >= 70000 / 2:
                 query.ten_product_profit_top = True
             # Количество товаров с продажами: не меньше 20%
             if query.products_with_sales / products.count() >= 1/5:
@@ -745,6 +792,67 @@ class Parser(object):
         query.calculated = True
         query.save()
         print(query.to_json())
+
+    def calculate_products(self):
+        # "Товары в этот раздел отбираются по следующему принципу:
+        # 1. В каждой категории нижнего уровня отбираются топ 50 товаров
+        # по росту оборота в процентах.
+        # Условие отбора:
+        # - Оборот товара в первом периоде должен быть больше 10 000
+        # 2. Алгоритм вычленяет главное слово и характеристику для
+        # каждого товара из топ 50 и объединяет товары по главному слову
+        # и характеристике и составляет их в одну таблицу
+        # 3. Алгоритм забивает каждое наименование в поиск на маркетплейсе
+        # Условие отбора:
+        # - товаров по запросу должно быть не больше 1000
+        # 3. Составляется таблица товаров из выдачи с сортировкой по обороту
+        # от большего к меньшему
+        # Условия отбора:
+        # - Количество товаров с продажами: не меньше 40%
+        # - Оборот первого не меньше 500к, оборот десятого не меньше 100к
+        # Если все условия соблюдены, первые 2 товара из объединенного списка
+        # (или один товар, если он не объединенный) попадают в таблицу ""Топ товаров""
+        # Операция повторяется с каждым товаром из таблицы с объединенными
+        # товарами, составленной в пункте 2
+        #
+        # В этой странице открывается таблица со следующеми данными:
+        # 1. Название товара
+        # 2. Фото
+        # 3. Ссылка
+        # 4. Рейтинг
+        # 5. Продавец
+        # 6. Бренд
+        # 7. Оборот в текущем периоде, в скобках: увеличение оборота в процентах относительно прошлого периода
+        # 8. Цена (после скидки)
+        # 9. Продажи (в штуках)
+        # 10. Количество товаров на складе
+        # 11. Упущенный оборот из-за обнуления остатков(?)
+        # 12. Перспективность ниши (?)
+        # 13. Ключевые слова (?)
+        # "Здесь и дальше период оценки 30 дней:
+        # - Если сравниваются периоды продаж: то первые 15 дней и
+        # следующие 15 дней , без привязки к календарным месяцам
+        # - Если сравнивается средняя цена в категории, то сравнивается
+        # средняя цена 30 дней назад и на данный момент"
+        # "
+        category = Categories.objects(
+            products_calculated__ne=True,
+            parse=True,
+        ).first()
+        while category:
+            self.calculate_category_products(category)
+            category = Categories.objects(
+                products_calculated__ne=True,
+                parse=True,
+            ).first()
+        self.config.products_calculated = True
+        self.config.save()
+        self.processing()
+
+    def calculate_category_products(self, category):
+        # тут все расчёты
+        category.products_calculated = True
+        category.save()
 
 
 parser = Parser()

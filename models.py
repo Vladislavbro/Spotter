@@ -16,6 +16,7 @@ class Config(Document):
     queries_done = BooleanField()
     queries_calculated = BooleanField()
     categories_calculated = BooleanField()
+    products_calculated = BooleanField()
     calculated = BooleanField()
     meta = {
         'ordering': ['-current_parsing_id']
@@ -28,16 +29,20 @@ class Queries(Document):
     root = StringField()
     features = ListField(default=[])
     products_count = IntField()
+    products_with_sales = IntField()
     first_product_decada_profit = IntField()
     ten_product_decada_profit = IntField()
-    products_with_sales = IntField()
+    first_product_hom_profit = IntField()
+    ten_product_hom_profit = IntField()
+    # period
     avg_price_prev_period = IntField()
     avg_price_period = IntField()
     profit_prev_period = IntField()
     profit_period = IntField()
+    sales_period = IntField()
+    # period end
     sellers = IntField()
     sellers_with_sales = IntField()
-    sales_period = IntField()
     parsed_at = DateTimeField()
     last_parsed_page = IntField()
     current_parsing_id = IntField()
@@ -71,8 +76,13 @@ class Categories(Document):
     start_parsing_at = DateTimeField()
     current_parsing_id = IntField()
     updated_at = DateTimeField()
+    # period
     profit_period = IntField()
     profit_prev_period = IntField()
+    sales_period = IntField()
+    avg_price_prev_period = IntField()
+    avg_price_period = IntField()
+    # end period
     first_product_price = IntField()
     first_product_decada_sales = IntField()
     first_product_decada_profit = IntField()
@@ -81,13 +91,10 @@ class Categories(Document):
     ten_product_decada_profit = IntField()
     products_count = IntField()
     products_with_sales = IntField()
-    sales_period = IntField()
     sellers = IntField()
     sellers_with_sales = IntField()
     rel_sellers = FloatField()
     rel_sales = FloatField()
-    avg_price_prev_period = IntField()
-    avg_price_period = IntField()
     top = BooleanField()
     ten_product_profit_top = BooleanField()
     first_product_profit_top = BooleanField()
@@ -95,6 +102,7 @@ class Categories(Document):
     avg_price_top = BooleanField()
     rel_sales_top = BooleanField()
     calculated = BooleanField()
+    products_calculated = BooleanField()
 
     meta = {
         'indexes': [
@@ -152,8 +160,18 @@ class Products(Document):
     current_decada_sales = IntField()
     last_decada_sales = IntField()
     decada_sales_growth = IntField()
-    last_decada_profit = IntField()
     current_decada_profit = IntField()
+    last_decada_profit = IntField()
+    decada_profit_growth = IntField()
+
+    # hom - half of month - полмесяца
+    current_hom_sales = IntField()
+    last_hom_sales = IntField()
+    hom_sales_growth = IntField()
+    current_hom_profit = IntField()
+    last_hom_profit = IntField()
+    hom_profit_growth = IntField()
+
     meta = {
         'indexes': [
             'check_articul',
@@ -164,6 +182,7 @@ class Products(Document):
             'parsed_at',
             'root',
             'decada_sales_growth',
+            'hom_sales_growth',
             '-sales',
             ('category_id', 'last_parsing_id'),
         ],
