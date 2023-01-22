@@ -194,6 +194,7 @@ class Parser(object):
             self.notify('Парсинг категорий закончился')
             Categories.objects(parse=True).update(
                 calculated=False,
+                products_calculated=False,
                 parsed_at=None,
                 last_parsed_page=None,
                 last_parsed_page_at=None,
@@ -471,8 +472,7 @@ class Parser(object):
                          s in current_decada_data])
                     if last_decada_sales != 0:
                         decada_sales_growth = int(
-                            current_decada_sales /
-                            last_decada_sales * 100)
+                            current_decada_sales / last_decada_sales * 100)
                     # HOM
                     last_hom_data = [sales for sales in product.sizes
                                      if sales.date >= last_hom_start
