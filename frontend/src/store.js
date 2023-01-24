@@ -4,9 +4,9 @@ import {api} from './api'
 const store = new Vuex.Store({
   state: {
     topCategoriesParams: {
-      model: 'queries',
+      model: 'categories',
       page: 1,
-      sort: null
+      sort: 'top'
     },
     total: 0,
     topCategories: [],

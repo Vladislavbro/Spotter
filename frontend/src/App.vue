@@ -11,9 +11,6 @@
               <router-link :to="{ name: 'Index', params: {} }" class="nav-link">Топ категорий</router-link>
             </li>
             <li class="nav-item">
-              <router-link :to="{ name: 'TopProducts', params: {} }" class="nav-link">Топ товаров</router-link>
-            </li>
-            <li class="nav-item">
               <router-link :to="{ name: 'Categories', params: {} }" class="nav-link">Категории</router-link>
             </li>
             <!-- <li class="nav-item">
