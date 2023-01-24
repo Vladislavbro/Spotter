@@ -20,20 +20,21 @@
         </a>
       </div>
 
+
+      <div class="form-check">
+        <input
+          @change="getData"
+          value="categories"
+          v-model="$store.state.topCategoriesParams.model"
+          class="form-check-input"
+          type="radio"
+          name="model"
+          id="flexRadioDefault2">
+        <label class="form-check-label" for="flexRadioDefault2">
+          Путь 1
+        </label>
+      </div>
       <div class="form-check me-3">
-        <div class="form-check">
-          <input
-            @change="getData"
-            value="categories"
-            v-model="$store.state.topCategoriesParams.model"
-            class="form-check-input"
-            type="radio"
-            name="model"
-            id="flexRadioDefault2">
-          <label class="form-check-label" for="flexRadioDefault2">
-            Путь 1
-          </label>
-        </div>
         <input
           @change="getData"
           value="queries"
