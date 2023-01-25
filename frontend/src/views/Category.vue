@@ -7,32 +7,47 @@
     </div>
     <table class="table table-bordered table-hover">
       <thead>
-        <th>Группа</th>
-        <th>Товаров</th>
-        <th>Продаж в предыдущей декаде</th>
-        <th>Продаж в текущей декаде</th>
-        <th>Процент роста</th>
+        <th>Название товара</th>
+        <th>Фото</th>
+        <th>Рейтинг</th>
+        <th>Продавец</th>
+        <th>Оборот в тек периоде</th>
+        <th>Продажи (в штуках)</th>
       </thead>
       <tbody>
-        <tr v-for="(group, i) in $store.state.groups" :key="i">
-          <td>{{ group[0] }}</td>
-          <td>{{ group[1] }}</td>
-          <td>{{ group[2] }}</td>
-          <td>{{ group[3] }}</td>
-          <td>{{ group[4] }}</td>
+        <tr v-for="product in $store.state.products" :key="product.id">
+          <td>
+            <a
+              :href="'https://www.wildberries.ru/catalog/' + product.articul + '/detail.aspx'"
+              target="_blank">
+              {{ product.name }}
+            </a>
+          </td>
+          <td>
+            <img :src="getProductUrl(product)" height="60">
+          </td>
+          <td>{{ product.rating }}</td>
+          <td>{{ product.brand }}</td>
+          <td>{{ product.current_hom_profit }} ({{ product.hom_profit_growth }})</td>
+          <td>{{ product.current_hom_sales }}</td>
         </tr>
       </tbody>
     </table>
   </div>
 </template>
 
+
 <script>
 export default {
+  methods: {
+    getProductUrl (product) {
+      return `https://images.wbstatic.net/big/new/${product.articul.toString().substr(0, 4)}0000/${product.articul}-1.jpg`
+    }
+  },
   mounted () {
     this.$store.commit('mergeStore', {
       category: {},
-      groups: [],
-      info: null,
+      products: [],
     })
     const id = this.$route.params.id
     this.$store.dispatch('getCategory', id)

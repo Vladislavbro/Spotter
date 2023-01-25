@@ -13,7 +13,6 @@ const store = new Vuex.Store({
     categories: [],
     category: {},
     products: [],
-    groups: [],
     info: null,
   },
   mutations: {
@@ -65,7 +64,7 @@ const store = new Vuex.Store({
         if (response.status === 200 && response.data) {
           context.commit('mergeStore', {
             category: response.data.category,
-            groups: response.data.groups,
+            products: response.data.products,
             info: response.data.info,
           })
         }

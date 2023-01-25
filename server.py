@@ -163,24 +163,6 @@ def export_queries():
 def export_categories():
     config = Config.objects(calculated=True).first()
     items = Categories.objects(parse=True).all()
-    # fields = ['name', 'profit_period', 'profit_prev_period',
-    #           'first_product_price', 'first_product_decada_sales',
-    #           'first_product_decada_profit', 'ten_product_price',
-    #           'ten_product_decada_sales', 'ten_product_decada_profit',
-    #           'products_count', 'products_with_sales', 'sales_period',
-    #           'sellers', 'sellers_with_sales', 'rel_sellers', 'rel_sales',
-    #           'avg_price_prev_period', 'avg_price_period', 'top',
-    #           'ten_product_profit_top', 'first_product_profit_top',
-    #           'profit_top', 'avg_price_top', 'rel_sales_top']
-    # rows = [
-    #     [i.name, i.profit_period, i.profit_prev_period, i.first_product_price,
-    #      i.first_product_decada_sales, i.first_product_decada_profit,
-    #      i.ten_product_price, i.ten_product_decada_sales,
-    #      i.ten_product_decada_profit, i.products_count, i.products_with_sales,
-    #      i.sales_period, i.sellers, i.sellers_with_sales, i.rel_sellers,
-    #      i.rel_sales, i.avg_price_prev_period, i.avg_price_period, i.top,
-    #      i.ten_product_profit_top, i.first_product_profit_top, i.profit_top,
-    #      i.avg_price_top, i.rel_sales_top] for i in items]
     fields = ['Наименование', 'Кол-во товаров',
               'Товары с продажами', 'Товары с продажами',
               'Оборот первого товара', 'Оборот десятого товара',
@@ -225,22 +207,13 @@ def get_child_ids(category, ids):
 
 @app.route('/api/categories/<id>')
 def category(id):
-    root_category = Categories.objects.get(pk=id)
-    ids = get_child_ids(root_category, [root_category.wb_id])
-    products = Products.objects(category_wb_id__in=ids)
-    counter = Counter([p.root for p in products.filter(root__ne=None).only('root')])
-    groups = sorted(counter.items(), key=lambda item: item[1], reverse=True)
-    groups = [[g[0], g[1]] for g in groups if g[1] > 15]
-    for group in groups:
-        current_decada_sales = products.filter(root=group[0]).sum('current_decada_sales')
-        last_decada_sales = products.filter(root=group[0]).sum('last_decada_sales')
-        growth = int(current_decada_sales / last_decada_sales * 100)
-        group += [last_decada_sales, current_decada_sales, growth]
+    category_ = Categories.objects.get(pk=id)
+    products = Products.objects(
+        categories__in=[category_.wb_id]
+    ).order_by('-current_hom_profit')[0:100]
     return {
-        'category': json.loads(root_category.to_json()),
-        'ids': ids,
-        'info': products.count(),
-        'groups': groups
+        'category': json.loads(category_.to_json()),
+        'products': json.loads(products.to_json()),
     }
 
 

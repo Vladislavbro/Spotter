@@ -21,7 +21,7 @@
       </div>
 
 
-      <div class="form-check">
+      <div class="form-check me-3">
         <input
           @change="getData"
           value="categories"
@@ -34,7 +34,7 @@
           Путь 1
         </label>
       </div>
-      <div class="form-check me-3">
+      <div class="form-check">
         <input
           @change="getData"
           value="queries"

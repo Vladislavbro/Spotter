@@ -142,7 +142,7 @@ class Products(Document):
     queries = ListField(default=[])
     categories = ListField(default=[])
     subject_id = IntField(required=True)
-    rating = IntField()
+    rating = FloatField()
     feedbacks = IntField()
     data = DictField()
     is_new = BooleanField()
