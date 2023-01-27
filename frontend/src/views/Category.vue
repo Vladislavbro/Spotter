@@ -1,14 +1,13 @@
 <template>
   <div class="container py-4">
     <h3>{{ $store.state.category.name }}</h3>
-    <small>{{ $store.state.category }}</small>
+    <!-- <small>{{ $store.state.category }}</small> -->
     <div class="py-3 text-end">
-      Товаров: <strong>{{ $store.state.info }}</strong>
+      <!-- Товаров: <strong>{{ $store.state.info }}</strong> -->
     </div>
     <table class="table table-bordered table-hover">
       <thead>
         <th>Название товара</th>
-        <th>Фото</th>
         <th>Рейтинг</th>
         <th>Продавец</th>
         <th>Оборот в тек периоде</th>
@@ -23,12 +22,12 @@
               {{ product.name }}
             </a>
           </td>
-          <td>
-            <img :src="getProductUrl(product)" height="60">
-          </td>
           <td>{{ product.rating }}</td>
           <td>{{ product.brand }}</td>
-          <td>{{ product.current_hom_profit }} ({{ product.hom_profit_growth }})</td>
+          <td>
+            {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(product.current_hom_profit) }}
+            ({{ product.hom_profit_growth }})
+          </td>
           <td>{{ product.current_hom_sales }}</td>
         </tr>
       </tbody>
