@@ -1,5 +1,5 @@
 // const back = 'http://0.0.0.0:5000/'
-const back = 'http://wb.nio.design'
+const back = 'https://spotter.fun'
 module.exports = {
   devServer: {
     proxy: {

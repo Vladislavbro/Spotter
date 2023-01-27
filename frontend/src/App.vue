@@ -24,8 +24,10 @@
             </li> -->
           </ul>
           <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <router-link :to="{name: 'Account'}" class="nav-link">Василий</router-link>
+            </li>
             <span class="navbar-text">
-              <strong class="me-2">Василий</strong>
               <i>10 дней до конца подписки</i>
             </span>
           </ul>
