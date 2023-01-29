@@ -6,7 +6,8 @@ module.exports = {
       interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
     },
     {
-      script: 'ghback/manage.py runserver',
+      script: 'ghback/manage.py',
+      args: 'runserver',
       interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
     },
     {
