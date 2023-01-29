@@ -25,7 +25,9 @@ SECRET_KEY = "django-insecure-9s67622d0#-1z(3h9p#9damp565bjykj#a1lx+c48!-or*55k)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'spotter.fun'
+]
 
 
 # Application definition
