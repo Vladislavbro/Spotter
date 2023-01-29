@@ -3,6 +3,9 @@ import {app} from './main'
 import {api} from './api'
 const store = new Vuex.Store({
   state: {
+    user: {},
+    auth: 'login',
+
     topCategoriesParams: {
       model: 'categories',
       page: 1,
@@ -108,6 +111,23 @@ const store = new Vuex.Store({
       }
     },
 
+    async signup (context) {
+      try {
+        const response = await api.signup(context)
+        if (response.status === 200 && response.data.status === 'success') {
+          context.state.auth = 'login'
+          app.$toast.success('Успешная регистрация!', {duration: 2000})
+          setTimeout(() => {
+            location.replace('/')
+          }, 2000)
+        } else {
+          app.$toast.error(response.data.message)
+        }
+      } catch (e) {
+        app.$toast.error(`${e.name}: ${e.message}`)
+      }
+    },
+
     async login (context) {
       try {
         const response = await api.login(context)
@@ -128,6 +148,18 @@ const store = new Vuex.Store({
         }
       } catch (e) {
         // app.toasted.error(`${e.name}: ${e.message}`)
+      }
+    },
+
+    async logout (context) {
+      try {
+        const response = await api.logout(context)
+        if (response.status === 200) {
+          context.commit('mergeStore', {user: {}})
+          location.reload()
+        }
+      } catch (e) {
+        app.$toast.error(`${e.name}: ${e.message}`)
       }
     },
 

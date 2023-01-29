@@ -19,14 +19,30 @@ function getToken(name) {
 export const api = {
 
   async getMe () {
-    return axios.get('/api/me')
+    return axios.get('/api/auth/me')
   },
 
   async login (context) {
-    return axios.post('/api/login', {
+    return axios.post('/api/auth/log_in', {
       username: context.state.user.username,
       password: context.state.user.password,
     }, {
+      headers: {
+        'X-CSRFToken': getToken('csrftoken')
+      }
+    })
+  },
+
+  async signup (context) {
+    return axios.post('/api/auth/signup', context.state.user, {
+      headers: {
+        'X-CSRFToken': getToken('csrftoken')
+      }
+    })
+  },
+
+  async logout () {
+    return axios.post('/api/auth/log_out', {}, {
       headers: {
         'X-CSRFToken': getToken('csrftoken')
       }

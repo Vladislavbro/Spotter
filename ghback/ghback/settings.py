@@ -26,13 +26,18 @@ SECRET_KEY = "django-insecure-9s67622d0#-1z(3h9p#9damp565bjykj#a1lx+c48!-or*55k)
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'spotter.fun'
+    'spotter.fun',
+    '0.0.0.0'
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8080'
+]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'api.apps.ApiConfig',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

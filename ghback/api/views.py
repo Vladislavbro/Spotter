@@ -5,11 +5,16 @@ from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import AnonymousUser, User
 from django.forms.models import model_to_dict
+from api.models import Customer
 
 
 def me(request):
     if request.user.is_authenticated:
-        user = request.user.__class__.objects.filter(pk=request.user.id).values().first()
+        user = User.objects.prefetch_related('customer').filter(
+            pk=request.user.id).values(
+                'id', 'username', 'email', 'first_name', 'last_name',
+                'customer__subscribe_until', 'is_staff',
+                'is_superuser').first()
         return JsonResponse(user)
     else:
         response = JsonResponse({})
@@ -37,8 +42,6 @@ def log_out(request):
 
 
 def signup(request):
-    # try:
-    # body = json.loads(request.POST['data'])
     body = json.loads(request.body)
     if body['password'] != body['password_confirm']:
         return JsonResponse({
@@ -59,10 +62,24 @@ def signup(request):
     )
     user.set_password(body['password'])
     user.save()
+    customer = Customer(
+        user=user
+    )
+    customer.save()
     login(request, user)
     return JsonResponse({'status': 'success', 'user': model_to_dict(user)})
-    # except IntegrityError as e:
-    #     return JsonResponse({'status': 'error', 'message': e.args[1]})
+
+
+def accounts(request):
+    if request.user.is_authenticated:
+        user = User.objects.get(pk=request.user.id)
+        if user.is_superuser:
+            accounts = User.objects.prefetch_related('customer').all().values(
+                'id', 'username', 'email', 'first_name', 'last_name',
+                'customer__subscribe_until', 'is_staff',
+                'is_superuser')
+            return JsonResponse({'accounts': list(accounts)})
+    return JsonResponse({'accounts': []})
 
 
 def payment(request):
