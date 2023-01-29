@@ -6,19 +6,16 @@ module.exports = {
       interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
     },
     {
+      script: 'ghback/manage.py runserver',
+      interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
+    },
+    {
       script: 'bot.py',
       interpreter: '/home/deploy/apps/goods_hunter/botvenv/bin/python',
     },
   ],
 
   deploy : {
-    production_old: {
-      user : 'deploy',
-      host : '194.87.99.114',
-      ref  : 'origin/master',
-      repo : 'git@github.com:Vladislavbro/goods_hunter.git',
-      path : '/home/deploy/apps/goods_hunter',
-    },
     production : {
       user : 'deploy',
       host : '109.196.164.236',

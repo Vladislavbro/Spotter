@@ -6,3 +6,4 @@ data/*.csv
 data/*.hdf
 node_modules
 bot.pkl
+ghback/db.sqlite3
