@@ -20,7 +20,7 @@
           <td>{{ account.email }}</td>
           <td>{{ account.first_name }}</td>
           <td>{{ account.last_name }}</td>
-          <td>{{ account.customer__subscribe_until }}</td>
+          <td>{{ moment(account.customer__subscribe_until * 1000).format() }}</td>
           <td>
             <button
               class="btn btn-link"
@@ -82,12 +82,17 @@
 </template>
 
 <script>
+import moment from 'moment'
+moment.locale('ru')
 export default {
   data () {
     return {
       accounts: [],
       account: {},
     }
+  },
+  created: function () {
+    this.moment = moment
   },
   methods: {
     async getAccounts () {
@@ -101,19 +106,49 @@ export default {
       }
     },
     setAccount (account) {
-      this.account = account
+      this.account = {
+        ...account,
+        customer__subscribe_until: moment(account.customer__subscribe_until * 1000).format().substr(0, 16),
+      }
+    },
+    getToken (name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
     },
     async saveAccount () {
       try {
+        let subscribe_until = this.account.customer__subscribe_until
+        if (subscribe_until) {
+          subscribe_until = moment(this.account.customer__subscribe_until).unix()
+        }
         const response = await fetch('/api/account', {
           method: 'POST',
           headers: {
-
+            'X-CSRFToken': this.getToken('csrftoken')
           },
-          body: JSON.stringify(this.account)
+          body: JSON.stringify({
+            subscribe_until,
+            id: this.account.id,
+            first_name: this.account.first_name,
+            last_name: this.account.last_name,
+          })
         })
         const data = await response.json()
-        this.accounts = data.accounts
+        console.log('data', data)
+        this.account = data
+        // this.$store.commit('mergeStore', {account: this.account})
+        this.getAccounts()
       } catch (e) {
         console.error(e)
         this.$toast.error(`${e.type}: ${e.message}`)

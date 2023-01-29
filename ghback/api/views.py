@@ -82,6 +82,35 @@ def accounts(request):
     return JsonResponse({'accounts': []})
 
 
+def account(request):
+    if request.user.is_authenticated:
+        user = User.objects.get(pk=request.user.id)
+        if user.is_superuser:
+            body = json.loads(request.body)
+            if body.get('id'):
+                user = User.objects.get(pk=body.get('id'))
+                user.first_name = body.get('first_name')
+                user.last_name = body.get('last_name')
+                user.save()
+                if body.get('subscribe_until'):
+                    customer = Customer.objects.get(user=user)
+                    customer.subscribe_until = body['subscribe_until']
+                    customer.save()
+                user = User.objects.prefetch_related('customer').filter(
+                    pk=request.user.id).values(
+                        'id', 'username', 'email', 'first_name', 'last_name',
+                        'customer__subscribe_until', 'is_staff',
+                        'is_superuser').first()
+                return JsonResponse(user)
+            # else:
+            #     user = User(
+            #         name=body['name'],
+            #         name_ua=body.get('name_ua', body.get('name'))
+            #     )
+            # user.save()
+    return JsonResponse({})
+
+
 def payment(request):
     # body = json.loads(request.body)
     print('payment')

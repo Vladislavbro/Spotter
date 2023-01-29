@@ -48,16 +48,21 @@
 </template>
 
 <script>
+import moment from 'moment'
+moment.locale('ru')
 import Auth from './views/components/Auth'
 export default {
   name: "Index",
   components: {
     Auth,
   },
+  created: function () {
+    this.moment = moment
+  },
   computed: {
     getSubPeriod () {
       if (this.$store.state.user.customer__subscribe_until) {
-        return '(10 дней до конца подписки)'
+        return 'Конец подписки: ' + this.moment(this.$store.state.user.customer__subscribe_until * 1000).fromNow()
       } else {
         return '(без подписки)'
       }

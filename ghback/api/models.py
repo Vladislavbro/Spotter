@@ -10,4 +10,4 @@ class Customer(models.Model):
 
     def __str__(self):
         user = self.user
-        return '{0} {1} {2}'.format(user.first_name, self.patronymic, user.last_name)
+        return '{0} {1}'.format(user.first_name, user.last_name)
