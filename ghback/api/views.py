@@ -63,3 +63,9 @@ def signup(request):
     return JsonResponse({'status': 'success', 'user': model_to_dict(user)})
     # except IntegrityError as e:
     #     return JsonResponse({'status': 'error', 'message': e.args[1]})
+
+
+def payment(request):
+    # body = json.loads(request.body)
+    print('payment')
+    return HttpResponse('ok')
