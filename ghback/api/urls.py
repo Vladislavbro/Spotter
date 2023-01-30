@@ -10,4 +10,6 @@ urlpatterns = [
     path('payment', views.payment, name='payment'),
     path('accounts', views.accounts, name='accounts'),
     path('account', views.account, name='account'),
+    path('account/<int:id>/delete', views.delete_account,
+         name='delete_account'),
 ]

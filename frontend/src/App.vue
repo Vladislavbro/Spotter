@@ -1,7 +1,7 @@
 <template>
   <main>
     <div v-if="$store.state.user.id" class="">
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
         <div class="container-fluid">
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -29,7 +29,10 @@
             </ul>
             <ul class="navbar-nav ms-auto">
               <li class="nav-item">
-                <router-link :to="{name: 'Account'}" class="nav-link">{{ $store.state.user.username }}</router-link>
+                <router-link :to="{name: 'Account'}" class="nav-link">
+                  {{ $store.state.user.username }}
+                  <small v-if="$store.state.user.customer__subscribe_type">({{ $store.state.user.customer__subscribe_type }})</small>
+                </router-link>
               </li>
               <span class="navbar-text me-3 text-black-50">
                 <i>{{ getSubPeriod }}</i>
@@ -64,7 +67,7 @@ export default {
       if (this.$store.state.user.customer__subscribe_until) {
         return 'Конец подписки: ' + this.moment(this.$store.state.user.customer__subscribe_until * 1000).fromNow()
       } else {
-        return '(без подписки)'
+        return 'без подписки'
       }
     }
   },

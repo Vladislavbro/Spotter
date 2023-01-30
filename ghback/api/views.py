@@ -13,8 +13,8 @@ def me(request):
         user = User.objects.prefetch_related('customer').filter(
             pk=request.user.id).values(
                 'id', 'username', 'email', 'first_name', 'last_name',
-                'customer__subscribe_until', 'is_staff',
-                'is_superuser').first()
+                'customer__subscribe_type', 'customer__subscribe_until',
+                'is_staff', 'is_superuser').first()
         return JsonResponse(user)
     else:
         response = JsonResponse({})
@@ -76,8 +76,8 @@ def accounts(request):
         if user.is_superuser:
             accounts = User.objects.prefetch_related('customer').all().values(
                 'id', 'username', 'email', 'first_name', 'last_name',
-                'customer__subscribe_until', 'is_staff',
-                'is_superuser')
+                'customer__subscribe_type', 'customer__subscribe_until',
+                'is_staff', 'is_superuser')
             return JsonResponse({'accounts': list(accounts)})
     return JsonResponse({'accounts': []})
 
@@ -95,19 +95,60 @@ def account(request):
                 if body.get('subscribe_until'):
                     customer = Customer.objects.get(user=user)
                     customer.subscribe_until = body['subscribe_until']
+                    customer.subscribe_type = body['subscribe_type']
                     customer.save()
                 user = User.objects.prefetch_related('customer').filter(
-                    pk=request.user.id).values(
+                    pk=body.get('id')).values(
                         'id', 'username', 'email', 'first_name', 'last_name',
+                        'customer__subscribe_type',
                         'customer__subscribe_until', 'is_staff',
                         'is_superuser').first()
                 return JsonResponse(user)
-            # else:
-            #     user = User(
-            #         name=body['name'],
-            #         name_ua=body.get('name_ua', body.get('name'))
-            #     )
-            # user.save()
+            else:
+                if User.objects.filter(email=body['email'].strip()).first():
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': (
+                            'Пользователь с таким email уже существует, '
+                            'выберите другой или восстановите пароль.'
+                        )})
+                if User.objects.filter(username=body['username'].strip()).first():
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': (
+                            'Пользователь с таким логином уже существует, '
+                            'выберите другой или восстановите пароль.'
+                        )})
+                user = User(
+                    username=body['username'].strip(),
+                    email=body['email'].strip(),
+                    last_name=body['last_name'].strip(),
+                    first_name=body['first_name'].strip(),
+                )
+                user.set_password(body['password'])
+                user.save()
+                customer = Customer(
+                    user=user
+                )
+                customer.save()
+                if body.get('subscribe_until'):
+                    customer.subscribe_until = body['subscribe_until']
+                    customer.subscribe_type = body['subscribe_type']
+                    customer.save()
+                return JsonResponse(User.objects.prefetch_related(
+                    'customer').filter(pk=user.id).values(
+                        'id', 'username', 'email', 'first_name', 'last_name',
+                        'customer__subscribe_type',
+                        'customer__subscribe_until', 'is_staff',
+                        'is_superuser').first())
+    return JsonResponse({})
+
+
+def delete_account(request, id):
+    if request.user.is_authenticated:
+        user = User.objects.get(pk=request.user.id)
+        if user.is_superuser:
+            User.objects.get(pk=id).delete()
     return JsonResponse({})
 
 
