@@ -133,9 +133,11 @@ const store = new Vuex.Store({
         const response = await api.login(context)
         if (response.status === 200 && response.data) {
           context.dispatch('getUser')
+        } else {
+          app.$toast.error(`Что то пошло не так`)
         }
       } catch (e) {
-        // app.toasted.error(`${e.name}: ${e.message}`)
+        app.$toast.error(`${e.name}: ${e.message}`)
       }
     },
 
