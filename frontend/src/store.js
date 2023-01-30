@@ -132,7 +132,11 @@ const store = new Vuex.Store({
       try {
         const response = await api.login(context)
         if (response.status === 200 && response.data) {
-          context.dispatch('getUser')
+          if (response.data.status === 'not auth') {
+            return app.$toast.error(`Неправильный логин или пароль`)
+          } else {
+            context.dispatch('getUser')
+          }
         } else {
           app.$toast.error(`Что то пошло не так`)
         }
@@ -146,7 +150,6 @@ const store = new Vuex.Store({
         const response = await api.getMe()
         if (response.data) {
           context.commit('setUser', response.data)
-          context.dispatch('getCategories')
         }
       } catch (e) {
         // app.toasted.error(`${e.name}: ${e.message}`)
