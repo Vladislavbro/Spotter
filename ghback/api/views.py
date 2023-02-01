@@ -8,6 +8,7 @@ from django.forms.models import model_to_dict
 from api.models import Customer, Order
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
+from dateutil.relativedelta import relativedelta
 
 
 def me(request):
@@ -158,6 +159,15 @@ def delete_account(request, id):
 def payment(request):
     body = json.loads(request.body)
     print('payment', body)
+    if body['Success'] and body['Status'] == 'CONFIRMED':
+        order = Order.objects.get(pk=body['OrderId'])
+        order.paid = True
+        order.save()
+        user = order.user
+        user.subscribe_type = order.subscribe_type
+        user.subscribe_until = datetime.now() + relativedelta(months=1)
+        user.save()
+    # payment {'TerminalKey': '1664189383150', 'OrderId': '4', 'Success': True, 'Status': 'CONFIRMED', 'PaymentId': 2298207035, 'ErrorCode': '0', 'Amount': 1900, 'CardId': 276988801, 'Pan': '553420******8996', 'ExpDate': '0929', 'Token': '90892c775d31abd05ae5747a132dfdb78da6721509365f38eb483410db9ec6e4'}
     return HttpResponse('ok')
 
 
