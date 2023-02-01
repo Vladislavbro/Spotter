@@ -166,7 +166,7 @@ def payment(request):
         user = order.user
         customer = Customer.objects.get(user=user)
         customer.subscribe_type = order.subscribe_type
-        customer.subscribe_until = datetime.now() + relativedelta(months=1)
+        customer.subscribe_until = int((datetime.now() + relativedelta(months=1)).timestamp())
         customer.save()
     # payment {'TerminalKey': '1664189383150', 'OrderId': '4', 'Success': True, 'Status': 'CONFIRMED', 'PaymentId': 2298207035, 'ErrorCode': '0', 'Amount': 1900, 'CardId': 276988801, 'Pan': '553420******8996', 'ExpDate': '0929', 'Token': '90892c775d31abd05ae5747a132dfdb78da6721509365f38eb483410db9ec6e4'}
     return HttpResponse('ok')
