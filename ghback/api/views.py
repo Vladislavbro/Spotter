@@ -5,7 +5,8 @@ from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import AnonymousUser, User
 from django.forms.models import model_to_dict
-from api.models import Customer
+from api.models import Customer, Order
+from datetime import datetime
 
 
 def me(request):
@@ -153,6 +154,33 @@ def delete_account(request, id):
 
 
 def payment(request):
-    # body = json.loads(request.body)
-    print('payment')
+    body = json.loads(request.body)
+    print('payment', body)
     return HttpResponse('ok')
+
+
+def order(request):
+    body = json.loads(request.body)
+    if request.user.is_authenticated:
+        user = User.objects.get(pk=request.user.id)
+        order = Order.objects.filter(
+            user=user,
+            paid=False
+        ).first()
+        if order is None:
+            order = Order(
+                user=user,
+            )
+        order.amount = body['amount']
+        order.subscribe_type = body['subscribe_type']
+        order.date = datetime.now()
+        order.save()
+        return JsonResponse({'order': {
+            'id': order.id,
+            'user': order.user_id,
+            'paid': order.paid,
+            'subscribe_type': order.subscribe_type,
+            'date': order.date,
+        }})
+    else:
+        return JsonResponse({})

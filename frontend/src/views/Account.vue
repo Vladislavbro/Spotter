@@ -5,7 +5,6 @@
     </div>
 
     <div class="container py-4">
-
       <div class="row">
         <div class="col">
           <div class="card card-body">
@@ -27,12 +26,6 @@
             </div>
             <button class="btn btn-primary me-3" @click="saveAccount">Сохранить</button>
           </div>
-          "Что можно посмотреть:
-
-      тарифы: пробный и премиум (названия пока под вопросом)
-
-      Что можно сделать:
-      - Изменить статус подписки с переходом на оплату от тинька"
         </div>
         <div class="col">
           <div class="card card-body">
@@ -52,24 +45,10 @@
                     Пробная
                   </div>
                   <div class="card-body">
-                    <h5 class="card-title"><i>69 ₽</i></h5>
+                    <h5 class="card-title"><i>19 ₽</i></h5>
                     <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
                     <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <!-- <button @click="goToPay('trial', 69)" class="btn btn-warning btn-lg">Перейти</button> -->
-
-                    <form ref="form" name="TinkoffPayForm text-center" @submit.prevent="tinkoffPayFunction">
-                      <input class="tinkoffPayRow" type="hidden" name="terminalkey" value="1664189383150DEMO">
-                      <input class="tinkoffPayRow" type="hidden" name="frame" value="true">
-                      <input class="tinkoffPayRow" type="hidden" name="language" value="ru">
-                      <input v-model="receipt" class="tinkoffPayRow" type="hidden" name="receipt">
-                      <input class="tinkoffPayRow" type="hidden" value="69" placeholder="Сумма заказа" name="amount" required>
-                      <!-- <input class="tinkoffPayRow" type="hidden" value="69" placeholder="Номер заказа" name="order"> -->
-                      <input class="tinkoffPayRow" type="hidden" value="Переход на тариф Пробный" placeholder="Описание заказа" name="description">
-                      <input v-model="name" class="tinkoffPayRow" type="hidden" placeholder="ФИО плательщика" name="name">
-                      <input v-model="email" class="tinkoffPayRow" type="hidden" placeholder="E-mail" name="email">
-                      <input v-model="phone" class="tinkoffPayRow" type="hidden" placeholder="Контактный телефон" name="phone">
-                      <input type="submit" value="Перейти"  class="btn btn-warning btn-lg tinkoffPayRow">
-                    </form>
+                    <button @click="getOrder('trial', 19)" class="btn btn-warning btn-lg">Перейти</button>
                   </div>
                   <!-- <div class="card-footer text-muted">
                     2 days ago
@@ -85,7 +64,7 @@
                     <h5 class="card-title"><i>99 ₽</i></h5>
                     <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
                     <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <button @click="goToPay('premium', 99)" class="btn btn-dark btn-lg">Перейти</button>
+                    <button @click="getOrder('premium', 29)" class="btn btn-dark btn-lg">Перейти</button>
                   </div>
                   <!-- <div class="card-footer text-muted">
                     2 days ago
@@ -94,20 +73,6 @@
               </div>
             </div>
           </div>
-
-          <!-- <form ref="form" name="TinkoffPayForm" @submit.prevent="tinkoffPayFunction">
-            <input class="tinkoffPayRow" type="hidden" name="terminalkey" value="1664189383150DEMO">
-            <input class="tinkoffPayRow" type="hidden" name="frame" value="true">
-            <input class="tinkoffPayRow" type="hidden" name="language" value="ru">
-            <input v-model="receipt" class="tinkoffPayRow" type="hidden" name="receipt">
-            <input v-model="amount" class="tinkoffPayRow" type="text" placeholder="Сумма заказа" name="amount" required>
-            <input class="tinkoffPayRow" type="text" placeholder="Номер заказа" name="order">
-            <input class="tinkoffPayRow" type="text" placeholder="Описание заказа" name="description">
-            <input v-model="name" class="tinkoffPayRow" type="text" placeholder="ФИО плательщика" name="name">
-            <input v-model="email" class="tinkoffPayRow" type="text" placeholder="E-mail" name="email">
-            <input v-model="phone" class="tinkoffPayRow" type="text" placeholder="Контактный телефон" name="phone">
-            <input class="tinkoffPayRow" type="submit" value="Оплатить">
-          </form> -->
         </div>
       </div>
     </div>
@@ -121,6 +86,7 @@ moment.locale('ru')
 export default {
   data () {
     return {
+      order: {},
       name: null,
       email: null,
       phone: null,
@@ -132,60 +98,90 @@ export default {
     this.moment = moment
   },
   methods: {
-    goToPay (type, amount) {
-      console.log('goToPay', type, amount)
-      this.amount = amount
-      this.email = this.$store.state.user.email
-      this.name = `${this.$store.state.user.first_name} ${this.$store.state.user.last_name}`
-      this.phone = '9099099099'
-      if (this.amount && this.email && this.phone) {
-        this.receipt = JSON.stringify({
-          "Email": this.email,
-          "Phone": this.phone,
-          "EmailCompany": "mail@mail.com",
-          "Taxation": "usn_income",
-          "Items": [
-            {
-              "Name": this.name,
-              "Price": this.amount + '00',
-              "Quantity": 1.00,
-              "Amount": this.amount + '00',
-              "PaymentMethod": "full_prepayment",
-              "PaymentObject": "service",
-              "Tax": "none"
-            }
-          ]
+
+    getToken (name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    },
+
+    async getOrder (subscribe_type, amount) {
+      try {
+        const response = await fetch('/api/order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': this.getToken('csrftoken'),
+          },
+          body: JSON.stringify({subscribe_type, amount})
         })
-        window.pay(this.$refs.form)
-      } else {
-        alert("Не все обязательные поля заполнены")
+        const data = await response.json()
+        console.log('data', data)
+        if (data.order) {
+          this.order = data.order
+          this.goToPay(subscribe_type, amount)
+        }
+      } catch (e) {
+        console.error(e)
       }
     },
-    tinkoffPayFunction () {
-      if (this.amount && this.email && this.phone) {
-        this.receipt = JSON.stringify({
-          "Email": this.email,
-          "Phone": this.phone,
-          "EmailCompany": "mail@mail.com",
-          "Taxation": "patent",
-          "Items": [
-            {
-              "Name": this.name,
-              "Price": this.amount + '00',
-              "Quantity": 1.00,
-              "Amount": this.amount + '00',
-              "PaymentMethod": "full_prepayment",
-              "PaymentObject": "service",
-              "Tax": "none"
+
+    async goToPay (subscribe_type, amount) {
+      try {
+        const response = await fetch('https://securepay.tinkoff.ru/v2/Init', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            TerminalKey: '1664189383150DEMO',
+            Amount: amount * 100,
+            OrderId: this.order.id,
+            Description: `Оформление подписки за ${amount}.00 рублей`,
+            DATA: {
+              Phone: this.$store.state.user.phone,
+              Email: this.$store.state.user.email
+            },
+            Receipt: {
+              Email: this.$store.state.user.email,
+              Phone: this.$store.state.user.phone,
+              EmailCompany: 'i.vladsn@gmail.com',
+              Taxation: 'usn_income_outcome',
+              Items: [
+                {
+                  Name: `Подписка ${subscribe_type}`,
+                  Price: amount * 100,
+                  Quantity: 1.00,
+                  Amount: amount * 100,
+                  PaymentMethod: 'full_prepayment',
+                  PaymentObject: 'service',
+                  Tax: 'none',
+                  // Ean13: "0123456789"
+                },
+              ]
             }
-          ]
+          })
         })
-        window.pay(this.$refs.form)
-      } else {
-        alert("Не все обязательные поля заполнены")
+        const data = await response.json()
+        if (data.Success) {
+          location.replace(data.PaymentURL)
+        }
+        console.log('data', data)
+      } catch (e) {
+        console.error(e)
       }
-      return false
-    }
+    },
+
   },
   mounted () {
     this.email = this.$store.state.user.email

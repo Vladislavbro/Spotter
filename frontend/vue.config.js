@@ -12,6 +12,9 @@ module.exports = {
       '^/api/account': {
         target: 'http://0.0.0.0:8000/'
       },
+      '^/api/order': {
+        target: 'http://0.0.0.0:8000/'
+      },
       '^/api': {
         target: back
       },
