@@ -144,7 +144,7 @@ export default {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            TerminalKey: '1664189383150DEMO',
+            TerminalKey: '1664189383150',
             Amount: amount * 100,
             OrderId: this.order.id,
             Description: `Оформление подписки за ${amount}.00 рублей`,
