@@ -7,6 +7,7 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.forms.models import model_to_dict
 from api.models import Customer, Order
 from datetime import datetime
+from django.views.decorators.csrf import csrf_exempt
 
 
 def me(request):
@@ -153,6 +154,7 @@ def delete_account(request, id):
     return JsonResponse({})
 
 
+@csrf_exempt
 def payment(request):
     body = json.loads(request.body)
     print('payment', body)
