@@ -46,8 +46,8 @@
         <label class="form-check-label" for="flexRadioDefault1">
           Путь 2
         </label>
-      </div>
-    </div> -->
+      </div> -->
+    </div>
 
     <div class="table-wrapper">
       <table class="table table-bordered table-hover">
