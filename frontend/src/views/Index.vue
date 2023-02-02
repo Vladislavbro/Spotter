@@ -177,7 +177,8 @@
               {{ new Intl.NumberFormat('ru-RU').format(category.products_with_sales) }}
             </td>
             <td>
-              <span v-if="category.products_count">{{ (category.products_with_sales * 100 / category.products_count).toFixed() }} %</span>
+              <!-- <span v-if="category.products_count">{{ (category.products_with_sales * 100 / category.products_count).toFixed() }} %</span> -->
+              <span v-if="category.products_count">{{ category.rel_products_with_sales }} %</span>
             </td>
             <td>
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.first_product_decada_profit) }}

@@ -46,12 +46,12 @@ def categories_top():
             # current_parsing_id=1672043096,
             root__ne=None,
             products_count__lte=2500,
-        )
+        ).order_by('-rel_products_with_sales')
     elif model == 'categories':
         items = Categories.objects(parse=True).all()
     total = items.count()
-    if sort:
-        items = items.order_by(f'-{sort}')
+    # if sort:
+    #     items = items.order_by(f'-{sort}')
     items = items[((page - 1) * 100):page * 100]
     if model == 'queries':
         return {
@@ -65,6 +65,7 @@ def categories_top():
                 'first_product_decada_profit': i.first_product_decada_profit,
                 'ten_product_decada_profit': i.ten_product_decada_profit,
                 'products_with_sales': i.products_with_sales,
+                'rel_products_with_sales': i.rel_products_with_sales,
                 'avg_price_prev_period': i.avg_price_prev_period,
                 'avg_price_period': i.avg_price_period,
                 'profit_prev_period': i.profit_prev_period,

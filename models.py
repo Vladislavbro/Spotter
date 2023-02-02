@@ -30,6 +30,7 @@ class Queries(Document):
     features = ListField(default=[])
     products_count = IntField()
     products_with_sales = IntField()
+    rel_products_with_sales = IntField()
     first_product_decada_profit = IntField()
     ten_product_decada_profit = IntField()
     first_product_hom_profit = IntField()
