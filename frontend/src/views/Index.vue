@@ -56,98 +56,50 @@
             <th>Название</th>
             <th v-if="params.model == 'queries'">Характеристики</th>
             <th>
-              <button
-                class="btn btn-link"
-                @click="sortItems('products_count')">
-                Товаров
-              </button>
-            </th>
-            <th>
-              <button
-                class="btn btn-link"
-                @click="sortItems('products_with_sales')">
-                Товары с продажами
-              </button>
+              Товаров
             </th>
             <th>
               Товары с продажами
             </th>
             <th>
-              <button
-                class="btn btn-link"
-                @click="sortItems('first_product_decada_profit')">
-                Оборот 1-го
-              </button>
+              Товары с продажами
             </th>
             <th>
-              <button
-                class="btn btn-link"
-                @click="sortItems('ten_product_decada_profit')">
-                Оборот 10-го
-              </button>
+              Оборот 1-го
             </th>
             <th>
-              <button
-                class="btn btn-link"
-                @click="sortItems('avg_price_prev_period')">
-                Средняя цена пред
-              </button>
+              Оборот 10-го
             </th>
             <th>
-              <button
-                class="btn btn-link"
-                @click="sortItems('avg_price_period')">
-                Средняя цена тек
-              </button>
+              Средняя цена пред
+            </th>
+            <th>
+              Средняя цена тек
             </th>
             <th>Изм средней цены</th>
             <th>
-              <button
-                class="btn btn-link"
-                @click="sortItems('profit_prev_period')">
-                Оборот пред. период
-              </button>
+              Оборот пред. период
             </th>
             <th>
-              <button
-                class="btn btn-link"
-                @click="sortItems('profit_period')">
-                Оборот
-              </button>
+              Оборот
             </th>
             <th>
               Изменение оборота
             </th>
             <th v-if="params.model == 'categories'">
-              <button
-                class="btn btn-link"
-                @click="sortItems('sellers')">
-                Продавцов
-              </button>
-            </th>
-            <th v-if="params.model == 'categories'">
-              <button
-                class="btn btn-link"
-                @click="sortItems('sellers_with_sales')">
-                Продавцы с продажами
-              </button>
+              Продавцов
             </th>
             <th v-if="params.model == 'categories'">
               Продавцы с продажами
             </th>
             <th v-if="params.model == 'categories'">
-              <button
-                class="btn btn-link"
-                @click="sortItems('sales_period')">
-                Продаж
-              </button>
+              Продавцы с продажами
+            </th>
+            <th v-if="params.model == 'categories'">
+              Продаж
             </th>
             <th>
-              <button
-                class="btn btn-link"
-                @click="sortItems('top')">
-                Топ
-              </button>
+              Топ
             </th>
           </tr>
         </thead>
