@@ -98,9 +98,9 @@
             <th v-if="params.model == 'categories'">
               Продаж
             </th>
-            <th>
+            <!-- <th>
               Топ
-            </th>
+            </th> -->
           </tr>
         </thead>
         <tbody>
@@ -170,7 +170,7 @@
             <td v-if="params.model == 'categories'">
               {{ new Intl.NumberFormat('ru-RU').format(category.sales_period) }}
             </td>
-            <td>{{ category.top }}</td>
+            <!-- <td>{{ category.top }}</td> -->
           </tr>
         </tbody>
       </table>

@@ -47,6 +47,7 @@ def categories_top():
             root__ne=None,
             products_count__lte=2500,
             products_count__gte=10,
+            top=True,
         ).order_by('-rel_products_with_sales')
     elif model == 'categories':
         items = Categories.objects(parse=True).all()
