@@ -52,7 +52,9 @@
           <td>{{ product.rating }}</td>
           <td>{{ product.brand }}</td>
           <td>
-            {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(product.current_hom_profit) }}
+            <span v-if="product.current_hom_profit">
+              {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(product.current_hom_profit) }}
+            </span>
             <!-- ({{ product.hom_profit_growth }}) -->
           </td>
           <td>{{ product.current_hom_sales }}</td>

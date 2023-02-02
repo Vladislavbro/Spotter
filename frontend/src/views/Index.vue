@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="d-flex py-3">
       <div class="">
-        <h3>Топ категорий</h3>
+        <h3>Топ ниши</h3>
       </div>
 
       <div class="mx-auto">

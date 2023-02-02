@@ -9,7 +9,7 @@
           <div class="collapse navbar-collapse w-100" id="navbarNav">
             <ul class="navbar-nav">
               <li class="nav-item">
-                <router-link :to="{ name: 'Index', params: {} }" class="nav-link">Топ категорий</router-link>
+                <router-link :to="{ name: 'Index', params: {} }" class="nav-link">Топ ниши</router-link>
               </li>
               <li class="nav-item">
                 <router-link :to="{ name: 'Categories', params: {} }" class="nav-link">Категории</router-link>
