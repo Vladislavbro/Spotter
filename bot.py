@@ -41,7 +41,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     text = (
         '🦾 <b>Привет! Я - супер робот для WILDBERRIES</b>\n\n'
         'Сканирую этот маркетплейс каждый день и анализирую все данные.\n'
-        'Если хочешь получить мои данные, то вот ссылка - http://wb.nio.design'
+        'Если хочешь получить мои данные, то вот ссылка - https://spotter.fun'
     )
     await update.message.reply_text(text, parse_mode='html')
     return MAIN

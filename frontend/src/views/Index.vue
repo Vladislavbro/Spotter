@@ -49,12 +49,6 @@
       </div>
     </div>
 
-    <!-- "В этой странице открывается таблица с лучшими категориями товаров
-    Категории отбираются согласно разделу анализ ниши
-    Какие данные отражаются в таблице с подборкой:
-    9. Среднее количество продаж на один товар
-    10. Среднее количество продаж на одного продавца" -->
-
     <div class="table-wrapper">
       <table class="table table-bordered table-hover">
         <thead>
@@ -160,9 +154,6 @@
         <tbody>
           <tr
             v-for="category in $store.state.topCategories"
-            :class="{
-              'table-success': category.top
-            }"
             :key="category.id">
             <td>
               <a
@@ -182,30 +173,22 @@
             <td>
               {{ new Intl.NumberFormat('ru-RU').format(category.products_count) }}
             </td>
-            <td :class="{
-              'table-primary': category.rel_sales_top
-            }">
+            <td>
               {{ new Intl.NumberFormat('ru-RU').format(category.products_with_sales) }}
             </td>
             <td>
               <span v-if="category.products_count">{{ (category.products_with_sales * 100 / category.products_count).toFixed() }} %</span>
             </td>
-            <td :class="{
-              'table-primary': category.first_product_profit_top
-            }">
+            <td>
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.first_product_decada_profit) }}
             </td>
-            <td :class="{
-              'table-primary': category.ten_product_profit_top
-            }">
+            <td>
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.ten_product_decada_profit) }}
             </td>
             <td>
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.avg_price_prev_period) }}
             </td>
-            <td :class="{
-              'table-primary': category.avg_price_top
-            }">
+            <td>
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.avg_price_period) }}
             </td>
             <td>
@@ -214,9 +197,7 @@
             <td>
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_prev_period) }}
             </td>
-            <td :class="{
-              'table-primary': category.profit_top
-            }">
+            <td>
               {{ new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(category.profit_period) }}
             </td>
             <td>

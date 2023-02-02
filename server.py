@@ -210,7 +210,13 @@ def category(id):
     category_ = Categories.objects.get(pk=id)
     products = Products.objects(
         categories__in=[category_.wb_id]
-    ).order_by('-current_hom_profit')[0:100]
+    )
+    sort = request.args.get('sort')
+    if sort:
+        products = products.order_by(f'-{sort}')
+    else:
+        products = products.order_by('-current_hom_profit')
+    products = products[0:100]
     return {
         'category': json.loads(category_.to_json()),
         'products': json.loads(products.to_json()),

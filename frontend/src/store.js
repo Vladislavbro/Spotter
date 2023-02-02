@@ -15,6 +15,9 @@ const store = new Vuex.Store({
     topCategories: [],
     categories: [],
     category: {},
+    categoryParams: {
+      sort: null
+    },
     products: [],
     info: null,
   },
@@ -63,7 +66,7 @@ const store = new Vuex.Store({
 
     async getCategory (context, id) {
       try {
-        const response = await api.getCategory(id)
+        const response = await api.getCategory(context, id)
         if (response.status === 200 && response.data) {
           context.commit('mergeStore', {
             category: response.data.category,

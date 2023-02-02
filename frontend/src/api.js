@@ -65,8 +65,8 @@ export const api = {
     return axios.get('/api/categories')
   },
 
-  async getCategory (id) {
-    return axios.get(`/api/categories/${id}`)
+  async getCategory (context, id) {
+    return axios.get(`/api/categories/${id}`, {params: context.state.categoryParams})
   },
 
   async saveCategory (context) {
