@@ -7,7 +7,7 @@ const store = new Vuex.Store({
     auth: 'login',
 
     topCategoriesParams: {
-      model: 'categories',
+      model: 'queries',
       page: 1,
       sort: 'top'
     },

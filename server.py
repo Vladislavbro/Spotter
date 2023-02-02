@@ -42,9 +42,10 @@ def categories_top():
     # queries = Queries.objects(current_parsing_id=config.current_parsing_id)
     if model == 'queries':
         items = Queries.objects(
-            # current_parsing_id=config.current_parsing_id,
-            current_parsing_id=1672043096,
-            root__ne=None
+            current_parsing_id=config.current_parsing_id,
+            # current_parsing_id=1672043096,
+            root__ne=None,
+            products_count__lte=2500,
         )
     elif model == 'categories':
         items = Categories.objects(parse=True).all()

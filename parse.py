@@ -676,6 +676,7 @@ class Parser(object):
                     category.profit_prev_period * 1.1):
                 category.profit_top = True
             if (
+                    category.products_count <= 2500 and
                     category.first_product_profit_top and
                     category.ten_product_profit_top and
                     category.rel_sales_top and
@@ -719,7 +720,7 @@ class Parser(object):
     def calculate_query(self, query):
         products = Products.objects(
             articul__in=query.articuls
-        ).fields(slice__sizes=[-30, 30]).order_by('-current_decada_sales')
+        ).fields(slice__sizes=[-30, 30]).order_by('-current_hom_sales')
         products_count = products.count()
         if products_count >= 10:
             query.first_product_decada_profit = (
@@ -782,6 +783,7 @@ class Parser(object):
                     query.profit_period <= query.profit_prev_period * 1.4):
                 query.profit_top = True
             if (
+                    query.products_count <= 2500 and
                     query.first_product_profit_top and
                     query.ten_product_profit_top and
                     query.products_with_sales_top and
