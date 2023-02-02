@@ -735,7 +735,7 @@ class Parser(object):
             )
             query.products_with_sales = products.filter(
                 current_hom_sales__gt=0).count()
-            query.rel_products_with_sales = int(query.products_with_sales / products_count)
+            query.rel_products_with_sales = int(query.products_with_sales * 100 / products_count)
             query.avg_price_prev_period = self.get_avg(
                 [[s.price for s in p.sizes if s.price
                   and s.date >= self.start_prev_period
