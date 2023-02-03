@@ -691,14 +691,14 @@ class Parser(object):
         query = Queries.objects(
             current_parsing_id=self.config.current_parsing_id,
             calculated__ne=True,
-            products_count__ne=None
+            products_count__gte=1,
         ).first()
         while query:
             self.calculate_query(query)
             query = Queries.objects(
                 current_parsing_id=self.config.current_parsing_id,
                 calculated__ne=True,
-                products_count__ne=None,
+                products_count__gte=1,
             ).first()
         self.config.queries_calculated = True
         self.config.save()
