@@ -691,6 +691,7 @@ class Parser(object):
         query = Queries.objects(
             current_parsing_id=self.config.current_parsing_id,
             calculated__ne=True,
+            products_count__ne=None
         ).first()
         while query:
             self.calculate_query(query)
@@ -735,8 +736,7 @@ class Parser(object):
             )
             query.products_with_sales = products.filter(
                 current_hom_sales__gt=0).count()
-            if query.products_count:
-                query.rel_products_with_sales = int(query.products_with_sales * 100 / query.products_count)
+            query.rel_products_with_sales = int(query.products_with_sales * 100 / query.products_count)
             else:
                 query.rel_products_with_sales = 0
             query.avg_price_prev_period = self.get_avg(
