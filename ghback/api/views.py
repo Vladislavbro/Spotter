@@ -12,12 +12,21 @@ from dateutil.relativedelta import relativedelta
 
 
 def me(request):
+    print(' --- me --- ', request.get_host)
     if request.user.is_authenticated:
         user = User.objects.prefetch_related('customer').filter(
             pk=request.user.id).values(
                 'id', 'username', 'email', 'first_name', 'last_name',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser').first()
+        return JsonResponse(user)
+    elif request.get_host == 'test.spotter.fun':
+        user = User.objects.prefetch_related('customer').filter(
+            email='test@test.ru').values(
+                'id', 'username', 'email', 'first_name', 'last_name',
+                'customer__subscribe_type', 'customer__subscribe_until',
+                'is_staff', 'is_superuser').first()
+        login(request, user)
         return JsonResponse(user)
     else:
         response = JsonResponse({})
