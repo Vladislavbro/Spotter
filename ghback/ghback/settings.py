@@ -27,12 +27,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'spotter.fun',
+    'test.spotter.fun',
     '0.0.0.0'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8080',
-    'https://spotter.fun'
+    'https://spotter.fun',
+    'https://test.spotter.fun',
 ]
 
 # Application definition
