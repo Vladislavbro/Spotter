@@ -21,13 +21,17 @@ def me(request):
                 'is_staff', 'is_superuser').first()
         return JsonResponse(user)
     elif request.get_host() == 'test.spotter.fun':
-        user = User.objects.prefetch_related('customer').filter(
-            email='test@test.ru').values(
+        user = authenticate(username='Тест', password='123')
+        login(request, user)
+        return JsonResponse(
+            User.objects.prefetch_related('customer').filter(
+                email='test@test.ru'
+            ).values(
                 'id', 'username', 'email', 'first_name', 'last_name',
                 'customer__subscribe_type', 'customer__subscribe_until',
-                'is_staff', 'is_superuser').first()
-        login(request, user)
-        return JsonResponse(user)
+                'is_staff', 'is_superuser'
+            ).first()
+        )
     else:
         response = JsonResponse({})
         response.set_cookie('csrftoken', get_token(request))
