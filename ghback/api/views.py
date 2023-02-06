@@ -20,7 +20,7 @@ def me(request):
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser').first()
         return JsonResponse(user)
-    elif request.get_host == 'test.spotter.fun':
+    elif request.get_host() == 'test.spotter.fun':
         user = User.objects.prefetch_related('customer').filter(
             email='test@test.ru').values(
                 'id', 'username', 'email', 'first_name', 'last_name',
