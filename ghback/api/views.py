@@ -12,7 +12,7 @@ from dateutil.relativedelta import relativedelta
 
 
 def me(request):
-    print(' --- me --- ', request.get_host)
+    print(' --- me --- ', request.get_host())
     if request.user.is_authenticated:
         user = User.objects.prefetch_related('customer').filter(
             pk=request.user.id).values(
