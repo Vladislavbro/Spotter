@@ -4,7 +4,7 @@ from mongoengine import (connect, Document, EmbeddedDocument, IntField,
                          FloatField)
 from datetime import datetime
 
-connect(db='wb22')
+connect(db='wb22', host='172.17.0.1')
 
 # https://flask-httpauth.readthedocs.io/en/latest/
 
