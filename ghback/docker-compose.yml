@@ -1,0 +1,35 @@
+version: "3.3"
+
+services:
+  # db:
+  #   image: postgres
+  #   ports:
+  #     - '5432:5432'
+  #   environment:
+  #     POSTGRES_DB: 'gh'
+  #     POSTGRES_USER: 'ghuser'
+  #     POSTGRES_PASSWORD: 'ghpassword'
+  #   restart: always
+  #   volumes:
+  #     - ./data/db:/var/lib/postgres
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+      # - POSTGRES_DB=gh
+      # - POSTGRES_USER=ghuser
+      # - POSTGRES_PASSWORD=ghpassword
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db

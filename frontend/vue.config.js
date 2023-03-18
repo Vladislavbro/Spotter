@@ -15,6 +15,12 @@ module.exports = {
       '^/api/order': {
         target: 'http://0.0.0.0:8000/'
       },
+      '^/api/test_threading': {
+        target: 'http://0.0.0.0:8000/'
+      },
+      '^/api/list_threading': {
+        target: 'http://0.0.0.0:8000/'
+      },
       '^/api': {
         target: back
       },

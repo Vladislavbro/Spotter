@@ -20,7 +20,7 @@ module.exports = {
     production : {
       user : 'deploy',
       host : '109.196.164.236',
-      ref  : 'origin/master',
+      ref  : 'origin/upgrade',
       repo : 'git@github.com:Vladislavbro/goods_hunter.git',
       path : '/home/deploy/apps/goods_hunter',
       // 'pre-deploy-local': '',

@@ -5,10 +5,14 @@ from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import AnonymousUser, User
 from django.forms.models import model_to_dict
-from api.models import Customer, Order
+from api.models import Customer, Order, Config
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from dateutil.relativedelta import relativedelta
+import threading
+import csv
+from api.parse import Parser
+from api.mongo_models import Categories, Products, Config, Queries
 
 
 def me(request):
@@ -210,3 +214,245 @@ def order(request):
         }})
     else:
         return JsonResponse({})
+
+
+def parser(request):
+    native_ids = [t.native_id for t in threading.enumerate()]
+    config = Config.objects.first()
+    if config.thread_id not in native_ids:
+        t = threading.Thread(target=Parser, args=(), kwargs={})
+        t.setDaemon(True)
+        t.start()
+        config.thread_id = t.native_id
+        config.save()
+    return JsonResponse({
+        'native_ids': native_ids,
+        'active_count': threading.active_count(),
+        'status': 'success'
+    })
+
+
+def get_children(category, categories):
+    return [{
+        **c,
+        'children': get_children(c, categories)
+    } for c in categories if c.get('parent') == category['wb_id']]
+
+
+def categories_list(request):
+    out = []
+    categories = json.loads(Categories.objects().all().to_json())
+    for root in [c for c in categories if c.get('parent') is None]:
+        root['children'] = get_children(root, categories)
+        out.append(root)
+    return {
+        'categories': out
+    }
+
+
+def categories_top(request):
+    model = request.GET.get('model')
+    page = int(request.GET.get('page'))
+    sort = request.GET.get('sort')
+    config = Config.objects(calculated=True).first()
+    # config = Config.objects.first()
+    # queries = Queries.objects(current_parsing_id=config.current_parsing_id)
+    if model == 'queries':
+        items = Queries.objects(
+            current_parsing_id=config.current_parsing_id,
+            # current_parsing_id=1672043096,
+            root__ne=None,
+            products_count__lte=2500,
+            products_count__gte=10,
+            top=True,
+        ).order_by('-rel_products_with_sales')
+    elif model == 'categories':
+        items = Categories.objects(parse=True).all()
+    total = items.count()
+    # if sort:
+    #     items = items.order_by(f'-{sort}')
+    items = items[((page - 1) * 100):page * 100]
+    if model == 'queries':
+        return {
+            'total': total,
+            'items': [{
+                'id': str(i.id),
+                'name': i.root + ' ' + ' '.join(i.features),
+                'root': i.root,
+                'features': ' '.join(i.features),
+                'products_count': i.products_count,
+                'first_product_decada_profit': i.first_product_decada_profit,
+                'ten_product_decada_profit': i.ten_product_decada_profit,
+                'products_with_sales': i.products_with_sales,
+                'rel_products_with_sales': i.rel_products_with_sales,
+                'avg_price_prev_period': i.avg_price_prev_period,
+                'avg_price_period': i.avg_price_period,
+                'profit_prev_period': i.profit_prev_period,
+                'profit_period': i.profit_period,
+                'sellers': i.sellers,
+                'sellers_with_sales': i.sellers_with_sales,
+                'sales_period': i.sales_period,
+                'last_parsed_page': i.last_parsed_page,
+                'current_parsing_id': i.current_parsing_id,
+                'top': i.top,
+                'ten_product_profit_top': i.ten_product_profit_top,
+                'first_product_profit_top': i.first_product_profit_top,
+                'products_with_sales_top': i.products_with_sales_top,
+                'profit_top': i.profit_top,
+                'avg_price_top': i.avg_price_top,
+                'rel_sales_top': i.rel_sales_top,
+            } for i in items]
+        }
+    elif model == 'categories':
+        return {
+            'total': total,
+            'items': [{
+                'id': str(i.id),
+                'url': i.url,
+                'name': i.name,
+                'profit_period': i.profit_period,
+                'profit_prev_period': i.profit_prev_period,
+                'first_product_price': i.first_product_price,
+                'first_product_decada_sales': i.first_product_decada_sales,
+                'first_product_decada_profit': i.first_product_decada_profit,
+                'ten_product_price': i.ten_product_price,
+                'ten_product_decada_sales': i.ten_product_decada_sales,
+                'ten_product_decada_profit': i.ten_product_decada_profit,
+                'products_count': i.products_count,
+                'products_with_sales': i.products_with_sales,
+                'sales_period': i.sales_period,
+                'sellers': i.sellers,
+                'sellers_with_sales': i.sellers_with_sales,
+                'rel_sellers': i.rel_sellers,
+                'rel_sales': i.rel_sales,
+                'avg_price_prev_period': i.avg_price_prev_period,
+                'avg_price_period': i.avg_price_period,
+                'top': i.top,
+                'ten_product_profit_top': i.ten_product_profit_top,
+                'first_product_profit_top': i.first_product_profit_top,
+                'profit_top': i.profit_top,
+                'avg_price_top': i.avg_price_top,
+                'rel_sales_top': i.rel_sales_top,
+            } for i in items],
+        }
+
+
+def export_queries(request):
+    config = Config.objects(calculated=True).first()
+    items = Queries.objects(
+        # current_parsing_id=config.current_parsing_id,
+        current_parsing_id=1672043096,
+        root__ne=None
+    )
+    fields = ['Корень', 'Характеристики', 'Кол-во товаров',
+              'Товары с продажами', 'Товары с продажами',
+              'Оборот первого товара', 'Оборот десятого товара',
+              'Средняя цена пред', 'Средняя цена тек', 'Изменение оборота',
+              'Количество продавцов', 'Продавцы с продажами',
+              'Продавцы с продажами', 'Топ', 'Топ товар 1', 'Топ товар 10',
+              'Топ товары с продажами', 'Топ средний чек', 'Топ оборот']
+    rows = [
+        [i.root, i.features, i.products_count, i.products_with_sales,
+         int((i.products_with_sales or 0) * 100 / i.products_count) if i.products_count else 0,
+         i.first_product_decada_profit, i.ten_product_decada_profit,
+         i.avg_price_prev_period, i.avg_price_period,
+         int((i.avg_price_period or 0) * 100 / i.avg_price_prev_period) if i.avg_price_prev_period else 0,
+         i.sellers, i.sellers_with_sales,
+         int((i.sellers_with_sales or 0) * 100 / i.sellers) if i.sellers else 0,
+         i.top, i.first_product_profit_top, i.ten_product_profit_top,
+         i.products_with_sales_top, i.avg_price_top, i.profit_top]
+        for i in items
+    ]
+    filename = f'{config.current_parsing_id}-queries.csv'
+    file_path = f'export/{filename}'
+    with open(file_path, 'w') as f:
+        write = csv.writer(f)
+        write.writerow(fields)
+        write.writerows(rows)
+    f = open(file_path, 'r')
+    content = f.read()
+    return Response(
+        content,
+        mimetype="text/csv",
+        headers={
+            "Content-disposition":
+            f"attachment; filename={filename}"})
+
+
+def export_categories():
+    config = Config.objects(calculated=True).first()
+    items = Categories.objects(parse=True).all()
+    fields = ['Наименование', 'Кол-во товаров',
+              'Товары с продажами', 'Товары с продажами',
+              'Оборот первого товара', 'Оборот десятого товара',
+              'Средняя цена пред', 'Средняя цена тек', 'Изменение оборота',
+              'Количество продавцов', 'Продавцы с продажами',
+              'Продавцы с продажами', 'Топ', 'Топ товар 1', 'Топ товар 10',
+              'Топ товары с продажами', 'Топ средний чек', 'Топ оборот']
+    rows = [
+        [i.name, i.products_count, i.products_with_sales,
+         int(i.products_with_sales * 100 / i.products_count) if i.products_count else 0,
+         i.first_product_decada_profit, i.ten_product_decada_profit,
+         i.avg_price_prev_period, i.avg_price_period,
+         int(i.avg_price_period * 100 / i.avg_price_prev_period),
+         i.sellers, i.sellers_with_sales,
+         int(i.sellers_with_sales * 100 / i.sellers),
+         i.top, i.first_product_profit_top, i.ten_product_profit_top,
+         i.rel_sales_top, i.avg_price_top, i.profit_top]
+        for i in items
+    ]
+    filename = f'{config.current_parsing_id}-categories.csv'
+    file_path = f'export/{filename}'
+    with open(file_path, 'w') as f:
+        write = csv.writer(f)
+        write.writerow(fields)
+        write.writerows(rows)
+    f = open(file_path, 'r')
+    content = f.read()
+    return Response(
+        content,
+        mimetype="text/csv",
+        headers={
+            "Content-disposition":
+            f"attachment; filename={filename}"})
+
+
+def get_child_ids(category, ids):
+    for child in Categories.objects(parent=category.wb_id):
+        ids.append(child.wb_id)
+        get_child_ids(child, ids)
+    return ids
+
+
+def category(request, id):
+    category_ = Categories.objects.get(pk=id)
+    products = Products.objects(
+        categories__in=[category_.wb_id]
+    )
+    sort = request.args.get('sort')
+    if sort:
+        products = products.order_by(f'-{sort}')
+    else:
+        products = products.order_by('-current_hom_profit')
+    products = products[0:100]
+    return {
+        'category': json.loads(category_.to_json()),
+        'products': json.loads(products.to_json()),
+    }
+
+
+def data(request):
+    return {
+        'products': json.loads(Products.objects.filter(to_sort=True, inner_rating__gt=0).order_by('-inner_rating').limit(30).to_json()),
+        'totalPages': int(Products.objects.filter(to_sort=True, inner_rating__gt=0).count() / 30),
+        'categories': json.loads(Categories.objects.to_json()),
+    }
+
+
+def products(request):
+    page = int(request.GET.get('page'))
+    skip = (page - 1) * 30
+    products = Products.objects.filter(to_sort=True, inner_rating__gt=0).order_by('-inner_rating').skip(skip).limit(30)
+    return {
+        'products': json.loads(products.to_json()),
+    }
