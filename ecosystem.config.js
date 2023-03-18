@@ -1,15 +1,15 @@
 module.exports = {
 
   apps : [
-    {
-      script: 'server.py',
-      interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
-    },
-    {
-      script: 'ghback/manage.py',
-      args: 'runserver',
-      interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
-    },
+    // {
+    //   script: 'server.py',
+    //   interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
+    // },
+    // {
+    //   script: 'ghback/manage.py',
+    //   args: 'runserver',
+    //   interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
+    // },
     {
       script: 'bot.py',
       interpreter: '/home/deploy/apps/goods_hunter/botvenv/bin/python',
