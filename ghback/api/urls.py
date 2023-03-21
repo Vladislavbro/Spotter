@@ -21,4 +21,8 @@ urlpatterns = [
     path('export/categories', views.export_categories, name='export_categories'),
     path('data', views.data, name='data'),
     path('products', views.products, name='products'),
+    path('transfer/config', views.transfer_config, name='transfer_config'),
+    path('transfer/category', views.transfer_category, name='transfer_category'),
+    path('transfer/query', views.transfer_query, name='transfer_query'),
+    path('transfer/product', views.transfer_product, name='transfer_product'),
 ]

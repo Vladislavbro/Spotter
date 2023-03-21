@@ -18,12 +18,14 @@ class Config(Document):
     categories_calculated = BooleanField()
     products_calculated = BooleanField()
     calculated = BooleanField()
+    pg_id = IntField()
     meta = {
         'ordering': ['-current_parsing_id']
     }
 
 
 class Queries(Document):
+    pg_id = IntField()
     category_id = ReferenceField('Categories')
     articuls = ListField(default=[])
     root = StringField()
@@ -63,6 +65,7 @@ class Queries(Document):
 
 
 class Categories(Document):
+    pg_id = IntField()
     name = StringField(required=True)
     wb_id = IntField(required=True)
     parent = IntField()
@@ -129,6 +132,7 @@ class Sizes(EmbeddedDocument):
 
 
 class Products(Document):
+    pg_id = IntField()
     check_articul = BooleanField()
     articul = IntField(required=True)  # , unique=True
     name = StringField(required=True)
@@ -175,6 +179,7 @@ class Products(Document):
 
     meta = {
         'indexes': [
+            'pg_id',
             'check_articul',
             'articul',
             'category_wb_id',

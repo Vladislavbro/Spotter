@@ -36,9 +36,10 @@ class Order(models.Model):
 
 
 class Config(models.Model):
-    thread_id = models.IntegerField()
-    current_parsing_date = models.DateTimeField()
-    current_parsing_id = models.IntegerField()
+    mongo_id = models.CharField(max_length=24, blank=True, null=True)
+    thread_id = models.IntegerField(blank=True, null=True)
+    parsing_date = models.BigIntegerField(blank=True, null=True)
+    current_parsing_id = models.IntegerField(blank=True, null=True)
     parsing_done = models.BooleanField(default=False)
     queries_done = models.BooleanField(default=False)
     queries_calculated = models.BooleanField(default=False)
@@ -51,20 +52,21 @@ class Config(models.Model):
 
 
 class Category(models.Model):
+    mongo_id = models.CharField(max_length=24, blank=True, null=True)
     name = models.CharField(max_length=200)
     wb_id = models.IntegerField()
     parent = models.IntegerField(blank=True, null=True)
     # query = models.CharField(max_length=200)
-    seo = models.CharField(max_length=200)
-    shard = models.CharField(max_length=200)
-    url = models.CharField(max_length=200)
+    seo = models.CharField(max_length=200, blank=True, null=True)
+    shard = models.CharField(max_length=200, blank=True, null=True)
+    url = models.CharField(max_length=200, blank=True, null=True)
     parse = models.BooleanField(default=False)
     parsed_at = models.DateTimeField(blank=True, null=True)
     last_parsed_page_at = models.DateTimeField(blank=True, null=True)
     last_parsed_page = models.IntegerField(blank=True, null=True)
     start_parsing_at = models.DateTimeField(blank=True, null=True)
     current_parsing_id = models.IntegerField(blank=True, null=True)
-    updated_at = models.DateTimeField()
+    updated_at = models.DateTimeField(blank=True, null=True)
     # period
     profit_period = models.IntegerField(blank=True, null=True)
     profit_prev_period = models.IntegerField(blank=True, null=True)
@@ -96,7 +98,10 @@ class Category(models.Model):
 
 
 class Query(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    mongo_id = models.CharField(max_length=30, blank=True, null=True)
+    mongo_category_id = models.CharField(max_length=30, blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE,
+                                 blank=True, null=True)
     # category_id = ReferenceField('Categories')
     articuls = ArrayField(ArrayField(models.IntegerField(blank=True)))
     root = models.CharField(max_length=200)
@@ -133,38 +138,41 @@ class Query(models.Model):
 
 
 class Product(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
+    mongo_id = models.CharField(max_length=24, blank=True, null=True)
+    mongo_category_id = models.CharField(max_length=24, blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.DO_NOTHING,
+                                 blank=True, null=True)
     articul = models.IntegerField()  # , unique=True
     name = models.CharField(max_length=200)
     root = models.CharField(max_length=200)
     entity = models.CharField(max_length=200, blank=True, null=True)
     features = ArrayField(ArrayField(models.CharField(max_length=100,
                                                       blank=True)))
-    brand = models.CharField(max_length=200)
-    brand_id = models.IntegerField()
+    brand = models.CharField(max_length=200, blank=True, null=True)
+    brand_id = models.IntegerField(blank=True, null=True)
     category_name = models.CharField(max_length=200)
-    category_wb_id = models.IntegerField()
+    category_wb_id = models.IntegerField(blank=True, null=True)
     queries = ArrayField(ArrayField(models.IntegerField(blank=True)))
     categories = ArrayField(ArrayField(models.IntegerField(blank=True)))
-    subject_id = models.IntegerField()
-    rating = models.FloatField()
-    feedbacks = models.IntegerField()
-    # data = HStoreField()
-    is_new = models.BooleanField()
-    price = models.IntegerField()
-    priceU = models.IntegerField()
-    quantity = models.IntegerField()
-    sales = models.IntegerField()
+    subject_id = models.IntegerField(blank=True, null=True)
+    rating = models.FloatField(blank=True, null=True)
+    feedbacks = models.IntegerField(blank=True, null=True)
+    is_new = models.BooleanField(blank=True, null=True)
+    price = models.IntegerField(blank=True, null=True)
+    priceU = models.IntegerField(blank=True, null=True)
+    quantity = models.IntegerField(blank=True, null=True)
+    sales = models.IntegerField(blank=True, null=True)
+    sales_count = models.IntegerField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
-    last_parsing_id = models.IntegerField()
-    parsed_at = models.DateTimeField()
-    current_hom_sales = models.IntegerField()
-    last_hom_sales = models.IntegerField()
-    hom_sales_growth = models.IntegerField()
-    current_hom_profit = models.IntegerField()
-    last_hom_profit = models.IntegerField()
-    hom_profit_growth = models.IntegerField()
+    last_parsing_id = models.IntegerField(blank=True, null=True)
+    parsed_at = models.DateTimeField(blank=True, null=True)
+    current_hom_sales = models.IntegerField(blank=True, null=True)
+    last_hom_sales = models.IntegerField(blank=True, null=True)
+    hom_sales_growth = models.IntegerField(blank=True, null=True)
+    current_hom_profit = models.IntegerField(blank=True, null=True)
+    last_hom_profit = models.IntegerField(blank=True, null=True)
+    hom_profit_growth = models.IntegerField(blank=True, null=True)
 
     class Meta():
         indexes = [
@@ -182,8 +190,8 @@ class Product(models.Model):
 
 class Sale(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    sales = models.IntegerField()
-    profit = models.IntegerField()
-    price = models.IntegerField()
-    date = models.DateTimeField()
+    quantity = models.IntegerField(blank=True, null=True, default=0)
+    sales = models.IntegerField(blank=True, null=True, default=0)
+    profit = models.IntegerField(blank=True, null=True, default=0)
+    price = models.IntegerField(blank=True, null=True, default=0)
+    date = models.DateTimeField(blank=True, null=True)

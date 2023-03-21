@@ -12,6 +12,7 @@ from dateutil.relativedelta import relativedelta
 import threading
 import csv
 from api.parse import Parser
+from api.migrate import Migrate
 from api.mongo_models import Categories, Products, Config, Queries
 
 
@@ -456,3 +457,39 @@ def products(request):
     return {
         'products': json.loads(products.to_json()),
     }
+
+
+@csrf_exempt
+def transfer_config(request):
+    body = json.loads(request.body)
+    m = Migrate()
+    pg_id = m.create_config(body)
+    print('pg_id', pg_id)
+    return HttpResponse(pg_id)
+
+
+@csrf_exempt
+def transfer_category(request):
+    body = json.loads(request.body)
+    m = Migrate()
+    pg_id = m.create_category(body)
+    print('pg_id', pg_id)
+    return HttpResponse(pg_id)
+
+
+@csrf_exempt
+def transfer_query(request):
+    body = json.loads(request.body)
+    m = Migrate()
+    pg_id = m.create_query(body)
+    print('pg_id', pg_id)
+    return HttpResponse(pg_id)
+
+
+@csrf_exempt
+def transfer_product(request):
+    body = json.loads(request.body)
+    m = Migrate()
+    pg_id = m.create_product(body)
+    print('pg_id', pg_id)
+    return HttpResponse(pg_id)

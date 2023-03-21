@@ -1,5 +1,6 @@
 // const back = 'http://0.0.0.0:5000/'
-const back = 'https://spotter.fun'
+const back = 'http://0.0.0.0:8000/'
+// const back = 'https://spotter.fun'
 module.exports = {
   devServer: {
     proxy: {
