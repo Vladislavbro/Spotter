@@ -1,5 +1,5 @@
 import requests
-from api.mongo_models import Categories, Products, Config, Queries
+# from api.mongo_models import Categories, Products, Config, Queries
 from time import sleep
 from datetime import datetime, timedelta
 import time
@@ -91,25 +91,25 @@ class Parser(object):
             self.get_category()
 
     def create_queries(self):
-        categories = Categories.objects(parse=True)
+        categories = Category.objects.filter(parse=True)
         for category in categories:
             self.category = category
-            products = Products.objects(categories__in=[self.category.wb_id])
+            products = Product.objects.filter(
+                categories__contains=[self.category.wb_id])
             top_products = products.filter(
-                last_decada_profit__gte=10000/3,
-                current_decada_sales__gt=0,
-                root__ne=None
-            ).order_by('-current_decada_sales')[0:50]
+                last_hom_profit__gte=10000/3,
+                current_hom_sales__gt=0,
+            ).exclude(root=None).order_by('-current_hom_sales')[0:50]
             for top in top_products:
                 features = top.features
                 features.sort()
-                q = Queries.objects(
+                q = Query.objects.filter(
                     root=top.root,
                     features=features,
                     current_parsing_id=self.config.current_parsing_id
                 ).first()
                 if q is None:
-                    q = Queries(
+                    q = Query(
                         root=top.root,
                         features=features,
                         category_id=category.id,
@@ -119,9 +119,9 @@ class Parser(object):
                     print(q.root, q.features)
 
     def update_category(self, child):
-        category = Categories.objects(wb_id=child['id']).first()
+        category = Category.objects.filter(wb_id=child['id']).first()
         if category is None:
-            category = Categories(wb_id=child['id'])
+            category = Category(wb_id=child['id'])
         category.name = child.get('name')
         category.shard = child.get('shard')
         category.query = child.get('query')
@@ -152,7 +152,7 @@ class Parser(object):
                             self.update_category(subchild)
 
     def upgrade_parsing(self):
-        Categories.objects.update(
+        Category.objects.update(
             # parse=False,
             parsed_at=None,
             last_parsed_page=None,
@@ -168,11 +168,10 @@ class Parser(object):
                 print('send message except')
 
     def get_query(self):
-        self.query = Queries.objects.filter(
+        self.query = Query.objects.filter(
             current_parsing_id=self.config.current_parsing_id,
             parsed_at=None,
-            root__ne=None
-        ).first()
+        ).exclude(root=None).first()
         if self.query is None:
             self.notify('Парсинг запросов закончился')
             self.config.queries_done = True
@@ -188,11 +187,11 @@ class Parser(object):
             return self.query_crawl()
 
     def get_category(self):
-        self.category = Categories.objects.filter(parsed_at=None,
-                                                  parse=True).first()
+        self.category = Category.objects.filter(parsed_at=None,
+                                                parse=True).first()
         if self.category is None:
             self.notify('Парсинг категорий закончился')
-            Categories.objects(parse=True).update(
+            Category.objects.filter(parse=True).update(
                 calculated=False,
                 products_calculated=False,
                 parsed_at=None,
@@ -345,7 +344,8 @@ class Parser(object):
 
     def check_unique(self, product):
         print(product.articul)
-        Products.objects(articul=product.articul, id__ne=product.id).delete()
+        Product.objects.filter(articul=product.articul).exclude(
+            id=product.id).delete()
         product.check_articul = True
         product.save()
 
@@ -355,9 +355,12 @@ class Parser(object):
         details = self.get_details(ids)
         print('details: ', len(details))
         for index, item in enumerate(products):
-            product = Products.objects(
-                articul=item['id']
-            ).fields(slice__sizes=[-2, 2]).first()
+            try:
+                product = Product.objects.get(articul=item['id'])
+                last_sale = product.sale_set.first()
+            except Content.DoesNotExist:
+                product = None
+                last_sale = None
             price = item.get('salePriceU') / 100
             detail = [detail for detail in details if detail['id'] == item['id']]
             if len(detail):
@@ -377,7 +380,7 @@ class Parser(object):
 
             if product and detail:
                 # self.check_unique(product)
-                if product.sizes[-1].date != datetime.now().date():
+                if last_sale.date != datetime.now().date():
                     # Если последняя цена вчерашняя то посчитать разницу остатков и
                     # записать как количество продаж
                     sales = product.quantity - quantity
@@ -387,101 +390,65 @@ class Parser(object):
                         sales = 0
                 else:
                     sales = 0
+
                 if product.name != item['name'].strip():
                     product.name = item['name'].strip()
                     self.text_process(product)
-                    product.save()
-                Products.objects(id=product.id).update_one(
-                    set__name=item['name'],
-                    set__brand=item['brand'],
-                    set__brand_id=item['siteBrandId'],
-                    set__subject_id=item['subjectId'],
-                    set__rating=item['rating'],
-                    set__feedbacks=item['feedbacks'],
-                    set__is_new=item.get('isNew', False),
-                    set__data=item,
-                    set__price=price,
-                    set__priceU=item.get('priceU') / 100,
-                    set__quantity=quantity,
-                    set__sales=sales,
-                    set__parsed_at=datetime.utcnow(),
-                )
+
+                product.name = item['name']
+                product.brand = item['brand']
+                product.brand_id = item['siteBrandId']
+                product.subject_id = item['subjectId']
+                product.rating = item['rating']
+                product.feedbacks = item['feedbacks']
+                product.is_new = item.get('isNew', False)
+
+                product.price = price
+                product.priceU = item.get('priceU') / 100
+                product.quantity = quantity
+                product.sales = sales
+                product.parsed_at = datetime.utcnow()
+
                 if self.query is None:
-                    Products.objects(id=product.id).update_one(
-                        set__category_name=self.category.name,
-                        set__category_id=self.category.id,
-                        set__category_wb_id=self.category.wb_id,
-                    )
-                if len(product.sizes) and product.sizes[-1].date.date() == datetime.now().date():
+                    product.category_name = self.category.name
+                    product.category_id = self.category.id
+                    product.category_wb_id = self.category.wb_id
+
+                if last_sale and last_sale.date.date() == datetime.now().date():
                     pass
                 else:
-                    Products.objects(id=product.id).update_one(
-                        push__sizes={
-                            'sales': sales,
-                            'price': price,
-                            'profit': sales * price,
-                            'quantity': quantity,
-                            'date': datetime.utcnow()
-                        }
+                    product.sale_set.create(
+                        sales=sales,
+                        price=price,
+                        profit=sales * price,
+                        quantity=quantity,
+                        date=datetime.utcnow()
                     )
-                # if self.query:
-                #     if str(self.query.id) not in product.queries:
-                #         Products.objects(id=product.id).update_one(
-                #             push__queries=str(self.query.id)
-                #         )
+
                 if self.query is None and self.category.wb_id not in product.categories:
-                    Products.objects(id=product.id).update_one(
-                        push__categories=self.category.wb_id
-                    )
-                product = Products.objects(
-                    articul=item['id']
-                ).fields(slice__sizes=[-30, 30]).first()
+                    product.categories.append(self.category.wb_id)
+
+                last_sales = product.sale_set.all()[:30]
                 now = datetime.utcnow()
-                current_decada_start = (now - timedelta(days=10)).replace(
-                    hour=0, minute=0, second=0, microsecond=0)
-                last_decada_start = current_decada_start - timedelta(days=10)
                 current_hom_start = (now - timedelta(days=15)).replace(
                     hour=0, minute=0, second=0, microsecond=0)
                 last_hom_start = current_hom_start - timedelta(days=15)
-                last_decada_sales = 0
-                current_decada_sales = 0
-                decada_sales_growth = 0
-                last_decada_profit = 0
-                current_decada_profit = 0
                 last_hom_sales = 0
                 current_hom_sales = 0
                 hom_sales_growth = 0
                 last_hom_profit = 0
                 current_hom_profit = 0
                 hom_profit_growth = 0
-                if len(product.sizes):
-                    last_decada_data = [sales for sales in product.sizes
-                                        if sales.date >= last_decada_start
-                                        and sales.date < current_decada_start]
-                    last_decada_sales = sum([(s.sales or 0) for s
-                                             in last_decada_data])
-                    last_decada_profit = sum([(s.sales or 0) * (s.price or product.price or 0) for s
-                                             in last_decada_data])
-                    current_decada_data = [sales for sales in product.sizes
-                                           if sales.date >= current_decada_start]
-                    current_decada_sales = sum([(s.sales or 0) for s
-                                                in current_decada_data])
-                    current_decada_profit = sum(
-                        [(s.sales or 0) *
-                         (s.price or product.price or 0) for
-                         s in current_decada_data])
-                    if last_decada_sales != 0:
-                        decada_sales_growth = int(
-                            current_decada_sales / last_decada_sales * 100)
+                if len(last_sales):
                     # HOM
-                    last_hom_data = [sales for sales in product.sizes
+                    last_hom_data = [sales for sales in last_sales
                                      if sales.date >= last_hom_start
                                      and sales.date < current_hom_start]
                     last_hom_sales = sum([(s.sales or 0) for s
                                           in last_hom_data])
                     last_hom_profit = sum([(s.sales or 0) * (s.price or product.price or 0) for s
                                            in last_hom_data])
-                    current_hom_data = [sales for sales in product.sizes
+                    current_hom_data = [sales for sales in last_sales
                                         if sales.date >= current_hom_start]
                     current_hom_sales = sum([(s.sales or 0) for s
                                              in current_hom_data])
@@ -501,21 +468,22 @@ class Parser(object):
                             last_hom_profit * 100)
                     else:
                         hom_profit_growth = 0
-                Products.objects(id=product.id).update_one(
-                    set__decada_sales_growth=decada_sales_growth,
-                    set__current_decada_sales=current_decada_sales,
-                    set__last_decada_sales=last_decada_sales,
-                    set__current_decada_profit=current_decada_profit,
-                    set__last_decada_profit=last_decada_profit,
-                    set__last_hom_sales=last_hom_sales,
-                    set__current_hom_sales=current_hom_sales,
-                    set__hom_sales_growth=hom_sales_growth,
-                    set__last_hom_profit=last_hom_profit,
-                    set__current_hom_profit=current_hom_profit,
-                    set__hom_profit_growth=hom_profit_growth,
-                )
+
+                product.decada_sales_growth = decada_sales_growth
+                product.current_decada_sales = current_decada_sales
+                product.last_decada_sales = last_decada_sales
+                product.current_decada_profit = current_decada_profit
+                product.last_decada_profit = last_decada_profit
+                product.last_hom_sales = last_hom_sales
+                product.current_hom_sales = current_hom_sales
+                product.hom_sales_growth = hom_sales_growth
+                product.last_hom_profit = last_hom_profit
+                product.current_hom_profit = current_hom_profit
+                product.hom_profit_growth = hom_profit_growth
+                product.save()
+
             elif detail and item['name'].strip():
-                product = Products(
+                product = Product(
                     articul=item['id'],
                     name=item['name'],
                     brand=item['brand'],
@@ -528,28 +496,29 @@ class Parser(object):
                     rating=item['rating'],
                     feedbacks=item['feedbacks'],
                     is_new=item.get('isNew', False),
-                    data=item,
                     price=price,
                     sales=sales,
                     priceU=(item.get('priceU') / 100),
                     quantity=quantity,
                     parsed_at=datetime.utcnow(),
                 )
-                product.sizes.create(
+                self.text_process(product)
+                product.save()
+                product.sale_set.create(
                     quantity=quantity,
                     sales=sales,
                     price=price,
                     profit=sales * price,
-                    date=datetime.utcnow())
-                self.text_process(product)
-                product.save()
+                    date=datetime.utcnow()
+                )
 
     def parse_search(self, data):
         print('parse_search', self.query)
         if len(data.get('data', {}).get('products', [])) > 0:
             products = data['data']['products']
             ids = self.query.articuls + [p['id'] for p in products]
-            Queries.objects(id=self.query.id).update_one(set__articuls=ids)
+            self.query.articuls = ids
+            self.query.save()
             self.parse_products(data['data']['products'])
             self.query.last_parsed_page = self.page
             self.query.save()
@@ -606,14 +575,15 @@ class Parser(object):
         # Если все условия пройдены - то информация о нише и топ 50 товарах
         # отправляются в раздел ""топ категории"" для декады делим месяц на три
         self.set_period_dates()
-        products = Products.objects(categories__in=[category.wb_id]).fields(
-            slice__sizes=[-30, 30])
+        products = Product.objects.prefetch_related('sale_set').filter(
+            categories__contains=[category.wb_id])
+        # last_sales = product.sale_set.all()[:30]
         category.products_count = products.count()
         print(category.name, category.products_count)
         if category.products_count > 10:
-            top_products = products.order_by('-current_decada_sales')[0:50]
+            top_products = products.order_by('-current_hom_sales')[0:50]
             category.products_with_sales = products.filter(
-                current_decada_sales__gt=0).count()
+                current_hom_sales__gt=0).count()
             category.profit_period = self.get_sum([
                 [s.profit or ((s.sales or 0) * (s.price or p.price or 0))
                  for s in p.sizes if s.date >= self.end_prev_period]
@@ -627,7 +597,7 @@ class Parser(object):
             category.sellers = len(list(set([p.brand_id for p in products])))
             category.sellers_with_sales = len(list(set([
                 p.brand_id for p
-                in products.filter(current_decada_sales__gt=0)])))
+                in products.filter(current_hom_sales__gt=0)])))
             category.avg_price_prev_period = self.get_avg([
                 [s.price for s in p.sizes
                  if s.price and s.date >= self.start_prev_period and
@@ -641,25 +611,25 @@ class Parser(object):
                  if s.date >= self.end_prev_period] for p in products])
 
             category.first_product_price = top_products[0].price
-            category.first_product_decada_sales = top_products[0].current_decada_sales
-            category.first_product_decada_profit = (
-                (top_products[0].current_decada_sales or 0)
+            category.first_product_sales = top_products[0].current_hom_sales
+            category.first_product_profit = (
+                (top_products[0].current_hom_sales or 0)
                 *
                 (top_products[0].price or 0)
             )
             category.ten_product_price = top_products[9].price
-            category.ten_product_decada_sales = top_products[9].current_decada_sales
-            category.ten_product_decada_profit = (
-                (top_products[9].current_decada_sales or 0)
+            category.ten_product_sales = top_products[9].current_hom_sales
+            category.ten_product_profit = (
+                (top_products[9].current_hom_sales or 0)
                 *
                 (top_products[9].price or 0)
             )
             category.rel_sellers = category.sellers_with_sales / category.sellers
             category.rel_sales = category.products_with_sales / category.products_count
 
-            if category.first_product_decada_profit >= self.profit_first_top:
+            if category.first_product_hom_profit >= self.profit_first_top:
                 category.first_product_profit_top = True
-            if category.ten_product_decada_profit >= self.profit_ten_top:
+            if category.ten_product_hom_profit >= self.profit_ten_top:
                 category.ten_product_profit_top = True
             if category.rel_sales >= 1/5:
                 category.rel_sales_top = True
@@ -685,53 +655,48 @@ class Parser(object):
                 category.top = True
         category.calculated = True
         category.save()
-        print(category.to_json())
+        print(category)
 
     def calculate_queries(self):
-        query = Queries.objects(
+        query = Query.objects.filter(
             current_parsing_id=self.config.current_parsing_id,
-            calculated__ne=True,
             products_count__gte=1,
-        ).first()
+        ).exclude(calculated=True).first()
         while query:
             self.calculate_query(query)
-            query = Queries.objects(
+            query = Query.objects.filter(
                 current_parsing_id=self.config.current_parsing_id,
-                calculated__ne=True,
                 products_count__gte=1,
-            ).first()
+            ).exclude(calculated=True).first()
         self.config.queries_calculated = True
         self.config.save()
         self.processing()
 
     def calculate_categories(self):
-        category = Categories.objects(
-            calculated__ne=True,
-            parse=True,
-        ).first()
+        category = Category.objects.filter(parse=True).exclude(
+            calculated=True).first()
         while category:
             self.calculate_category(category)
-            category = Categories.objects(
-                calculated__ne=True,
-                parse=True,
-            ).first()
+            category = Category.objects.filter(parse=True).exclude(
+                calculated=True).first()
         self.config.categories_calculated = True
         self.config.save()
         self.processing()
 
     def calculate_query(self, query):
-        products = Products.objects(
+        products = Product.objects.prefetch_related('sale_set').filter(
             articul__in=query.articuls
-        ).fields(slice__sizes=[-30, 30]).order_by('-current_hom_sales')
+        )
+        # .fields(slice__sizes=[-30, 30]).order_by('-current_hom_sales')
         products_count = products.count()
         if products_count >= 10:
-            query.first_product_decada_profit = (
-                (products[0].current_decada_sales or 0)
+            query.first_product_hom_profit = (
+                (products[0].current_hom_sales or 0)
                 *
                 (products[0].price or 0)
             )
-            query.ten_product_decada_profit = (
-                (products[9].current_decada_sales or 0)
+            query.ten_product__profit = (
+                (products[9].current_hom_sales or 0)
                 *
                 (products[9].price or 0)
             )
@@ -763,10 +728,10 @@ class Parser(object):
                  for p in products]
             )
             # Оборот первого не меньше 500к -> 300к
-            if query.first_product_decada_profit >= 300000 / 2:
+            if query.first_product_hom_profit >= 300000 / 2:
                 query.first_product_profit_top = True
             # оборот десятого не меньше 100к -> 70к
-            if query.ten_product_decada_profit >= 70000 / 2:
+            if query.ten_product_hom_profit >= 70000 / 2:
                 query.ten_product_profit_top = True
             # Количество товаров с продажами: не меньше 20%
             if query.products_with_sales / products.count() >= 1/5:
@@ -795,7 +760,7 @@ class Parser(object):
                 query.top = True
         query.calculated = True
         query.save()
-        print(query.to_json())
+        print(query)
 
     def calculate_products(self):
         # "Товары в этот раздел отбираются по следующему принципу:
@@ -839,16 +804,12 @@ class Parser(object):
         # - Если сравнивается средняя цена в категории, то сравнивается
         # средняя цена 30 дней назад и на данный момент"
         # "
-        category = Categories.objects(
-            products_calculated__ne=True,
-            parse=True,
-        ).first()
+        category = Category.objects.filter(parse=True).exclude(
+            products_calculated=True).first()
         while category:
             self.calculate_category_products(category)
-            category = Categories.objects(
-                products_calculated__ne=True,
-                parse=True,
-            ).first()
+            category = Category.objects.filter(parse=True).exclude(
+                products_calculated=True).first()
         self.config.products_calculated = True
         self.config.save()
         self.processing()

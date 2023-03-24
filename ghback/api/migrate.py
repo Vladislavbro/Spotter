@@ -169,8 +169,9 @@ class Migrate(object):
                 sales=sale.get('sales'),
                 profit=sale.get('profit'),
                 price=sale.get('price'),
-                date=datetime.utcfromtimestamp(int(data.get(
-                    'date', {}).get('$date')) / 1000) if data.get('date') else None,
+                date=datetime.utcfromtimestamp(int(sale.get(
+                    'date', {}).get('$date')) / 1000) if sale.get(
+                        'date') else None,
             )
 
         # sizes = EmbeddedDocumentListField('Sizes')

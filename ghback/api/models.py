@@ -75,7 +75,11 @@ class Category(models.Model):
     avg_price_period = models.IntegerField(blank=True, null=True)
     # end period
     first_product_price = models.IntegerField(blank=True, null=True)
+    first_product_sales = models.IntegerField(blank=True, null=True)
+    first_product_profit = models.IntegerField(blank=True, null=True)
     ten_product_price = models.IntegerField(blank=True, null=True)
+    ten_product_sales = models.IntegerField(blank=True, null=True)
+    ten_product_profit = models.IntegerField(blank=True, null=True)
     products_count = models.IntegerField(blank=True, null=True)
     products_with_sales = models.IntegerField(blank=True, null=True)
     sellers = models.IntegerField(blank=True, null=True)
@@ -182,6 +186,7 @@ class Product(models.Model):
             models.Index(fields=['queries']),
             models.Index(fields=['parsed_at']),
             models.Index(fields=['root']),
+            models.Index(fields=['current_hom_sales']),
             models.Index(fields=['hom_sales_growth']),
             models.Index(fields=['-sales']),
             models.Index(fields=['category_id', 'last_parsing_id']),
@@ -195,3 +200,6 @@ class Sale(models.Model):
     profit = models.IntegerField(blank=True, null=True, default=0)
     price = models.IntegerField(blank=True, null=True, default=0)
     date = models.DateTimeField(blank=True, null=True)
+
+    class Meta():
+        ordering = ['-date']
