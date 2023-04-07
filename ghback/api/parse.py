@@ -358,7 +358,7 @@ class Parser(object):
             try:
                 product = Product.objects.get(articul=item['id'])
                 last_sale = product.sale_set.first()
-            except Content.DoesNotExist:
+            except Product.DoesNotExist:
                 product = None
                 last_sale = None
             price = item.get('salePriceU') / 100
