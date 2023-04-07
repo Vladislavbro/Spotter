@@ -125,9 +125,8 @@ class Parser(object):
             category = Category(wb_id=child['id'])
         category.name = child.get('name')
         category.shard = child.get('shard')
-        category.query = child.get('query')
+        category.wb_query = child.get('query')
         category.parent = child.get('parent')
-        category.query = child.get('query')
         category.seo = child.get('seo')
         category.url = child.get('url')
         category.shard = child.get('shard')
@@ -272,7 +271,7 @@ class Parser(object):
             f'appType=1&couponsGeo={self.couponsGeo}&curr=rub&'
             f'dest={self.dest}&emp=0&lang=ru&locale=ru&'
             f'pricemarginCoeff=1.0&reg=1&regions={self.regions}&'
-            f'sort=popular&spp=25&page={self.page}&{self.category.query}'
+            f'sort=popular&spp=25&page={self.page}&{self.category.wb_query}'
         )
         print(self.category.name, self.page)
 

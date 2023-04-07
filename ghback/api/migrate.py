@@ -53,6 +53,7 @@ class Migrate(object):
             parent=data.get('parent'),
             seo=data.get('seo'),
             shard=data.get('shard'),
+            wb_query=data.get('query'),
             url=data['url'],
             parse=data['parse'],
             parsed_at=datetime.utcfromtimestamp(int(data.get(
