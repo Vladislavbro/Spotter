@@ -16,6 +16,7 @@ from random_user_agent.user_agent import UserAgent
 import spacy
 import os
 from urllib import request
+import asyncio
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 nlp = spacy.load('ru_core_news_md')
@@ -163,7 +164,10 @@ class Parser(object):
     def notify(self, text):
         for id in self.adminIds:
             try:
-                bot.send_message(chat_id=id, text=text)
+                loop = asyncio.new_event_loop()
+                loop.run_until_complete(
+                    bot.send_message(chat_id=id, text=text)
+                )
             except:
                 print('send message except')
 
@@ -273,12 +277,14 @@ class Parser(object):
             f'pricemarginCoeff=1.0&reg=1&regions={self.regions}&'
             f'sort=popular&spp=25&page={self.page}&{self.category.wb_query}'
         )
-        print(self.category.name, self.page)
 
+        print(self.category.name, self.page, url)
         response = self.get_url(url)
+        print(response.status_code)
 
         if response.status_code == 200:
             if response.text == '':
+                print('change_category')
                 return self.change_category()
             try:
                 data = json.loads(r"{}".format(response.text))
