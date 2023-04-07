@@ -107,10 +107,11 @@ class Query(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  blank=True, null=True)
     # category_id = ReferenceField('Categories')
-    articuls = ArrayField(ArrayField(models.IntegerField(blank=True)))
+    articuls = ArrayField(ArrayField(models.IntegerField(blank=True)), 
+                          default=[])
     root = models.CharField(max_length=200)
     features = ArrayField(ArrayField(models.CharField(max_length=100,
-                                                      blank=True)))
+                                                      blank=True)), default=[])
     products_count = models.IntegerField(blank=True, null=True)
     products_with_sales = models.IntegerField(blank=True, null=True)
     rel_products_with_sales = models.IntegerField(blank=True, null=True)
@@ -151,13 +152,15 @@ class Product(models.Model):
     root = models.CharField(max_length=200)
     entity = models.CharField(max_length=200, blank=True, null=True)
     features = ArrayField(ArrayField(models.CharField(max_length=100,
-                                                      blank=True)))
+                                                      blank=True)), default=[])
     brand = models.CharField(max_length=200, blank=True, null=True)
     brand_id = models.IntegerField(blank=True, null=True)
     category_name = models.CharField(max_length=200)
     category_wb_id = models.IntegerField(blank=True, null=True)
-    queries = ArrayField(ArrayField(models.IntegerField(blank=True)))
-    categories = ArrayField(ArrayField(models.IntegerField(blank=True)))
+    queries = ArrayField(ArrayField(models.IntegerField(blank=True)),
+                         default=[])
+    categories = ArrayField(ArrayField(models.IntegerField(blank=True)),
+                            default=[])
     subject_id = models.IntegerField(blank=True, null=True)
     rating = models.FloatField(blank=True, null=True)
     feedbacks = models.IntegerField(blank=True, null=True)

@@ -473,12 +473,6 @@ class Parser(object):
                             last_hom_profit * 100)
                     else:
                         hom_profit_growth = 0
-
-                product.decada_sales_growth = decada_sales_growth
-                product.current_decada_sales = current_decada_sales
-                product.last_decada_sales = last_decada_sales
-                product.current_decada_profit = current_decada_profit
-                product.last_decada_profit = last_decada_profit
                 product.last_hom_sales = last_hom_sales
                 product.current_hom_sales = current_hom_sales
                 product.hom_sales_growth = hom_sales_growth
