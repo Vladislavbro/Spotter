@@ -421,7 +421,7 @@ class Parser(object):
                     product.category_id = self.category.id
                     product.category_wb_id = self.category.wb_id
 
-                if last_sale and last_sale.date.date() == datetime.utcnow().date():
+                if last_sale and utc.localize(last_sale.date).date() == utc.localize(datetime.now()).date():
                     pass
                 else:
                     product.sale_set.create(
