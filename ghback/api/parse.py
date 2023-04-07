@@ -387,7 +387,7 @@ class Parser(object):
 
             if product and detail:
                 # self.check_unique(product)
-                if utc.localize(last_sale.date) != datetime.utcnow().date():
+                if last_sale.date.date() != datetime.utcnow().date():
                     # Если последняя цена вчерашняя то посчитать разницу остатков и
                     # записать как количество продаж
                     sales = product.quantity - quantity
