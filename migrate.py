@@ -8,7 +8,9 @@ class Migrate(object):
 
     def __init__(self):
         super(Migrate, self).__init__()
-        self.transfer_products()
+        self.transfer_configs()
+        self.transfer_categories()
+        self.transfer_queries()
 
     def transfer_configs(self):
         for config in Config.objects.all():
