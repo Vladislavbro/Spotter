@@ -248,9 +248,9 @@ def categories_list(request):
     for root in [c for c in categories if c.get('parent') is None]:
         root['children'] = get_children(root, categories)
         out.append(root)
-    return {
+    return JsonResponse({
         'categories': out
-    }
+    })
 
 
 def categories_top(request):
