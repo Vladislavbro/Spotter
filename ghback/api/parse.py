@@ -385,7 +385,7 @@ class Parser(object):
 
             if product and detail:
                 # self.check_unique(product)
-                if last_sale.date != datetime.now().date():
+                if last_sale.date != datetime.utcnow().date():
                     # Если последняя цена вчерашняя то посчитать разницу остатков и
                     # записать как количество продаж
                     sales = product.quantity - quantity
@@ -419,7 +419,7 @@ class Parser(object):
                     product.category_id = self.category.id
                     product.category_wb_id = self.category.wb_id
 
-                if last_sale and last_sale.date.date() == datetime.now().date():
+                if last_sale and last_sale.date.date() == datetime.utcnow().date():
                     pass
                 else:
                     product.sale_set.create(
@@ -554,7 +554,7 @@ class Parser(object):
         return sum([sum(value) for value in values])
 
     def set_period_dates(self):
-        self.end_prev_period = (datetime.now() - timedelta(days=15)).replace(
+        self.end_prev_period = (datetime.utcnow() - timedelta(days=15)).replace(
             hour=0, minute=0, second=0, microsecond=0)
         self.start_prev_period = self.end_prev_period - timedelta(days=15)
 
