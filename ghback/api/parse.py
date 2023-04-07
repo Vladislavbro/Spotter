@@ -1,5 +1,6 @@
 import requests
 # from api.mongo_models import Categories, Products, Config, Queries
+from api.models import Category, Product, Config, Query
 from time import sleep
 from datetime import datetime, timedelta
 import time

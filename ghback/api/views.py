@@ -13,7 +13,9 @@ import threading
 import csv
 from api.parse import Parser
 from api.migrate import Migrate
-from api.mongo_models import Categories, Products, Config, Queries
+from api.mongo_models import Categories, Products, Queries
+from api.mongo_models import Config as ConfigMongo
+from api.models import Category, Product, Config, Query
 
 
 def me(request):
@@ -242,7 +244,7 @@ def get_children(category, categories):
 
 def categories_list(request):
     out = []
-    categories = json.loads(Categories.objects().all().to_json())
+    categories = Category.objects.all().values()
     for root in [c for c in categories if c.get('parent') is None]:
         root['children'] = get_children(root, categories)
         out.append(root)
