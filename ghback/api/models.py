@@ -173,8 +173,7 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_parsing_id = models.IntegerField(blank=True, null=True)
-    # parsed_at = models.DateTimeField(blank=True, null=True)
-    parsed_at = models.IntegerField()
+    parsed_at = models.DateTimeField(blank=True, null=True)
     current_hom_sales = models.IntegerField(blank=True, null=True)
     last_hom_sales = models.IntegerField(blank=True, null=True)
     hom_sales_growth = models.IntegerField(blank=True, null=True)
@@ -203,8 +202,7 @@ class Sale(models.Model):
     sales = models.IntegerField(blank=True, null=True, default=0)
     profit = models.IntegerField(blank=True, null=True, default=0)
     price = models.IntegerField(blank=True, null=True, default=0)
-    date = models.IntegerField()
-    # date = models.DateTimeField(blank=True, null=True)
+    date = models.DateTimeField(blank=True, null=True)
 
     class Meta():
         ordering = ['-date']
