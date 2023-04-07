@@ -17,7 +17,9 @@ import spacy
 import os
 from urllib import request
 import asyncio
+import pytz
 
+utc = pytz.UTC
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 nlp = spacy.load('ru_core_news_md')
 
@@ -385,7 +387,7 @@ class Parser(object):
 
             if product and detail:
                 # self.check_unique(product)
-                if datetime.utcfromtimestamp(last_sale.date).date() != datetime.utcnow().date():
+                if utc.localize(last_sale.date) != datetime.utcnow().date():
                     # Если последняя цена вчерашняя то посчитать разницу остатков и
                     # записать как количество продаж
                     sales = product.quantity - quantity
@@ -412,14 +414,14 @@ class Parser(object):
                 product.priceU = item.get('priceU') / 100
                 product.quantity = quantity
                 product.sales = sales
-                product.parsed_at = datetime.utcnow().timestamp()
+                product.parsed_at = datetime.utcnow()
 
                 if self.query is None:
                     product.category_name = self.category.name
                     product.category_id = self.category.id
                     product.category_wb_id = self.category.wb_id
 
-                if last_sale and datetime.utcfromtimestamp(last_sale.date).date() == datetime.utcnow().date():
+                if last_sale and last_sale.date.date() == datetime.utcnow().date():
                     pass
                 else:
                     product.sale_set.create(
@@ -427,7 +429,7 @@ class Parser(object):
                         price=price,
                         profit=sales * price,
                         quantity=quantity,
-                        date=datetime.utcnow().timestamp()
+                        date=datetime.utcnow()
                     )
 
                 if self.query is None and self.category.wb_id not in product.categories:
@@ -436,8 +438,8 @@ class Parser(object):
                 last_sales = product.sale_set.all()[:30]
                 now = datetime.utcnow()
                 current_hom_start = (now - timedelta(days=15)).replace(
-                    hour=0, minute=0, second=0, microsecond=0).timestamp()
-                last_hom_start = (current_hom_start - timedelta(days=15)).timestamp()
+                    hour=0, minute=0, second=0, microsecond=0)
+                last_hom_start = current_hom_start - timedelta(days=15)
                 last_hom_sales = 0
                 current_hom_sales = 0
                 hom_sales_growth = 0
@@ -499,7 +501,7 @@ class Parser(object):
                     sales=sales,
                     priceU=(item.get('priceU') / 100),
                     quantity=quantity,
-                    parsed_at=datetime.utcnow().timestamp(),
+                    parsed_at=datetime.utcnow(),
                 )
                 self.text_process(product)
                 product.save()
@@ -508,7 +510,7 @@ class Parser(object):
                     sales=sales,
                     price=price,
                     profit=sales * price,
-                    date=datetime.utcnow().timestamp()
+                    date=datetime.utcnow()
                 )
 
     def parse_search(self, data):
