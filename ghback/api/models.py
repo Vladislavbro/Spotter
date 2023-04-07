@@ -56,7 +56,7 @@ class Category(models.Model):
     name = models.CharField(max_length=200)
     wb_id = models.IntegerField()
     parent = models.IntegerField(blank=True, null=True)
-    wb_query = models.CharField(max_length=1000, blank=True, null=True)
+    wb_query = models.TextField(max_length=4000, blank=True, null=True)
     seo = models.CharField(max_length=200, blank=True, null=True)
     shard = models.CharField(max_length=200, blank=True, null=True)
     url = models.CharField(max_length=200, blank=True, null=True)
