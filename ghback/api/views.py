@@ -226,8 +226,10 @@ def parser(request):
         t = threading.Thread(target=Parser, args=(), kwargs={})
         t.setDaemon(True)
         t.start()
+        print('t.native_id', t.native_id)
         config.thread_id = t.native_id
         config.save()
+        print('config', model_to_dict(config))
     return JsonResponse({
         'native_ids': native_ids,
         'active_count': threading.active_count(),
