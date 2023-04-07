@@ -85,7 +85,6 @@ class Parser(object):
             self.config.save()
             date = datetime.utcnow()
             self.config = Config(
-                current_parsing_date=date,
                 current_parsing_id=int(date.timestamp()),
             )
             self.config.save()
