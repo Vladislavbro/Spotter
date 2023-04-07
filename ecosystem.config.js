@@ -18,7 +18,7 @@ module.exports = {
 
   deploy : {
     production : {
-      user : 'upgrade',
+      user : 'deploy',
       host : '109.196.164.236',
       ref  : 'origin/upgrade',
       repo : 'git@github.com:Vladislavbro/goods_hunter.git',
