@@ -25,6 +25,7 @@ services:
       - POSTGRES_USER=ghuser
       - POSTGRES_PASSWORD=ghpassworde23f8852aa92
   web:
+    restart: always
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
