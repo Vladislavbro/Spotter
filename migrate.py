@@ -10,7 +10,7 @@ class Migrate(object):
         super(Migrate, self).__init__()
         # self.transfer_configs()
         self.transfer_categories()
-        self.transfer_queries()
+        # self.transfer_queries()
 
     def transfer_configs(self):
         for config in Config.objects.all():
