@@ -278,11 +278,7 @@ class Parser(object):
             f'pricemarginCoeff=1.0&reg=1&regions={self.regions}&'
             f'sort=popular&spp=25&page={self.page}&{self.category.wb_query}'
         )
-
-        print(self.category.name, self.page, url)
         response = self.get_url(url)
-        print(response.status_code)
-
         if response.status_code == 200:
             if response.text == '':
                 print('change_category')
@@ -365,6 +361,7 @@ class Parser(object):
             try:
                 product = Product.objects.get(articul=item['id'])
                 last_sale = product.sale_set.first()
+                print(product.id, product.parsed_at, last_sale.date)
             except Product.DoesNotExist:
                 product = None
                 last_sale = None
