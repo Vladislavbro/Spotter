@@ -2,7 +2,7 @@ import requests
 # from api.mongo_models import Categories, Products, Config, Queries
 from api.models import Category, Product, Config, Query
 from time import sleep
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import time
 import sys
 import re
@@ -85,7 +85,7 @@ class Parser(object):
         else:
             self.config.calculated = True
             self.config.save()
-            date = datetime.utcnow()
+            date = datetime.now(timezone.utc)
             self.config = Config(
                 current_parsing_id=int(date.timestamp()),
             )
@@ -212,7 +212,7 @@ class Parser(object):
             if self.category.last_parsed_page:
                 self.page = self.category.last_parsed_page + 1
             else:
-                self.category.start_parsing_at = datetime.utcnow()
+                self.category.start_parsing_at = datetime.now(timezone.utc)
                 self.category.save()
                 self.page = 1
             return self.crawl()
@@ -300,13 +300,13 @@ class Parser(object):
             return self.change_category()
 
     def change_query(self):
-        self.query.parsed_at = datetime.utcnow()
+        self.query.parsed_at = datetime.now(timezone.utc)
         self.query.save()
         self.get_query()
 
     def change_category(self):
-        self.category.last_parsed_page_at = datetime.utcnow()
-        self.category.parsed_at = datetime.utcnow()
+        self.category.last_parsed_page_at = datetime.now(timezone.utc)
+        self.category.parsed_at = datetime.now(timezone.utc)
         self.category.save()
         self.get_category()
 
@@ -387,7 +387,7 @@ class Parser(object):
 
             if product and detail:
                 # self.check_unique(product)
-                if utc.localize(last_sale.date).date() != utc.localize(datetime.now()).date():
+                if utc.localize(last_sale.date).date() != datetime.now(timezone.utc).date():
                     # Если последняя цена вчерашняя то посчитать разницу остатков и
                     # записать как количество продаж
                     sales = product.quantity - quantity
@@ -414,14 +414,14 @@ class Parser(object):
                 product.priceU = item.get('priceU') / 100
                 product.quantity = quantity
                 product.sales = sales
-                product.parsed_at = datetime.utcnow()
+                product.parsed_at = datetime.now(timezone.utc)
 
                 if self.query is None:
                     product.category_name = self.category.name
                     product.category_id = self.category.id
                     product.category_wb_id = self.category.wb_id
 
-                if last_sale and utc.localize(last_sale.date).date() == utc.localize(datetime.now()).date():
+                if last_sale and last_sale.date.date() == datetime.now(timezone.utc).date():
                     pass
                 else:
                     product.sale_set.create(
@@ -429,14 +429,14 @@ class Parser(object):
                         price=price,
                         profit=sales * price,
                         quantity=quantity,
-                        date=datetime.utcnow()
+                        date=datetime.now(timezone.utc)
                     )
 
                 if self.query is None and self.category.wb_id not in product.categories:
                     product.categories.append(self.category.wb_id)
 
                 last_sales = product.sale_set.all()[:30]
-                now = datetime.utcnow()
+                now = datetime.now(timezone.utc)
                 current_hom_start = (now - timedelta(days=15)).replace(
                     hour=0, minute=0, second=0, microsecond=0)
                 last_hom_start = current_hom_start - timedelta(days=15)
@@ -501,7 +501,7 @@ class Parser(object):
                     sales=sales,
                     priceU=(item.get('priceU') / 100),
                     quantity=quantity,
-                    parsed_at=datetime.utcnow(),
+                    parsed_at=datetime.now(timezone.utc),
                 )
                 self.text_process(product)
                 product.save()
@@ -510,7 +510,7 @@ class Parser(object):
                     sales=sales,
                     price=price,
                     profit=sales * price,
-                    date=datetime.utcnow()
+                    date=datetime.now(timezone.utc)
                 )
 
     def parse_search(self, data):
@@ -536,7 +536,7 @@ class Parser(object):
         if len(data.get('data', {}).get('products', [])) > 0:
             self.parse_products(data['data']['products'])
             self.category.last_parsed_page = self.page
-            self.category.last_parsed_page_at = datetime.utcnow()
+            self.category.last_parsed_page_at = datetime.now(timezone.utc)
             self.category.save()
             self.page += 1
             if self.page > 100:
@@ -556,7 +556,7 @@ class Parser(object):
         return sum([sum(value) for value in values])
 
     def set_period_dates(self):
-        self.end_prev_period = (datetime.utcnow() - timedelta(days=15)).replace(
+        self.end_prev_period = (datetime.now(timezone.utc) - timedelta(days=15)).replace(
             hour=0, minute=0, second=0, microsecond=0)
         self.start_prev_period = self.end_prev_period - timedelta(days=15)
 
