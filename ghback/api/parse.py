@@ -578,7 +578,7 @@ class Parser(object):
         # last_sales = product.sale_set.all()[:30]
         category.products_count = products.count()
         print(category.name, category.products_count)
-        if category.products_count > 10:
+        if category.products_count > 10 and category.products_count <= 2500:
             top_products = products.order_by('-current_hom_sales')[0:50]
             category.products_with_sales = products.filter(
                 current_hom_sales__gt=0).count()
@@ -627,9 +627,9 @@ class Parser(object):
             category.rel_sellers = category.sellers_with_sales / category.sellers
             category.rel_sales = category.products_with_sales / category.products_count
 
-            if category.first_product_hom_profit >= self.profit_first_top:
+            if category.first_product_profit >= self.profit_first_top:
                 category.first_product_profit_top = True
-            if category.ten_product_hom_profit >= self.profit_ten_top:
+            if category.ten_product_profit >= self.profit_ten_top:
                 category.ten_product_profit_top = True
             if category.rel_sales >= 1/5:
                 category.rel_sales_top = True

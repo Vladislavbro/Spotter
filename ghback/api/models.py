@@ -206,3 +206,6 @@ class Sale(models.Model):
 
     class Meta():
         ordering = ['-date']
+        indexes = [
+            models.Index(fields=['-date']),
+        ]
