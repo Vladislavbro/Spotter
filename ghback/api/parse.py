@@ -361,7 +361,6 @@ class Parser(object):
             try:
                 product = Product.objects.get(articul=item['id'])
                 last_sale = product.sale_set.first()
-                print(product.id, product.parsed_at, last_sale.date)
             except Product.DoesNotExist:
                 product = None
                 last_sale = None
@@ -432,7 +431,11 @@ class Parser(object):
                 if self.query is None and self.category.wb_id not in product.categories:
                     product.categories.append(self.category.wb_id)
 
+                # if product.sale_set.count() < 10:
+                #     requests.get()
+                #
                 last_sales = product.sale_set.all()[:30]
+
                 now = datetime.now(timezone.utc)
                 current_hom_start = (now - timedelta(days=15)).replace(
                     hour=0, minute=0, second=0, microsecond=0)
@@ -646,7 +649,6 @@ class Parser(object):
                     category.profit_prev_period * 1.1):
                 category.profit_top = True
             if (
-                    category.products_count <= 2500 and
                     category.first_product_profit_top and
                     category.ten_product_profit_top and
                     category.rel_sales_top and

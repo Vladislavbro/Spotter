@@ -246,5 +246,13 @@ def products():
     }
 
 
+@app.route('/api/products/<articul>')
+def get_product(articul):
+    product = Products.objects.get(articul=articul)
+    return {
+        'product': json.loads(product.to_json()),
+    }
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
