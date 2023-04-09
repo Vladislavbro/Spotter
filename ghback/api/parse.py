@@ -584,12 +584,13 @@ class Parser(object):
                 current_hom_sales__gt=0).count()
             category.profit_period = self.get_sum([
                 [s.profit or ((s.sales or 0) * (s.price or p.price or 0))
-                 for s in p.sizes if s.date >= self.end_prev_period]
+                 for s in p.sale_set.filter(date__gte=self.end_prev_period)]
                 for p in products])
             category.profit_prev_period = self.get_sum([
                 [s.profit or ((s.sales or 0) * (s.price or p.price or 0))
-                 for s in p.sizes if s.date >= self.start_prev_period and
-                 s.date < self.end_prev_period]
+                 for s in p.sale_set.filter(
+                     date__gte=self.start_prev_period,
+                     date__lt=self.end_prev_period)]
                 for p in products])
 
             category.sellers = len(list(set([p.brand_id for p in products])))
@@ -597,16 +598,17 @@ class Parser(object):
                 p.brand_id for p
                 in products.filter(current_hom_sales__gt=0)])))
             category.avg_price_prev_period = self.get_avg([
-                [s.price for s in p.sizes
-                 if s.price and s.date >= self.start_prev_period and
-                 s.date < self.end_prev_period] for p in products])
+                [s.price for s in p.sale_set.filter(
+                    price__gt=0, date__gte=self.start_prev_period,
+                    date__lt=self.end_prev_period)] for p in products])
             category.avg_price_period = self.get_avg([
-                [s.price for s in p.sizes
-                 if s.price and s.date >= self.end_prev_period]
+                [s.price for s in p.sale_set.filter(
+                    price__gt=0, date__gte=self.end_prev_period)]
                 for p in products])
             category.sales_period = self.get_sum([
-                [(s.sales or 0) for s in p.sizes
-                 if s.date >= self.end_prev_period] for p in products])
+                [(s.sales or 0) for s in p.sale_set.filter(
+                    date__gte=self.end_prev_period)
+                 ] for p in products])
 
             category.first_product_price = top_products[0].price
             category.first_product_sales = top_products[0].current_hom_sales
@@ -702,27 +704,27 @@ class Parser(object):
                 current_hom_sales__gt=0).count()
             query.rel_products_with_sales = int(query.products_with_sales * 100 / query.products_count)
             query.avg_price_prev_period = self.get_avg(
-                [[s.price for s in p.sizes if s.price
-                  and s.date >= self.start_prev_period
-                  and s.date < self.end_prev_period] for p in products]
+                [[s.price for s in p.sale_set.filter(
+                    price__gt=0, date__gte=self.start_prev_period,
+                    date__lt=self.end_prev_period)] for p in products]
             )
             query.avg_price_period = self.get_avg(
-                [[s.price for s in p.sizes if s.price
-                  and s.date >= self.end_prev_period] for p in products]
+                [[s.price for s in p.sale_set.filter(
+                    price__gt=0, date__gte=self.end_prev_period)] for p in products]
             )
             query.profit_prev_period = self.get_sum(
                 [[s.profit or ((s.sales or 0) *
                                (s.price or p.price or 0))
-                  for s in p.sizes
-                  if s.date >= self.start_prev_period
-                  and s.date < self.end_prev_period
-                  ]
+                  for s in p.sale_set.filter(
+                      date__gte=self.start_prev_period,
+                      date__lt=self.end_prev_period)]
                  for p in products]
             )
             query.profit_period = self.get_sum(
                 [[s.profit or ((s.sales or 0) *
                                (s.price or p.price or 0))
-                  for s in p.sizes if s.date >= self.end_prev_period]
+                  for s in p.sale_set.filter(
+                      date__gte=self.end_prev_period)]
                  for p in products]
             )
             # Оборот первого не меньше 500к -> 300к
