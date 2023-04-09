@@ -363,7 +363,7 @@ class Parser(object):
                         if size.get('profit') is not None:
                             date = datetime.fromtimestamp(
                                 size['date']['$date'] / 1000)
-                            date.replace(tzinfo=timezone.utc)
+                            date = date.replace(tzinfo=timezone.utc)
                             product.sale_set.create(
                                 date=date,
                                 quantity=size.get('quantity', 0),
@@ -374,7 +374,7 @@ class Parser(object):
             product.mongo_transfered = True
 
     def product_calculate(self, product):
-        last_sales = product.sale_set.all()[:30]
+        last_sales = product.sale_set.all()[:30].values()
 
         now = datetime.now(timezone.utc)
         current_hom_start = (now - timedelta(days=15)).replace(
@@ -388,14 +388,15 @@ class Parser(object):
         hom_profit_growth = 0
         if len(last_sales):
             # HOM
-            last_hom_data = [sales for sales in last_sales.filter(
-                date__gte=last_hom_start, date__lt=current_hom_start)]
+            last_hom_data = [sale for sale in last_sales
+                             if sale.date >= last_hom_start and
+                             sale.date < current_hom_start]
             last_hom_sales = sum([(s.sales or 0) for s
                                   in last_hom_data])
             last_hom_profit = sum([(s.sales or 0) * (s.price or product.price or 0) for s
                                    in last_hom_data])
-            current_hom_data = [sales for sales in last_sales.filter(
-                date__gte=current_hom_start)]
+            current_hom_data = [sale for sale in last_sales
+                                if sale.date >= current_hom_start]
             current_hom_sales = sum([(s.sales or 0) for s
                                      in current_hom_data])
             current_hom_profit = sum(
