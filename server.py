@@ -248,10 +248,13 @@ def products():
 
 @app.route('/api/products/<articul>')
 def get_product(articul):
-    product = Products.objects.get(articul=articul)
-    return {
-        'product': json.loads(product.to_json()),
-    }
+    product = Products.objects(articul=articul).first()
+    if product:
+        return {
+            'product': json.loads(product.to_json()),
+        }
+    else:
+        return {}
 
 
 if __name__ == '__main__':

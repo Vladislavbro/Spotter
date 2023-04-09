@@ -144,6 +144,8 @@ class Query(models.Model):
 
 class Product(models.Model):
     mongo_id = models.CharField(max_length=24, blank=True, null=True)
+    mongo_transfered = models.BooleanField(default=False, blank=True,
+                                           null=True)
     mongo_category_id = models.CharField(max_length=24, blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING,
                                  blank=True, null=True)

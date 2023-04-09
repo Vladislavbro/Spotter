@@ -352,6 +352,75 @@ class Parser(object):
         product.check_articul = True
         product.save()
 
+    def get_old_data(self, product):
+        if product.mongo_transfered is not True:
+            url = f'https://m.spotter.fun/api/products/{product.articul}'
+            response = requests.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('product'):
+                    for size in data['product'].get('sizes', []):
+                        if size.get('profit') is not None:
+                            date = datetime.fromtimestamp(
+                                size['date']['$date'] / 1000)
+                            date.replace(tzinfo=timezone.utc)
+                            product.sale_set.create(
+                                date=date,
+                                quantity=size.get('quantity', 0),
+                                sales=size.get('sales', 0),
+                                profit=size.get('profit', 0),
+                                price=size.get('price', 0),
+                            )
+            product.mongo_transfered = True
+
+    def product_calculate(self, product):
+        last_sales = product.sale_set.all()[:30]
+
+        now = datetime.now(timezone.utc)
+        current_hom_start = (now - timedelta(days=15)).replace(
+            hour=0, minute=0, second=0, microsecond=0)
+        last_hom_start = current_hom_start - timedelta(days=15)
+        last_hom_sales = 0
+        current_hom_sales = 0
+        hom_sales_growth = 0
+        last_hom_profit = 0
+        current_hom_profit = 0
+        hom_profit_growth = 0
+        if len(last_sales):
+            # HOM
+            last_hom_data = [sales for sales in last_sales.filter(
+                date__gte=last_hom_start, date__lt=current_hom_start)]
+            last_hom_sales = sum([(s.sales or 0) for s
+                                  in last_hom_data])
+            last_hom_profit = sum([(s.sales or 0) * (s.price or product.price or 0) for s
+                                   in last_hom_data])
+            current_hom_data = [sales for sales in last_sales.filter(
+                date__gte=current_hom_start)]
+            current_hom_sales = sum([(s.sales or 0) for s
+                                     in current_hom_data])
+            current_hom_profit = sum(
+                [(s.sales or 0) *
+                 (s.price or product.price or 0) for
+                 s in current_hom_data])
+            if last_hom_sales != 0:
+                hom_sales_growth = int(
+                    current_hom_sales /
+                    last_hom_sales * 100)
+            else:
+                hom_sales_growth = 0
+            if last_hom_profit != 0:
+                hom_profit_growth = int(
+                    current_hom_profit /
+                    last_hom_profit * 100)
+            else:
+                hom_profit_growth = 0
+        product.last_hom_sales = last_hom_sales
+        product.current_hom_sales = current_hom_sales
+        product.hom_sales_growth = hom_sales_growth
+        product.last_hom_profit = last_hom_profit
+        product.current_hom_profit = current_hom_profit
+        product.hom_profit_growth = hom_profit_growth
+
     def parse_products(self, products):
         print('products:', len(products))
         ids = [p['id'] for p in products]
@@ -431,56 +500,8 @@ class Parser(object):
                 if self.query is None and self.category.wb_id not in product.categories:
                     product.categories.append(self.category.wb_id)
 
-                # if product.sale_set.count() < 10:
-                #     requests.get()
-                #
-                last_sales = product.sale_set.all()[:30]
-
-                now = datetime.now(timezone.utc)
-                current_hom_start = (now - timedelta(days=15)).replace(
-                    hour=0, minute=0, second=0, microsecond=0)
-                last_hom_start = current_hom_start - timedelta(days=15)
-                last_hom_sales = 0
-                current_hom_sales = 0
-                hom_sales_growth = 0
-                last_hom_profit = 0
-                current_hom_profit = 0
-                hom_profit_growth = 0
-                if len(last_sales):
-                    # HOM
-                    last_hom_data = [sales for sales in last_sales
-                                     if sales.date >= last_hom_start
-                                     and sales.date < current_hom_start]
-                    last_hom_sales = sum([(s.sales or 0) for s
-                                          in last_hom_data])
-                    last_hom_profit = sum([(s.sales or 0) * (s.price or product.price or 0) for s
-                                           in last_hom_data])
-                    current_hom_data = [sales for sales in last_sales
-                                        if sales.date >= current_hom_start]
-                    current_hom_sales = sum([(s.sales or 0) for s
-                                             in current_hom_data])
-                    current_hom_profit = sum(
-                        [(s.sales or 0) *
-                         (s.price or product.price or 0) for
-                         s in current_hom_data])
-                    if last_hom_sales != 0:
-                        hom_sales_growth = int(
-                            current_hom_sales /
-                            last_hom_sales * 100)
-                    else:
-                        hom_sales_growth = 0
-                    if last_hom_profit != 0:
-                        hom_profit_growth = int(
-                            current_hom_profit /
-                            last_hom_profit * 100)
-                    else:
-                        hom_profit_growth = 0
-                product.last_hom_sales = last_hom_sales
-                product.current_hom_sales = current_hom_sales
-                product.hom_sales_growth = hom_sales_growth
-                product.last_hom_profit = last_hom_profit
-                product.current_hom_profit = current_hom_profit
-                product.hom_profit_growth = hom_profit_growth
+                self.get_old_data(product)
+                self.product_calculate(product)
                 product.save()
 
             elif detail and item['name'].strip():
@@ -512,6 +533,9 @@ class Parser(object):
                     profit=sales * price,
                     date=datetime.now(timezone.utc)
                 )
+                self.get_old_data(product)
+                self.product_calculate(product)
+                product.save()
 
     def parse_search(self, data):
         print('parse_search', self.query)
