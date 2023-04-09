@@ -389,19 +389,18 @@ class Parser(object):
         if len(last_sales):
             # HOM
             last_hom_data = [sale for sale in last_sales
-                             if sale.date >= last_hom_start and
-                             sale.date < current_hom_start]
-            last_hom_sales = sum([(s.sales or 0) for s
-                                  in last_hom_data])
-            last_hom_profit = sum([(s.sales or 0) * (s.price or product.price or 0) for s
+                             if sale['date'] >= last_hom_start and
+                             sale['date'] < current_hom_start]
+            last_hom_sales = sum([s.get('sales', 0) for s in last_hom_data])
+            last_hom_profit = sum([s.get('sales', 0) * (s.get('price', 0)
+                                                        or product.price) for s
                                    in last_hom_data])
             current_hom_data = [sale for sale in last_sales
-                                if sale.date >= current_hom_start]
-            current_hom_sales = sum([(s.sales or 0) for s
+                                if sale['date'] >= current_hom_start]
+            current_hom_sales = sum([s.get('sales', 0) for s
                                      in current_hom_data])
             current_hom_profit = sum(
-                [(s.sales or 0) *
-                 (s.price or product.price or 0) for
+                [s.get('sales', 0) * (s.get('price', 0) or product.price) for
                  s in current_hom_data])
             if last_hom_sales != 0:
                 hom_sales_growth = int(
