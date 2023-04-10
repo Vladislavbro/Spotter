@@ -202,7 +202,7 @@ class Sale(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(blank=True, null=True, default=0)
     sales = models.IntegerField(blank=True, null=True, default=0)
-    profit = models.IntegerField(blank=True, null=True, default=0)
+    profit = models.BigIntegerField(blank=True, null=True, default=0)
     price = models.IntegerField(blank=True, null=True, default=0)
     date = models.DateTimeField(blank=True, null=True)
 
