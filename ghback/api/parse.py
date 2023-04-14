@@ -263,6 +263,8 @@ class Parser(object):
             try:
                 data = json.loads(r"{}".format(response.text))
                 self.parse_search(data)
+            except AttributeError as e:
+                print('AttributeError', e)
             except JSONDecodeError as e:
                 self.notify('JSONDecodeError ' + query)
                 print('JSONDecodeError', e, url)
