@@ -291,6 +291,9 @@ class Parser(object):
                 print('JSONDecodeError', e, url)
             except Exception as e:
                 print('except', str(e))
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print('exc_type, fname, exc_tb.tb_lineno', exc_type, fname, exc_tb.tb_lineno)
         else:
             self.notify('404 ' + self.category.name)
             return self.change_category()
@@ -427,7 +430,6 @@ class Parser(object):
         details = self.get_details(ids)
         print('details: ', len(details))
         for index, item in enumerate(products):
-            print('index, item', index, item)
             try:
                 product = Product.objects.get(articul=item['id'])
                 last_sale = product.sale_set.first()
