@@ -263,8 +263,6 @@ class Parser(object):
             try:
                 data = json.loads(r"{}".format(response.text))
                 self.parse_search(data)
-            except AttributeError as e:
-                print('AttributeError', e)
             except JSONDecodeError as e:
                 self.notify('JSONDecodeError ' + query)
                 print('JSONDecodeError', e, url)
@@ -299,9 +297,6 @@ class Parser(object):
                 print('JSONDecodeError', e, url)
             except Exception as e:
                 print('except', str(e))
-                exc_type, exc_obj, exc_tb = sys.exc_info()
-                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                print('exc_type, fname, exc_tb.tb_lineno', exc_type, fname, exc_tb.tb_lineno)
         else:
             self.notify('404 ' + self.category.name)
             return self.change_category()
@@ -549,22 +544,28 @@ class Parser(object):
                 product.save()
 
     def parse_search(self, data):
-        print('parse_search', self.query)
-        if len(data.get('data', {}).get('products', [])) > 0:
-            products = data['data']['products']
-            ids = self.query.articuls + [p['id'] for p in products]
-            self.query.articuls = ids
-            self.query.save()
-            self.parse_products(data['data']['products'])
-            self.query.last_parsed_page = self.page
-            self.query.save()
-            self.page += 1
-            if self.page > 5:
-                self.change_query()
+        try:
+            print('parse_search', self.query)
+            if len(data.get('data', {}).get('products', [])) > 0:
+                products = data['data']['products']
+                ids = self.query.articuls + [p['id'] for p in products]
+                self.query.articuls = ids
+                self.query.save()
+                self.parse_products(data['data']['products'])
+                self.query.last_parsed_page = self.page
+                self.query.save()
+                self.page += 1
+                if self.page > 5:
+                    self.change_query()
+                else:
+                    self.get_query()
             else:
-                self.get_query()
-        else:
-            self.change_query()
+                self.change_query()
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print('parse_search exc_type, fname, exc_tb.tb_lineno',
+                  exc_type, fname, exc_tb.tb_lineno)
 
     def parse_catalog(self, data):
         print('parse_catalog', self.category.name, self.page)
