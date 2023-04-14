@@ -468,7 +468,7 @@ class Parser(object):
                         sales = 0
                 else:
                     sales = 0
-
+                print('item[name]', item.get('name'))
                 if product.name != item['name'].strip():
                     product.name = item['name'].strip()
                     self.text_process(product)
@@ -488,6 +488,7 @@ class Parser(object):
                 product.parsed_at = datetime.now(timezone.utc)
 
                 if self.query is None:
+                    print('self.category', self.category, self.category.name)
                     product.category_name = self.category.name
                     product.category_id = self.category.id
                     product.category_wb_id = self.category.wb_id
@@ -510,7 +511,7 @@ class Parser(object):
                 self.product_calculate(product)
                 product.save()
 
-            elif detail and item['name'].strip():
+            elif detail and item.get('name', '').strip():
                 product = Product(
                     articul=item['id'],
                     name=item['name'],
@@ -544,28 +545,22 @@ class Parser(object):
                 product.save()
 
     def parse_search(self, data):
-        try:
-            print('parse_search', self.query)
-            if len(data.get('data', {}).get('products', [])) > 0:
-                products = data['data']['products']
-                ids = self.query.articuls + [p['id'] for p in products]
-                self.query.articuls = ids
-                self.query.save()
-                self.parse_products(data['data']['products'])
-                self.query.last_parsed_page = self.page
-                self.query.save()
-                self.page += 1
-                if self.page > 5:
-                    self.change_query()
-                else:
-                    self.get_query()
-            else:
+        print('parse_search', self.query)
+        if len(data.get('data', {}).get('products', [])) > 0:
+            products = data['data']['products']
+            ids = self.query.articuls + [p['id'] for p in products]
+            self.query.articuls = ids
+            self.query.save()
+            self.parse_products(data['data']['products'])
+            self.query.last_parsed_page = self.page
+            self.query.save()
+            self.page += 1
+            if self.page > 5:
                 self.change_query()
-        except Exception as e:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print('parse_search exc_type, fname, exc_tb.tb_lineno',
-                  exc_type, fname, exc_tb.tb_lineno)
+            else:
+                self.get_query()
+        else:
+            self.change_query()
 
     def parse_catalog(self, data):
         print('parse_catalog', self.category.name, self.page)
