@@ -427,6 +427,7 @@ class Parser(object):
         details = self.get_details(ids)
         print('details: ', len(details))
         for index, item in enumerate(products):
+            print('index, item', index, item)
             try:
                 product = Product.objects.get(articul=item['id'])
                 last_sale = product.sale_set.first()
@@ -482,7 +483,6 @@ class Parser(object):
                 product.parsed_at = datetime.now(timezone.utc)
 
                 if self.query is None:
-                    print('485 self.category', self.category)
                     product.category_name = self.category.name
                     product.category_id = self.category.id
                     product.category_wb_id = self.category.wb_id
