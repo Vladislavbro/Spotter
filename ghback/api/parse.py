@@ -482,6 +482,7 @@ class Parser(object):
                 product.parsed_at = datetime.now(timezone.utc)
 
                 if self.query is None:
+                    print('485 self.category', self.category)
                     product.category_name = self.category.name
                     product.category_id = self.category.id
                     product.category_wb_id = self.category.wb_id

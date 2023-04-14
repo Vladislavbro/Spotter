@@ -10,10 +10,10 @@ module.exports = {
     //   args: 'runserver',
     //   interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
     // },
-    {
-      script: 'bot.py',
-      interpreter: '/home/deploy/apps/goods_hunter/botvenv/bin/python',
-    },
+    // {
+    //   script: 'bot.py',
+    //   interpreter: '/home/deploy/apps/goods_hunter/botvenv/bin/python',
+    // },
   ],
 
   deploy : {
