@@ -269,6 +269,9 @@ class Parser(object):
                 self.change_query()
             except Exception as e:
                 print('except', str(e))
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print('exc_type, fname, exc_tb.tb_lineno', exc_type, fname, exc_tb.tb_lineno)
         else:
             self.notify('404 ' + query)
             return self.change_query()
@@ -294,6 +297,9 @@ class Parser(object):
                 print('JSONDecodeError', e, url)
             except Exception as e:
                 print('except', str(e))
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print('exc_type, fname, exc_tb.tb_lineno', exc_type, fname, exc_tb.tb_lineno)
         else:
             self.notify('404 ' + self.category.name)
             return self.change_category()
