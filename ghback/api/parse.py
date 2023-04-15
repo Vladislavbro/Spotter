@@ -183,7 +183,7 @@ class Parser(object):
             self.config.save()
             return self.processing()
         else:
-            self.category = self.query.category_id
+            self.category = Category.objects.get(pk=self.query.category_id)
             if self.query.last_parsed_page and self.query.last_parsed_page < 5:
                 self.page = self.query.last_parsed_page + 1
             else:
