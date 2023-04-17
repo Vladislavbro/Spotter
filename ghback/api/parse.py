@@ -434,6 +434,7 @@ class Parser(object):
         print('details: ', len(details))
         for index, item in enumerate(products):
             try:
+                print('item[id]', item['id'])
                 product = Product.objects.get(articul=item['id'])
                 last_sale = product.sale_set.first()
             except Product.DoesNotExist:
@@ -468,7 +469,7 @@ class Parser(object):
                         sales = 0
                 else:
                     sales = 0
-                print('item[name]', item.get('name'))
+                # print('item[name]', item.get('name'))
                 if product.name != item['name'].strip():
                     product.name = item['name'].strip()
                     self.text_process(product)
