@@ -722,7 +722,11 @@ class Parser(object):
         )
         # .fields(slice__sizes=[-30, 30]).order_by('-current_hom_sales')
         products_count = products.count()
-        if products_count >= 10:
+        if (
+                query.ten_product_hom_profit and
+                query.first_product_hom_profit and
+                query.ten_product_hom_profit and
+                products_count >= 10):
             query.first_product_hom_profit = (
                 (products[0].current_hom_sales or 0)
                 *
