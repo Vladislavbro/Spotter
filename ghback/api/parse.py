@@ -435,7 +435,7 @@ class Parser(object):
         for index, item in enumerate(products):
             try:
                 print('item[id]', item['id'])
-                product = Product.objects.get(articul=item['id'])
+                product = Product.objects.filter(articul=item['id']).first()
                 last_sale = product.sale_set.first()
             except Product.DoesNotExist:
                 product = None
