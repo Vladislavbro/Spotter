@@ -489,7 +489,7 @@ class Parser(object):
                 product.parsed_at = datetime.now(timezone.utc)
 
                 if self.query is None:
-                    print('self.category', self.category, self.category.name)
+                    # print('self.category', self.category, self.category.name)
                     product.category_name = self.category.name
                     product.category_id = self.category.id
                     product.category_wb_id = self.category.wb_id
@@ -541,6 +541,7 @@ class Parser(object):
                     profit=sales * price,
                     date=datetime.now(timezone.utc)
                 )
+                print('get_old_data', product.articul)
                 self.get_old_data(product)
                 self.product_calculate(product)
                 product.save()
