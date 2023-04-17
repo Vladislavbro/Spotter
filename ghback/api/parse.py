@@ -433,11 +433,11 @@ class Parser(object):
         details = self.get_details(ids)
         print('details: ', len(details))
         for index, item in enumerate(products):
-            try:
-                print('item[id]', item['id'])
-                product = Product.objects.filter(articul=item['id']).first()
+            print('item[id]', item['id'])
+            product = Product.objects.filter(articul=item['id']).first()
+            if product:
                 last_sale = product.sale_set.first()
-            except Product.DoesNotExist:
+            else:
                 product = None
                 last_sale = None
             price = item.get('salePriceU') / 100
