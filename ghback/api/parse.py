@@ -24,7 +24,7 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 nlp = spacy.load('ru_core_news_md')
 
 user_agent_rotator = UserAgent()
-TOKEN = '507933514:AAHP_BHtTUEES3Mq9giC231W4ZkvfeqSBb0'
+TOKEN = '6161677884:AAE8uT0XWRVXr7SbGIjVTP3Ik6BhsDm8Z5I'
 bot = Bot(token=TOKEN)
 
 sys.setrecursionlimit(10**6)
