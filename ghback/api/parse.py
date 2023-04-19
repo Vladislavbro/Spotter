@@ -38,7 +38,7 @@ class Parser(object):
     page = 1
     category = None
     query = None
-    adminIds = [259180458]
+    adminIds = [259180458, 190056210]
     config = None
     end_prev_period = None
     start_prev_period = None
