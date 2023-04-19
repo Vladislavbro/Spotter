@@ -179,8 +179,8 @@ class Product(models.Model):
     current_hom_sales = models.IntegerField(blank=True, null=True)
     last_hom_sales = models.IntegerField(blank=True, null=True)
     hom_sales_growth = models.IntegerField(blank=True, null=True)
-    current_hom_profit = models.IntegerField(blank=True, null=True)
-    last_hom_profit = models.IntegerField(blank=True, null=True)
+    current_hom_profit = models.BigIntegerField(blank=True, null=True)
+    last_hom_profit = models.BigIntegerField(blank=True, null=True)
     hom_profit_growth = models.IntegerField(blank=True, null=True)
 
     class Meta():
