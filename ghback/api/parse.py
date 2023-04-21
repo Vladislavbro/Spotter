@@ -534,8 +534,8 @@ class Parser(object):
                 product.quantity_fbo = quantity_fbo
                 product.quantity_fbs = quantity_fbs
                 product.sales = sales
-                product.sales_fbo = sales.sales_fbo
-                product.sales_fbs = sales.sales_fbs
+                product.sales_fbo = sales_fbo
+                product.sales_fbs = sales_fbs
                 product.parsed_at = datetime.now(timezone.utc)
 
                 if self.query is None:
