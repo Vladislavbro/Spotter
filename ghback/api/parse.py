@@ -44,12 +44,45 @@ class Parser(object):
     start_prev_period = None
     profit_first_top = 500000 / 2
     profit_ten_top = 100000 / 2
+    wirehouses = [169537, 205985, 214951, 214110, 146666, 207399, 6149,
+                  118365, 1680, 213651, 117419, 216462, 152611, 210557, 6140,
+                  204223, 117414, 217390, 203632, 115651, 209209, 206844,
+                  216745, 118019, 117442, 205104, 159402, 130744, 205349,
+                  274562, 6144, 117456, 158311, 6156, 144649, 204939, 161003,
+                  133858, 203799, 117819, 206236, 1193, 140302, 106476,
+                  205228, 207404, 204615, 158751, 117986, 206708, 207803,
+                  217081, 169872, 210127, 158140, 207022, 131643, 120762,
+                  507, 206348, 205205, 210515, 1733, 160030, 204952, 208277,
+                  208941, 172430, 168458, 149445, 203631, 207016, 207743,
+                  211622, 211415, 206385, 206298, 211644, 209211]
 
     def __init__(self):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         self.set_period_dates()
         self.processing()
+
+    def get_wirehouses(self):
+        url = "https://seller.wildberries.ru/ns/distribution-offices/distribution-offices/api/v1/office/getAllMarketplace"
+        payload = json.dumps({
+          "params": {
+            "filters": [
+              "isSupply"
+            ]
+          },
+          "jsonrpc": "2.0",
+          "id": "json-rpc_8"
+        })
+        headers = {
+          'Cookie': 'BasketUID=da722e75-870f-400d-b096-bdb9d7960e94; _wbauid=199913131664012470; _ga=GA1.2.1918642823.1664012471; ___wbu=265a9450-8a5b-4e24-b416-7c18f4ba3f04.1664012470; locale=ru; x-supplier-id=d4607f1f-5b74-48e2-898e-db7ee2d7f7f0; x-supplier-id-external=d4607f1f-5b74-48e2-898e-db7ee2d7f7f0; WILDAUTHNEW_V3=732517BF2ED31BEBF20A5BD431CA9404CBE84BE113CB3733067195530FAC8EA57349678D4D71250BAA1EE7CAFDFBBF1BAC8C94A43F99B8AF48B44CEB5CBA7FCA7933FBD5C152D3D7246C1E4CAE8DD92163F809D9BD9037F461ABB5202A9DCDBCF4DCC1B5C0875D2B479C1E2FE4347C6A7D75888B91C6F778812C36FA911C158E2686B2F91369A473381459EC34A5116B5CF8E1F1D217C9093A292BAF0AAF39C778294F3021D4618BD066BDE66CBFD2A0C7774EE8553E1DFFA3736196F10F72532464346070BE81EA50B998CF91A439F75D444E67DFF90A9CA8DE765D7360729E3B20A9A85812A8F197BB2D6F5F6DC8B94B898986D29BC5D0B2FB6EB23020E966D1E6BE8FFB5AF2F373850B5073BC6631BD103ED5AE27A1BAD19E66BA82BBD2509FB7ACA207F4B6F1497200ECDBFC2384EA322297; WBToken=Apjb3xqygIDEDLLOieIMQv0FyZ2z9KJgryyA7xndg1yw-7o1dr5mJ7U6T_CEfEMxVRFzVBUigmeUWoxtYhUhr90KqQvk3FvvKdw2Vtvli-pewA',
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
+          'Content-Type': 'application/json'
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+        if response.status_code == 200:
+            data = response.json()
+            self.wirehouses = [w['origid'] for w
+                               in data['result']['resp']['data']]
 
     def get_url(self, url):
         try:
@@ -445,17 +478,25 @@ class Parser(object):
             if len(detail):
                 detail = detail[0]
                 sizes = detail.get('sizes', [])
-                quantity = sum([
-                    sum(
-                        [stock.get('qty', 0) for stock
-                         in size.get('stocks', [])]
-                    ) for size in sizes
-                ])
-                sales = 0
+                quantity = 0
+                quantity_fbo = 0
+                quantity_fbs = 0
+                for size in sizes:
+                    for stock in size.get('stocks', []):
+                        qty = stock.get('qty', 0)
+                        quantity += qty
+                        if stock.get('wh') in self.wirehouses:
+                            quantity_fbo += qty
+                        else:
+                            quantity_fbs += qty
             else:
                 detail = None
                 quantity = None
-                sales = 0
+                quantity_fbo = None
+                quantity_fbs = None
+            sales = 0
+            sales_fbo = 0
+            sales_fbs = 0
 
             if product and detail:
                 # self.check_unique(product)
@@ -463,12 +504,17 @@ class Parser(object):
                     # Если последняя цена вчерашняя то посчитать разницу остатков и
                     # записать как количество продаж
                     sales = product.quantity - quantity
+                    sales_fbo = product.quantity_fbo - quantity_fbo
+                    sales_fbs = product.quantity_fbs - quantity_fbs
                     # если цифра отрицательная то вероятно поступление
                     # на склад и расчет не получится
                     if sales < 0:
                         sales = 0
-                else:
-                    sales = 0
+                    if sales_fbo < 0:
+                        sales_fbo = 0
+                    if sales_fbs < 0:
+                        sales_fbs = 0
+
                 # print('item[name]', item.get('name'))
                 if product.name != item['name'].strip():
                     product.name = item['name'].strip()
@@ -485,7 +531,11 @@ class Parser(object):
                 product.price = price
                 product.priceU = item.get('priceU') / 100
                 product.quantity = quantity
+                product.quantity_fbo = quantity_fbo
+                product.quantity_fbs = quantity_fbs
                 product.sales = sales
+                product.sales_fbo = sales.sales_fbo
+                product.sales_fbs = sales.sales_fbs
                 product.parsed_at = datetime.now(timezone.utc)
 
                 if self.query is None:
@@ -499,9 +549,15 @@ class Parser(object):
                 else:
                     product.sale_set.create(
                         sales=sales,
+                        sales_fbo=sales_fbo,
+                        sales_fbs=sales_fbs,
                         price=price,
                         profit=sales * price,
+                        profit_fbo=sales_fbo * price,
+                        profit_fbs=sales_fbs * price,
                         quantity=quantity,
+                        quantity_fbo=quantity_fbo,
+                        quantity_fbs=quantity_fbs,
                         date=datetime.now(timezone.utc)
                     )
 
@@ -527,18 +583,28 @@ class Parser(object):
                     feedbacks=item['feedbacks'],
                     is_new=item.get('isNew', False),
                     price=price,
-                    sales=sales,
+                    # sales=sales,
+                    # sales_fbo=sales_fbo,
+                    # sales_fbs=sales_fbs,
                     priceU=(item.get('priceU') / 100),
                     quantity=quantity,
+                    quantity_fbo=quantity_fbo,
+                    quantity_fbs=quantity_fbs,
                     parsed_at=datetime.now(timezone.utc),
                 )
                 self.text_process(product)
                 product.save()
                 product.sale_set.create(
                     quantity=quantity,
-                    sales=sales,
+                    quantity_fbo=quantity_fbo,
+                    quantity_fbs=quantity_fbs,
+                    # sales=sales,
+                    # sales_fbo=sales_fbo,
+                    # sales_fbs=sales_fbs,
                     price=price,
                     profit=sales * price,
+                    profit_fbo=sales_fbo * price,
+                    profit_fbs=sales_fbs * price,
                     date=datetime.now(timezone.utc)
                 )
                 print('get_old_data', product.articul)

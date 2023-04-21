@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from dateutil.relativedelta import relativedelta
 import threading
 import csv
+import requests
 from api.parse import Parser
 from api.migrate import Migrate
 from api.mongo_models import Categories, Products, Queries
