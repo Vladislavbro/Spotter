@@ -504,8 +504,10 @@ class Parser(object):
                     # Если последняя цена вчерашняя то посчитать разницу остатков и
                     # записать как количество продаж
                     sales = product.quantity - quantity
-                    sales_fbo = product.quantity_fbo - quantity_fbo
-                    sales_fbs = product.quantity_fbs - quantity_fbs
+                    if product.quantity_fbo is not None:
+                        sales_fbo = product.quantity_fbo - quantity_fbo
+                    if product.quantity_fbs is not None:
+                        sales_fbs = product.quantity_fbs - quantity_fbs
                     # если цифра отрицательная то вероятно поступление
                     # на склад и расчет не получится
                     if sales < 0:
