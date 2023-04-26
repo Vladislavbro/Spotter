@@ -268,7 +268,7 @@ class Parser(object):
                 print('self.query.products_count', self.query.id,
                       self.query.products_count)
             except JSONDecodeError as e:
-                self.notify('get_query_detail JSONDecodeError ' + query)
+                # self.notify('get_query_detail JSONDecodeError ' + query)
                 print('get_query_detail JSONDecodeError', e, url)
             except Exception as e:
                 print('except', str(e))
@@ -276,7 +276,8 @@ class Parser(object):
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                 print('exc_type, fname, exc_tb.tb_lineno', exc_type, fname, exc_tb.tb_lineno)
         else:
-            self.notify(f'get_query_detail {response.status_code} {query}')
+            print(f'get_query_detail {response.status_code} {query}')
+            # self.notify()
 
     def query_crawl(self):
         query = self.query.root + ' ' + ' '.join(self.query.features)
@@ -297,7 +298,7 @@ class Parser(object):
                 data = json.loads(r"{}".format(response.text))
                 self.parse_search(data)
             except JSONDecodeError as e:
-                self.notify('JSONDecodeError ' + query)
+                # self.notify('JSONDecodeError ' + query)
                 print('JSONDecodeError', e, url)
                 self.change_query()
             except Exception as e:
@@ -306,7 +307,7 @@ class Parser(object):
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                 print('exc_type, fname, exc_tb.tb_lineno', exc_type, fname, exc_tb.tb_lineno)
         else:
-            self.notify('404 ' + query)
+            # self.notify('404 ' + query)
             return self.change_query()
 
     def crawl(self):
@@ -326,12 +327,12 @@ class Parser(object):
                 data = json.loads(r"{}".format(response.text))
                 self.parse_catalog(data)
             except JSONDecodeError as e:
-                self.notify('JSONDecodeError ' + self.category.name + ' ' + str(self.page))
+                # self.notify('JSONDecodeError ' + self.category.name + ' ' + str(self.page))
                 print('JSONDecodeError', e, url)
             except Exception as e:
                 print('except', str(e))
         else:
-            self.notify('404 ' + self.category.name)
+            # self.notify('404 ' + self.category.name)
             return self.change_category()
 
     def change_query(self):
@@ -356,18 +357,18 @@ class Parser(object):
         response = self.get_url(url)
         if response.status_code == 200:
             if response.text == '':
-                self.notify('get_details empty')
+                # self.notify('get_details empty')
                 return []
             try:
                 # data = response.json()
                 data = json.loads(r"{}".format(response.text))
                 return data['data']['products']
             except JSONDecodeError as e:
-                self.notify('JSONDecodeError ' + str(e))
+                # self.notify('JSONDecodeError ' + str(e))
                 print('JSONDecodeError', e, response)
             except Exception as e:
                 print('except', str(e))
-                self.notify('Exception ' + str(e))
+                # self.notify('Exception ' + str(e))
         return []
 
     def text_process(self, product):
