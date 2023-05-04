@@ -13,16 +13,12 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         }
     },
-    "host": "https://spotter.fun/",
+    "host": "https://spotter.fun",
     "basePath": "/api",
     "tags": [
         {
-            "name": "pet",
-            "description": "Everything about your Pets",
-            "externalDocs": {
-                "description": "Find out more",
-                "url": "http://swagger.io"
-            }
+            "name": "Списки",
+            "description": "Запросы, категории, товары"
         },
         {
             "name": "store",
@@ -38,46 +34,46 @@
         }
     ],
     "schemes": [
-        "https",
-        "http"
+        "https"
     ],
     "paths": {
-        "/pet/{petId}/uploadImage": {
-            "post": {
+        "/queries/top": {
+            "get": {
                 "tags": [
-                    "pet"
+                    "Списки"
                 ],
-                "summary": "uploads an image",
+                "summary": "Топ ниши",
                 "description": "",
-                "operationId": "uploadFile",
-                "consumes": [
-                    "multipart/form-data"
-                ],
+                "operationId": "topQueries",
                 "produces": [
                     "application/json"
                 ],
                 "parameters": [
                     {
-                        "name": "petId",
-                        "in": "path",
-                        "description": "ID of pet to update",
+                        "name": "page",
+                        "in": "query",
+                        "description": "Номер страницы",
                         "required": true,
                         "type": "integer",
                         "format": "int64"
                     },
                     {
-                        "name": "additionalMetadata",
-                        "in": "formData",
-                        "description": "Additional data to pass to server",
-                        "required": false,
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Сортировка",
+                        "required": true,
                         "type": "string"
                     },
                     {
-                        "name": "file",
-                        "in": "formData",
-                        "description": "file to upload",
-                        "required": false,
-                        "type": "file"
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Направление сортировки",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "desc",
+                            "asc"
+                        ]
                     }
                 ],
                 "responses": {
@@ -87,15 +83,7 @@
                             "$ref": "#/definitions/ApiResponse"
                         }
                     }
-                },
-                "security": [
-                    {
-                        "petstore_auth": [
-                            "write:pets",
-                            "read:pets"
-                        ]
-                    }
-                ]
+                }
             }
         },
         "/pet": {

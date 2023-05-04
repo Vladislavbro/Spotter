@@ -256,89 +256,54 @@ def categories_list(request):
     })
 
 
-def categories_top(request):
-    model = request.GET.get('model')
+def queries_top(request):
     page = int(request.GET.get('page'))
     sort = request.GET.get('sort')
+    direction = request.GET.get('direction')
+    if direction == 'desc':
+        direction = '-'
+    else:
+        direction = ''
     config = Config.objects(calculated=True).first()
-    # config = Config.objects.first()
-    # queries = Queries.objects(current_parsing_id=config.current_parsing_id)
-    if model == 'queries':
-        items = Queries.objects.filter(
-            current_parsing_id=config.current_parsing_id,
-            products_count__lte=2500,
-            products_count__gte=10,
-            top=True,
-        ).order_by('-rel_products_with_sales')
-    elif model == 'categories':
-        items = Categories.objects(parse=True).all()
+    items = Queries.objects.filter(
+        current_parsing_id=config.current_parsing_id,
+        products_count__lte=2500,
+        products_count__gte=10,
+        # top=True,
+    )
+    items = items.order_by(f'{direction}{sort}')
     total = items.count()
-    # if sort:
-    #     items = items.order_by(f'-{sort}')
     items = items[((page - 1) * 100):page * 100]
-    if model == 'queries':
-        return {
-            'total': total,
-            'items': [{
-                'id': str(i.id),
-                'name': i.root + ' ' + ' '.join(i.features),
-                'root': i.root,
-                'features': ' '.join(i.features),
-                'products_count': i.products_count,
-                'first_product_hom_profit': i.first_product_hom_profit,
-                'ten_product_hom_profit': i.ten_product_hom_profit,
-                'products_with_sales': i.products_with_sales,
-                'rel_products_with_sales': i.rel_products_with_sales,
-                'avg_price_prev_period': i.avg_price_prev_period,
-                'avg_price_period': i.avg_price_period,
-                'profit_prev_period': i.profit_prev_period,
-                'profit_period': i.profit_period,
-                'sellers': i.sellers,
-                'sellers_with_sales': i.sellers_with_sales,
-                'sales_period': i.sales_period,
-                'last_parsed_page': i.last_parsed_page,
-                'current_parsing_id': i.current_parsing_id,
-                'top': i.top,
-                'ten_product_profit_top': i.ten_product_profit_top,
-                'first_product_profit_top': i.first_product_profit_top,
-                'products_with_sales_top': i.products_with_sales_top,
-                'profit_top': i.profit_top,
-                'avg_price_top': i.avg_price_top,
-                'rel_sales_top': i.rel_sales_top,
-            } for i in items]
-        }
-    elif model == 'categories':
-        return {
-            'total': total,
-            'items': [{
-                'id': str(i.id),
-                'url': i.url,
-                'name': i.name,
-                'profit_period': i.profit_period,
-                'profit_prev_period': i.profit_prev_period,
-                'first_product_price': i.first_product_price,
-                'first_product_hom_sales': i.first_product_hom_sales,
-                'first_product_hom_profit': i.first_product_hom_profit,
-                'ten_product_price': i.ten_product_price,
-                'ten_product_hom_sales': i.ten_product_hom_sales,
-                'ten_product_hom_profit': i.ten_product_hom_profit,
-                'products_count': i.products_count,
-                'products_with_sales': i.products_with_sales,
-                'sales_period': i.sales_period,
-                'sellers': i.sellers,
-                'sellers_with_sales': i.sellers_with_sales,
-                'rel_sellers': i.rel_sellers,
-                'rel_sales': i.rel_sales,
-                'avg_price_prev_period': i.avg_price_prev_period,
-                'avg_price_period': i.avg_price_period,
-                'top': i.top,
-                'ten_product_profit_top': i.ten_product_profit_top,
-                'first_product_profit_top': i.first_product_profit_top,
-                'profit_top': i.profit_top,
-                'avg_price_top': i.avg_price_top,
-                'rel_sales_top': i.rel_sales_top,
-            } for i in items],
-        }
+    return JsonResponse({
+        'total': total,
+        'items': [{
+            'id': i.id,
+            'name': i.root + ' ' + ' '.join(i.features),
+            'root': i.root,
+            'features': ' '.join(i.features),
+            'products_count': i.products_count,
+            'first_product_hom_profit': i.first_product_hom_profit,
+            'ten_product_hom_profit': i.ten_product_hom_profit,
+            'products_with_sales': i.products_with_sales,
+            'rel_products_with_sales': i.rel_products_with_sales,
+            'avg_price_prev_period': i.avg_price_prev_period,
+            'avg_price_period': i.avg_price_period,
+            'profit_prev_period': i.profit_prev_period,
+            'profit_period': i.profit_period,
+            'sellers': i.sellers,
+            'sellers_with_sales': i.sellers_with_sales,
+            'sales_period': i.sales_period,
+            'last_parsed_page': i.last_parsed_page,
+            'current_parsing_id': i.current_parsing_id,
+            'top': i.top,
+            'ten_product_profit_top': i.ten_product_profit_top,
+            'first_product_profit_top': i.first_product_profit_top,
+            'products_with_sales_top': i.products_with_sales_top,
+            'profit_top': i.profit_top,
+            'avg_price_top': i.avg_price_top,
+            'rel_sales_top': i.rel_sales_top,
+        } for i in items]
+    })
 
 
 def export_queries(request):
