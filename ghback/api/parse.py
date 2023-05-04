@@ -790,20 +790,16 @@ class Parser(object):
     def calculate_query(self, query):
         products = Product.objects.prefetch_related('sale_set').filter(
             articul__in=query.articuls
-        )
-        # .fields(slice__sizes=[-30, 30]).order_by('-current_hom_sales')
+        ).order_by('-current_hom_sales')
+        # .fields(slice__sizes=[-30, 30])
         products_count = products.count()
-        if (
-                query.ten_product_hom_profit and
-                query.first_product_hom_profit and
-                query.ten_product_hom_profit and
-                products_count >= 10):
+        if products_count >= 10:
             query.first_product_hom_profit = (
                 (products[0].current_hom_sales or 0)
                 *
                 (products[0].price or 0)
             )
-            query.ten_product__profit = (
+            query.ten_product_hom_profit = (
                 (products[9].current_hom_sales or 0)
                 *
                 (products[9].price or 0)

@@ -8,10 +8,10 @@ from django.forms.models import model_to_dict
 from api.models import Customer, Order, Config
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
-from dateutil.relativedelta import relativedelta
+# from dateutil.relativedelta import relativedelta
 import threading
 import csv
-import requests
+# import requests
 from api.parse import Parser
 from api.migrate import Migrate
 from api.mongo_models import Categories, Products, Queries
@@ -264,10 +264,8 @@ def categories_top(request):
     # config = Config.objects.first()
     # queries = Queries.objects(current_parsing_id=config.current_parsing_id)
     if model == 'queries':
-        items = Queries.objects(
+        items = Queries.objects.filter(
             current_parsing_id=config.current_parsing_id,
-            # current_parsing_id=1672043096,
-            root__ne=None,
             products_count__lte=2500,
             products_count__gte=10,
             top=True,
@@ -287,8 +285,8 @@ def categories_top(request):
                 'root': i.root,
                 'features': ' '.join(i.features),
                 'products_count': i.products_count,
-                'first_product_decada_profit': i.first_product_decada_profit,
-                'ten_product_decada_profit': i.ten_product_decada_profit,
+                'first_product_hom_profit': i.first_product_hom_profit,
+                'ten_product_hom_profit': i.ten_product_hom_profit,
                 'products_with_sales': i.products_with_sales,
                 'rel_products_with_sales': i.rel_products_with_sales,
                 'avg_price_prev_period': i.avg_price_prev_period,
@@ -319,11 +317,11 @@ def categories_top(request):
                 'profit_period': i.profit_period,
                 'profit_prev_period': i.profit_prev_period,
                 'first_product_price': i.first_product_price,
-                'first_product_decada_sales': i.first_product_decada_sales,
-                'first_product_decada_profit': i.first_product_decada_profit,
+                'first_product_hom_sales': i.first_product_hom_sales,
+                'first_product_hom_profit': i.first_product_hom_profit,
                 'ten_product_price': i.ten_product_price,
-                'ten_product_decada_sales': i.ten_product_decada_sales,
-                'ten_product_decada_profit': i.ten_product_decada_profit,
+                'ten_product_hom_sales': i.ten_product_hom_sales,
+                'ten_product_hom_profit': i.ten_product_hom_profit,
                 'products_count': i.products_count,
                 'products_with_sales': i.products_with_sales,
                 'sales_period': i.sales_period,
@@ -360,7 +358,7 @@ def export_queries(request):
     rows = [
         [i.root, i.features, i.products_count, i.products_with_sales,
          int((i.products_with_sales or 0) * 100 / i.products_count) if i.products_count else 0,
-         i.first_product_decada_profit, i.ten_product_decada_profit,
+         i.first_product_hom_profit, i.ten_product_hom_profit,
          i.avg_price_prev_period, i.avg_price_period,
          int((i.avg_price_period or 0) * 100 / i.avg_price_prev_period) if i.avg_price_prev_period else 0,
          i.sellers, i.sellers_with_sales,
@@ -398,7 +396,7 @@ def export_categories():
     rows = [
         [i.name, i.products_count, i.products_with_sales,
          int(i.products_with_sales * 100 / i.products_count) if i.products_count else 0,
-         i.first_product_decada_profit, i.ten_product_decada_profit,
+         i.first_product_hom_profit, i.ten_product_hom_profit,
          i.avg_price_prev_period, i.avg_price_period,
          int(i.avg_price_period * 100 / i.avg_price_prev_period),
          i.sellers, i.sellers_with_sales,
