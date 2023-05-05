@@ -146,7 +146,7 @@ class Product(models.Model):
     mongo_id = models.CharField(max_length=24, blank=True, null=True)
     mongo_transfered = models.BooleanField(default=False, blank=True,
                                            null=True)
-    mongo_category_id = models.CharField(max_length=24, blank=True, null=True)
+    # mongo_category_id = models.CharField(max_length=24, blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING,
                                  blank=True, null=True)
     articul = models.IntegerField()  # , unique=True
@@ -159,8 +159,8 @@ class Product(models.Model):
     brand_id = models.IntegerField(blank=True, null=True)
     category_name = models.CharField(max_length=200)
     category_wb_id = models.IntegerField(blank=True, null=True)
-    queries = ArrayField(ArrayField(models.IntegerField(blank=True)),
-                         default=[])
+    # queries = ArrayField(ArrayField(models.IntegerField(blank=True)),
+    #                      default=[])
     categories = ArrayField(ArrayField(models.IntegerField(blank=True)),
                             default=[])
     subject_id = models.IntegerField(blank=True, null=True)
@@ -189,15 +189,14 @@ class Product(models.Model):
     class Meta():
         indexes = [
             models.Index(fields=['articul']),
-            models.Index(fields=['category_wb_id']),
             models.Index(fields=['categories']),
-            models.Index(fields=['queries']),
+            # models.Index(fields=['queries']),
             models.Index(fields=['parsed_at']),
-            models.Index(fields=['root']),
+            models.Index(fields=['root', 'features']),
             models.Index(fields=['current_hom_sales']),
-            models.Index(fields=['hom_sales_growth']),
+            # models.Index(fields=['hom_sales_growth']),
             models.Index(fields=['-sales']),
-            models.Index(fields=['category_id', 'last_parsing_id']),
+            # models.Index(fields=['category_id', 'last_parsing_id']),
         ]
 
 

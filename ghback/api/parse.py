@@ -103,9 +103,9 @@ class Parser(object):
         if self.config.parsing_done is not True:
             self.notify('Парсинг категорий начался')
             self.get_category()
-        elif self.config.queries_done is not True:
-            self.notify('Парсинг запросов начался')
-            self.get_query()
+            # elif self.config.queries_done is not True:
+            #     self.notify('Парсинг запросов начался')
+            #     self.get_query()
         elif self.config.queries_calculated is not True:
             self.notify('Расчет запросов начался')
             self.calculate_queries()
@@ -127,6 +127,7 @@ class Parser(object):
             self.get_category()
 
     def create_queries(self):
+        self.notify('Создаются поисковые запросы')
         categories = Category.objects.filter(parse=True)
         for category in categories:
             self.category = category
@@ -240,7 +241,7 @@ class Parser(object):
             self.config.parsing_done = True
             self.config.save()
             self.create_queries()
-            return self.get_query()
+            return self.calculate_query()
         else:
             if self.category.last_parsed_page:
                 self.page = self.category.last_parsed_page + 1
@@ -789,11 +790,16 @@ class Parser(object):
 
     def calculate_query(self, query):
         products = Product.objects.prefetch_related('sale_set').filter(
-            articul__in=query.articuls
+            root=query.root,
+            features=query.features,
         ).order_by('-current_hom_sales')
+        # products = Product.objects.prefetch_related('sale_set').filter(
+        #     articul__in=query.articuls
+        # ).order_by('-current_hom_sales')
         # .fields(slice__sizes=[-30, 30])
         products_count = products.count()
-        if products_count >= 10:
+        query.products_count = products_count
+        if products_count >= 10 and products_count <= 2500:
             query.first_product_hom_profit = (
                 (products[0].current_hom_sales or 0)
                 *
@@ -855,7 +861,6 @@ class Parser(object):
                     query.profit_period <= query.profit_prev_period * 1.4):
                 query.profit_top = True
             if (
-                    query.products_count <= 2500 and
                     query.first_product_profit_top and
                     query.ten_product_profit_top and
                     query.products_with_sales_top and
