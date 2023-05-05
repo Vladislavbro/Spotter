@@ -798,6 +798,7 @@ class Parser(object):
         # ).order_by('-current_hom_sales')
         # .fields(slice__sizes=[-30, 30])
         products_count = products.count()
+        print('calculate_query', products_count)
         query.products_count = products_count
         if products_count >= 10 and products_count <= 2500:
             query.first_product_hom_profit = (
