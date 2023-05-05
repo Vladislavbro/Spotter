@@ -789,6 +789,15 @@ class Parser(object):
         self.processing()
 
     def calculate_query(self, query):
+        # end_prev_7 = (datetime.now(timezone.utc) - timedelta(days=7)).replace(
+        #     hour=0, minute=0, second=0, microsecond=0)
+        # start_prev_7 = end_prev_7 - timedelta(days=7)
+        # end_prev_14 = (datetime.now(timezone.utc) - timedelta(days=14)).replace(
+        #     hour=0, minute=0, second=0, microsecond=0)
+        # start_prev_14 = end_prev_14 - timedelta(days=14)
+        # end_prev_30 = (datetime.now(timezone.utc) - timedelta(days=30)).replace(
+        #     hour=0, minute=0, second=0, microsecond=0)
+        # start_prev_30 = end_prev_30 - timedelta(days=30)
         products = Product.objects.prefetch_related('sale_set').filter(
             root=query.root,
             features=query.features,
@@ -813,7 +822,8 @@ class Parser(object):
             )
             query.products_with_sales = products.filter(
                 current_hom_sales__gt=0).count()
-            query.rel_products_with_sales = int(query.products_with_sales * 100 / query.products_count)
+            query.rel_products_with_sales = int(
+                query.products_with_sales * 100 / query.products_count)
             query.avg_price_prev_period = self.get_avg(
                 [[s.price for s in p.sale_set.filter(
                     price__gt=0, date__gte=self.start_prev_period,
