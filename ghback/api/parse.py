@@ -1,5 +1,6 @@
 import requests
 # from api.mongo_models import Categories, Products, Config, Queries
+from django.forms.models import model_to_dict
 from api.models import Category, Product, Config, Query
 from time import sleep
 from datetime import datetime, timedelta, timezone
@@ -879,6 +880,7 @@ class Parser(object):
                     query.profit_top):
                 query.top = True
         query.calculated = True
+        print(model_to_dict(query))
         query.save()
         print(query)
 
