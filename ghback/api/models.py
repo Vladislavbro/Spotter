@@ -141,7 +141,7 @@ class Query(models.Model):
         ]
 
 
-class Stat(models.Model):
+class CategoryStat(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now=True)
     period = models.IntegerField()
@@ -223,7 +223,31 @@ class ProductStat(models.Model):
     price = models.IntegerField()
 
     class Meta():
+        pass
         # ordering = ['-date']
         # indexes = [
         #     models.Index(fields=['-date']),
         # ]
+
+
+class Sale(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(blank=True, null=True, default=0)
+    quantity_fbo = models.IntegerField(blank=True, null=True, default=0)
+    quantity_fbs = models.IntegerField(blank=True, null=True, default=0)
+    sales = models.IntegerField(blank=True, null=True, default=0)
+    # fulfilment by operator
+    sales_fbo = models.IntegerField(blank=True, null=True, default=0)
+    # fulfilment by seller
+    sales_fbs = models.IntegerField(blank=True, null=True, default=0)
+    profit = models.BigIntegerField(blank=True, null=True, default=0)
+    profit_fbo = models.BigIntegerField(blank=True, null=True, default=0)
+    profit_fbs = models.BigIntegerField(blank=True, null=True, default=0)
+    price = models.IntegerField(blank=True, null=True, default=0)
+    date = models.DateTimeField(blank=True, null=True)
+
+    class Meta():
+        ordering = ['-date']
+        indexes = [
+            models.Index(fields=['-date']),
+        ]
