@@ -1,7 +1,7 @@
 import requests
 # from api.mongo_models import Categories, Products, Config, Queries
 from django.forms.models import model_to_dict
-from api.models import Category, Product, Config, Query
+from api.models import Category, Product, Config, Query, Stat
 from time import sleep
 from datetime import datetime, timedelta, timezone
 import time
@@ -481,23 +481,21 @@ class Parser(object):
             if len(detail):
                 detail = detail[0]
                 sizes = detail.get('sizes', [])
-                quantity = 0
                 quantity_fbo = 0
                 quantity_fbs = 0
                 for size in sizes:
                     for stock in size.get('stocks', []):
                         qty = stock.get('qty', 0)
-                        quantity += qty
                         if stock.get('wh') in self.wirehouses:
                             quantity_fbo += qty
                         else:
                             quantity_fbs += qty
             else:
                 detail = None
-                quantity = None
+                # quantity = None
                 quantity_fbo = None
                 quantity_fbs = None
-            sales = 0
+            # sales = 0
             sales_fbo = 0
             sales_fbs = 0
 
@@ -506,21 +504,20 @@ class Parser(object):
                 if last_sale and last_sale.date.date() != datetime.now(timezone.utc).date():
                     # Если последняя цена вчерашняя то посчитать разницу остатков и
                     # записать как количество продаж
-                    sales = product.quantity - quantity
+                    # sales = product.quantity - quantity
                     if product.quantity_fbo is not None:
                         sales_fbo = product.quantity_fbo - quantity_fbo
                     if product.quantity_fbs is not None:
                         sales_fbs = product.quantity_fbs - quantity_fbs
                     # если цифра отрицательная то вероятно поступление
                     # на склад и расчет не получится
-                    if sales < 0:
-                        sales = 0
+                    # if sales < 0:
+                    #     sales = 0
                     if sales_fbo < 0:
                         sales_fbo = 0
                     if sales_fbs < 0:
                         sales_fbs = 0
 
-                # print('item[name]', item.get('name'))
                 if product.name != item['name'].strip():
                     product.name = item['name'].strip()
                     self.text_process(product)
@@ -528,39 +525,45 @@ class Parser(object):
                 product.name = item['name']
                 product.brand = item['brand']
                 product.brand_id = item['siteBrandId']
-                product.subject_id = item['subjectId']
+                # product.subject_id = item['subjectId']
                 product.rating = item['rating']
                 product.feedbacks = item['feedbacks']
-                product.is_new = item.get('isNew', False)
+                # product.is_new = item.get('isNew', False)
 
                 product.price = price
-                product.priceU = item.get('priceU') / 100
-                product.quantity = quantity
+                # product.priceU = item.get('priceU') / 100
+                # product.quantity = quantity
                 product.quantity_fbo = quantity_fbo
                 product.quantity_fbs = quantity_fbs
-                product.sales = sales
+                # product.sales = sales
                 product.sales_fbo = sales_fbo
                 product.sales_fbs = sales_fbs
+                product.profit_fbo = sales_fbo * price
+                product.profit_fbs = sales_fbs * price
                 product.parsed_at = datetime.now(timezone.utc)
 
-                if self.query is None:
-                    # print('self.category', self.category, self.category.name)
-                    product.category_name = self.category.name
-                    product.category_id = self.category.id
-                    product.category_wb_id = self.category.wb_id
-
-                if last_sale and last_sale.date.date() == datetime.now(timezone.utc).date():
+                if last_sale and last_sale.date.date() == datetime.now(
+                        timezone.utc).date():
+                    # last_sale.sales_fbo = sales_fbo
+                    # last_sale.sales_fbs = sales_fbs
+                    # last_sale.price = price
+                    # last_sale.profit_fbo = sales_fbo * price
+                    # last_sale.profit_fbs = sales_fbs * price
+                    # last_sale.quantity_fbo = quantity_fbo
+                    # last_sale.quantity_fbs = quantity_fbs
+                    # last_sale.date = datetime.now(timezone.utc)
+                    # last_sale.save()
                     pass
                 else:
                     product.sale_set.create(
-                        sales=sales,
+                        # sales=sales,
                         sales_fbo=sales_fbo,
                         sales_fbs=sales_fbs,
                         price=price,
-                        profit=sales * price,
+                        # profit=sales * price,
                         profit_fbo=sales_fbo * price,
                         profit_fbs=sales_fbs * price,
-                        quantity=quantity,
+                        # quantity=quantity,
                         quantity_fbo=quantity_fbo,
                         quantity_fbs=quantity_fbs,
                         date=datetime.now(timezone.utc)
@@ -569,7 +572,7 @@ class Parser(object):
                 if self.query is None and self.category.wb_id not in product.categories:
                     product.categories.append(self.category.wb_id)
 
-                self.get_old_data(product)
+                # self.get_old_data(product)
                 self.product_calculate(product)
                 product.save()
 
@@ -579,20 +582,12 @@ class Parser(object):
                     name=item['name'],
                     brand=item['brand'],
                     brand_id=item['siteBrandId'],
-                    category_name=self.category.name,
-                    category_id=self.category.id,
-                    category_wb_id=self.category.wb_id,
                     categories=[self.category.wb_id],
-                    subject_id=item['subjectId'],
+                    # subject_id=item['subjectId'],
                     rating=item['rating'],
                     feedbacks=item['feedbacks'],
-                    is_new=item.get('isNew', False),
+                    # is_new=item.get('isNew', False),
                     price=price,
-                    # sales=sales,
-                    # sales_fbo=sales_fbo,
-                    # sales_fbs=sales_fbs,
-                    priceU=(item.get('priceU') / 100),
-                    quantity=quantity,
                     quantity_fbo=quantity_fbo,
                     quantity_fbs=quantity_fbs,
                     parsed_at=datetime.now(timezone.utc),
@@ -600,22 +595,15 @@ class Parser(object):
                 self.text_process(product)
                 product.save()
                 product.sale_set.create(
-                    quantity=quantity,
                     quantity_fbo=quantity_fbo,
                     quantity_fbs=quantity_fbs,
-                    # sales=sales,
-                    # sales_fbo=sales_fbo,
-                    # sales_fbs=sales_fbs,
                     price=price,
-                    profit=sales * price,
-                    profit_fbo=sales_fbo * price,
-                    profit_fbs=sales_fbs * price,
                     date=datetime.now(timezone.utc)
                 )
-                print('get_old_data', product.articul)
-                self.get_old_data(product)
-                self.product_calculate(product)
-                product.save()
+                # print('get_old_data', product.articul)
+                # self.get_old_data(product)
+                # self.product_calculate(product)
+                # product.save()
 
     def parse_search(self, data):
         print('parse_search', self.query)
@@ -679,25 +667,57 @@ class Parser(object):
         # не более чем на +-10%
         # Если все условия пройдены - то информация о нише и топ 50 товарах
         # отправляются в раздел ""топ категории"" для декады делим месяц на три
-        self.set_period_dates()
-        products = Product.objects.prefetch_related('sale_set').filter(
-            categories__contains=[category.wb_id])
-        # last_sales = product.sale_set.all()[:30]
-        category.products_count = products.count()
-        print(category.name, category.products_count)
-        if category.products_count > 10 and category.products_count <= 2500:
-            top_products = products.order_by('-current_hom_sales')[0:50]
+
+        # class Stat(models.Model):
+        #     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+        #     date = models.DateTimeField(auto_now=True)
+        #     fb = models.CharField(max_length=3)
+        #     period = models.IntegerField()
+        #     product_first_profit = models.BigIntegerField(blank=True, null=True)
+        #     product_ten_profit = models.BigIntegerField(blank=True, null=True)
+        #     products_count = models.IntegerField(blank=True, null=True)
+        #     products_price = models.IntegerField(blank=True, null=True)
+        #     products_solded = models.IntegerField(blank=True, null=True)
+        #     products_profit = models.BigIntegerField(blank=True, null=True)
+        #     products_solded_rel = models.IntegerField(blank=True, null=True)
+        #     sellers_solded_rel = models.IntegerField(blank=True, null=True)
+        #     top = models.BooleanField(blank=True, null=True)
+        for period in [7, 14, 30]:
+            end_prev_period = (datetime.now(timezone.utc) - timedelta(
+                days=period)).replace(hour=0, minute=0, second=0, 
+                                      microsecond=0)
+            start_prev_period = self.end_prev_period - timedelta(days=period)
+            print(category.name)
+            for fb in ['fbo', 'fbs']:
+                stat = Stat(
+                    category=category, 
+                    date=datetime.now(timezone.utc),
+                    fb=fb,
+                    period=period,
+                )
+                products = Product.objects.prefetch_related('sale_set').filter(
+                    categories__contains=[category.wb_id])
+                # last_sales = product.sale_set.all()[:30]
+                stat.products_count = products.count()
+                
+                # products[11].sale_set.filter(date__gte=start_prev_period, date__lt=end_prev_period).count()
+
+                top_products = products.exclude(
+                    current_hom_sales=None).order_by('-current_hom_sales')[0:50]
+                stat.products_solded = products.filter(
+                    current_hom_sales__gt=0).count()
+            
             category.products_with_sales = products.filter(
                 current_hom_sales__gt=0).count()
             category.profit_period = self.get_sum([
                 [s.profit or ((s.sales or 0) * (s.price or p.price or 0))
-                 for s in p.sale_set.filter(date__gte=self.end_prev_period)]
+                for s in p.sale_set.filter(date__gte=self.end_prev_period)]
                 for p in products])
             category.profit_prev_period = self.get_sum([
                 [s.profit or ((s.sales or 0) * (s.price or p.price or 0))
-                 for s in p.sale_set.filter(
-                     date__gte=self.start_prev_period,
-                     date__lt=self.end_prev_period)]
+                for s in p.sale_set.filter(
+                    date__gte=self.start_prev_period,
+                    date__lt=self.end_prev_period)]
                 for p in products])
 
             category.sellers = len(list(set([p.brand_id for p in products])))
@@ -715,7 +735,7 @@ class Parser(object):
             category.sales_period = self.get_sum([
                 [(s.sales or 0) for s in p.sale_set.filter(
                     date__gte=self.end_prev_period)
-                 ] for p in products])
+                ] for p in products])
 
             category.first_product_price = top_products[0].price
             category.first_product_sales = top_products[0].current_hom_sales
@@ -759,9 +779,9 @@ class Parser(object):
                     category.avg_price_top and
                     category.profit_top):
                 category.top = True
-        category.calculated = True
-        category.save()
-        print(category)
+            category.calculated = True
+            category.save()
+            print(category)
 
     def calculate_queries(self):
         query = Query.objects.filter(
@@ -789,16 +809,20 @@ class Parser(object):
         self.config.save()
         self.processing()
 
+    def calculate_query_products(self):
+        pass
+
     def calculate_query(self, query):
-        # end_prev_7 = (datetime.now(timezone.utc) - timedelta(days=7)).replace(
-        #     hour=0, minute=0, second=0, microsecond=0)
-        # start_prev_7 = end_prev_7 - timedelta(days=7)
-        # end_prev_14 = (datetime.now(timezone.utc) - timedelta(days=14)).replace(
-        #     hour=0, minute=0, second=0, microsecond=0)
-        # start_prev_14 = end_prev_14 - timedelta(days=14)
-        # end_prev_30 = (datetime.now(timezone.utc) - timedelta(days=30)).replace(
-        #     hour=0, minute=0, second=0, microsecond=0)
-        # start_prev_30 = end_prev_30 - timedelta(days=30)
+        end_prev_7 = (
+            datetime.now(timezone.utc) - timedelta(days=7)).replace(
+            hour=0, minute=0, second=0, microsecond=0)
+        start_prev_7 = end_prev_7 - timedelta(days=7)
+        end_prev_14 = (datetime.now(timezone.utc) - timedelta(
+            days=14)).replace(hour=0, minute=0, second=0, microsecond=0)
+        start_prev_14 = end_prev_14 - timedelta(days=14)
+        end_prev_30 = (datetime.now(timezone.utc) - timedelta(
+            days=30)).replace(hour=0, minute=0, second=0, microsecond=0)
+        start_prev_30 = end_prev_30 - timedelta(days=30)
         products = Product.objects.prefetch_related('sale_set').filter(
             root=query.root,
             features=query.features,
@@ -832,7 +856,8 @@ class Parser(object):
             )
             query.avg_price_period = self.get_avg(
                 [[s.price for s in p.sale_set.filter(
-                    price__gt=0, date__gte=self.end_prev_period)] for p in products]
+                    price__gt=0, date__gte=self.end_prev_period)] 
+                    for p in products]
             )
             query.profit_prev_period = self.get_sum(
                 [[s.profit or ((s.sales or 0) *
@@ -880,7 +905,7 @@ class Parser(object):
                     query.profit_top):
                 query.top = True
         query.calculated = True
-        print(model_to_dict(query))
+        # print(model_to_dict(query))
         query.save()
         print(query)
 
