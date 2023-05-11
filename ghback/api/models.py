@@ -68,38 +68,57 @@ class Category(models.Model):
     start_parsing_at = models.DateTimeField(blank=True, null=True)
     current_parsing_id = models.IntegerField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
-    # period
-    profit_period = models.BigIntegerField(blank=True, null=True)
-    profit_prev_period = models.BigIntegerField(blank=True, null=True)
-    sales_period = models.BigIntegerField(blank=True, null=True)
-    avg_price_prev_period = models.IntegerField(blank=True, null=True)
-    avg_price_period = models.IntegerField(blank=True, null=True)
-    # end period
-    first_product_price = models.IntegerField(blank=True, null=True)
-    first_product_sales = models.IntegerField(blank=True, null=True)
-    first_product_profit = models.BigIntegerField(blank=True, null=True)
-    ten_product_price = models.IntegerField(blank=True, null=True)
-    ten_product_sales = models.IntegerField(blank=True, null=True)
-    ten_product_profit = models.BigIntegerField(blank=True, null=True)
-    products_count = models.IntegerField(blank=True, null=True)
-    products_with_sales = models.IntegerField(blank=True, null=True)
-    sellers = models.IntegerField(blank=True, null=True)
-    sellers_with_sales = models.IntegerField(blank=True, null=True)
-    rel_sellers = models.FloatField(blank=True, null=True)
-    rel_sales = models.FloatField(blank=True, null=True)
-    top = models.BooleanField(blank=True, null=True)
-    ten_product_profit_top = models.BooleanField(blank=True, null=True)
-    first_product_profit_top = models.BooleanField(blank=True, null=True)
-    profit_top = models.BooleanField(blank=True, null=True)
-    avg_price_top = models.BooleanField(blank=True, null=True)
-    rel_sales_top = models.BooleanField(blank=True, null=True)
-    calculated = models.BooleanField(blank=True, null=True)
     products_calculated = models.BooleanField(blank=True, null=True)
 
     class Meta():
         indexes = [
-            models.Index(fields=['parsed_at'])
+            models.Index(fields=['-parsed_at'])
         ]
+
+
+class CategoryStat(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now=True)
+    parsing_id = models.IntegerField()
+    # period = models.IntegerField()
+    # fb = models.CharField(max_length=3)
+    products_count = models.IntegerField(blank=True, null=True)
+    products_solded_7_fbo = models.IntegerField(blank=True, null=True)
+    products_solded_7_fbs = models.IntegerField(blank=True, null=True)
+    products_solded_14_fbo = models.IntegerField(blank=True, null=True)
+    products_solded_14_fbs = models.IntegerField(blank=True, null=True)
+    products_solded_30_fbo = models.IntegerField(blank=True, null=True)
+    products_solded_30_fbs = models.IntegerField(blank=True, null=True)
+    sellers_count_7_fbo = models.IntegerField(blank=True, null=True)
+    sellers_count_7_fbs = models.IntegerField(blank=True, null=True)
+    sellers_count_14_fbo = models.IntegerField(blank=True, null=True)
+    sellers_count_14_fbs = models.IntegerField(blank=True, null=True)
+    sellers_count_30_fbo = models.IntegerField(blank=True, null=True)
+    sellers_count_30_fbs = models.IntegerField(blank=True, null=True)
+    sellers_solded_7_fbo = models.IntegerField(blank=True, null=True)
+    sellers_solded_7_fbs = models.IntegerField(blank=True, null=True)
+    sellers_solded_14_fbo = models.IntegerField(blank=True, null=True)
+    sellers_solded_14_fbs = models.IntegerField(blank=True, null=True)
+    sellers_solded_30_fbo = models.IntegerField(blank=True, null=True)
+    sellers_solded_30_fbs = models.IntegerField(blank=True, null=True)
+    price_avg_7_fbo = models.IntegerField(blank=True, null=True)
+    price_avg_7_fbs = models.IntegerField(blank=True, null=True)
+    price_avg_14_fbo = models.IntegerField(blank=True, null=True)
+    price_avg_14_fbs = models.IntegerField(blank=True, null=True)
+    price_avg_30_fbo = models.IntegerField(blank=True, null=True)
+    price_avg_30_fbs = models.IntegerField(blank=True, null=True)
+    profit_7_fbo = models.BigIntegerField(blank=True, null=True)
+    profit_7_fbs = models.BigIntegerField(blank=True, null=True)
+    profit_14_fbo = models.BigIntegerField(blank=True, null=True)
+    profit_14_fbs = models.BigIntegerField(blank=True, null=True)
+    profit_30_fbo = models.BigIntegerField(blank=True, null=True)
+    profit_30_fbs = models.BigIntegerField(blank=True, null=True)
+    top_7_fbo = models.BooleanField(blank=True, null=True)
+    top_7_fbs = models.BooleanField(blank=True, null=True)
+    top_14_fbo = models.BooleanField(blank=True, null=True)
+    top_14_fbs = models.BooleanField(blank=True, null=True)
+    top_30_fbo = models.BooleanField(blank=True, null=True)
+    top_30_fbs = models.BooleanField(blank=True, null=True)
 
 
 class Query(models.Model):
@@ -141,38 +160,20 @@ class Query(models.Model):
         ]
 
 
-class CategoryStat(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now=True)
-    period = models.IntegerField()
-    fb = models.CharField(max_length=3)
-    product_first_profit = models.BigIntegerField(blank=True, null=True)
-    product_ten_profit = models.BigIntegerField(blank=True, null=True)
-    products_price = models.IntegerField(blank=True, null=True)
-    products_count = models.IntegerField(blank=True, null=True)
-    products_solded = models.IntegerField(blank=True, null=True)
-    products_solded_rel = models.IntegerField(blank=True, null=True)
-    sellers_solded_rel = models.IntegerField(blank=True, null=True)
-    products_profit = models.BigIntegerField(blank=True, null=True)
-    top = models.BooleanField(blank=True, null=True)
-
-
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING,
                                  blank=True, null=True)
     articul = models.IntegerField()  # , unique=True
-    parsing_id = models.IntegerField(blank=True, null=True)
+    # parsing_id = models.IntegerField(blank=True, null=True)
     parsed_at = models.DateTimeField(blank=True, null=True)
-
     name = models.CharField(max_length=200)
-    desc = models.TextField()
+    # desc = models.TextField()
     root = models.CharField(max_length=200)
     entity = models.CharField(max_length=200, blank=True, null=True)
     features = ArrayField(ArrayField(models.CharField(max_length=100,
                                                       blank=True)), default=[])
     brand = models.CharField(max_length=200, blank=True, null=True)
     brand_id = models.IntegerField(blank=True, null=True)
-
     categories = ArrayField(ArrayField(models.IntegerField(blank=True)),
                             default=[])
     rating = models.FloatField(blank=True, null=True)
@@ -180,7 +181,6 @@ class Product(models.Model):
     # is_new = models.BooleanField(blank=True, null=True)
     price = models.IntegerField(blank=True, null=True)
     priceU = models.IntegerField(blank=True, null=True)
-
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -221,13 +221,14 @@ class ProductStat(models.Model):
     profit_30_fbo = models.BigIntegerField(blank=True, null=True, default=0)
     profit_30_fbs = models.BigIntegerField(blank=True, null=True, default=0)
     price = models.IntegerField()
+    priceU = models.IntegerField()
 
     class Meta():
-        pass
-        # ordering = ['-date']
-        # indexes = [
-        #     models.Index(fields=['-date']),
-        # ]
+        ordering = ['-parsing_id']
+        indexes = [
+            # models.Index(fields=['-date']),
+            models.Index(fields=['-parsing_id']),
+        ]
 
 
 class Sale(models.Model):

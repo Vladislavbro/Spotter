@@ -1,7 +1,8 @@
 import requests
 # from api.mongo_models import Categories, Products, Config, Queries
 from django.forms.models import model_to_dict
-from api.models import Category, Product, Config, Query, Stat
+from django.db.models import Sum, Avg
+from api.models import Category, Product, Config, Query, ProductStat, CategoryStat
 from time import sleep
 from datetime import datetime, timedelta, timezone
 import time
@@ -43,8 +44,8 @@ class Parser(object):
     config = None
     end_prev_period = None
     start_prev_period = None
-    profit_first_top = 500000 / 2
-    profit_ten_top = 100000 / 2
+    profit_first_top = 500000
+    profit_ten_top = 100000
     wirehouses = [169537, 205985, 214951, 214110, 146666, 207399, 6149,
                   118365, 1680, 213651, 117419, 216462, 152611, 210557, 6140,
                   204223, 117414, 217390, 203632, 115651, 209209, 206844,
@@ -416,67 +417,34 @@ class Parser(object):
             product.mongo_transfered = True
 
     def product_calculate(self, product):
-        last_sales = product.sale_set.all()[:30].values()
-
-        now = datetime.now(timezone.utc)
-        current_hom_start = (now - timedelta(days=15)).replace(
+        start = (datetime.now(timezone.utc) - timedelta(days=30)).replace(
             hour=0, minute=0, second=0, microsecond=0)
-        last_hom_start = current_hom_start - timedelta(days=15)
-        last_hom_sales = 0
-        current_hom_sales = 0
-        hom_sales_growth = 0
-        last_hom_profit = 0
-        current_hom_profit = 0
-        hom_profit_growth = 0
-        if len(last_sales):
-            # HOM
-            last_hom_data = [sale for sale in last_sales
-                             if sale['date'] >= last_hom_start and
-                             sale['date'] < current_hom_start]
-            last_hom_sales = sum([s.get('sales', 0) for s in last_hom_data])
-            last_hom_profit = sum([s.get('sales', 0) * (s.get('price', 0)
-                                                        or product.price) for s
-                                   in last_hom_data])
-            current_hom_data = [sale for sale in last_sales
-                                if sale['date'] >= current_hom_start]
-            current_hom_sales = sum([s.get('sales', 0) for s
-                                     in current_hom_data])
-            current_hom_profit = sum(
-                [s.get('sales', 0) * (s.get('price', 0) or product.price) for
-                 s in current_hom_data])
-            if last_hom_sales != 0:
-                hom_sales_growth = int(
-                    current_hom_sales /
-                    last_hom_sales * 100)
-            else:
-                hom_sales_growth = 0
-            if last_hom_profit != 0:
-                hom_profit_growth = int(
-                    current_hom_profit /
-                    last_hom_profit * 100)
-            else:
-                hom_profit_growth = 0
-        product.last_hom_sales = last_hom_sales
-        product.current_hom_sales = current_hom_sales
-        product.hom_sales_growth = hom_sales_growth
-        product.last_hom_profit = last_hom_profit
-        product.current_hom_profit = current_hom_profit
-        product.hom_profit_growth = hom_profit_growth
+        last_stats = product.productstat_set.filter(
+            date__gte=start)[:30].values()
+        update = {}
+        for period in [7, 14, 30]:
+            start_period = (datetime.now(timezone.utc) - timedelta(
+                days=period)).replace(hour=0, minute=0, second=0, 
+                                      microsecond=0)
+            data = [stat for stat in last_stats 
+                    if stat['date'] >= start_period]
+            for fb in ['fbo', 'fbs']:
+                sales = sum([stat[f'sales_{fb}'] for stat in data])
+                profit = sum([stat[f'sales_{fb}'] * stat['price'] 
+                              for stat in data])
+                update[f'sales_{period}_{fb}'] = sales
+                update[f'profit_{period}_{fb}'] = profit
+        product.productstat_set.first().update(**update)
 
     def parse_products(self, products):
-        print('products:', len(products))
         ids = [p['id'] for p in products]
         details = self.get_details(ids)
-        print('details: ', len(details))
         for index, item in enumerate(products):
-            print('item[id]', item['id'])
-            product = Product.objects.filter(articul=item['id']).first()
-            if product:
-                last_sale = product.sale_set.first()
-            else:
-                product = None
-                last_sale = None
+            name = item.get('name', '').strip()
+            if name == '':
+                continue
             price = item.get('salePriceU') / 100
+            priceU = item.get('priceU') / 100
             detail = [detail for detail in details if detail['id'] == item['id']]
             if len(detail):
                 detail = detail[0]
@@ -491,24 +459,32 @@ class Parser(object):
                         else:
                             quantity_fbs += qty
             else:
-                detail = None
-                # quantity = None
-                quantity_fbo = None
-                quantity_fbs = None
-            # sales = 0
-            sales_fbo = 0
-            sales_fbs = 0
-
-            if product and detail:
-                # self.check_unique(product)
-                if last_sale and last_sale.date.date() != datetime.now(timezone.utc).date():
+                continue
+            product = Product.objects.filter(articul=item['id']).first()
+            if product:
+                if product.name != name:
+                    product.name = name
+                    self.text_process(product)
+                product.name = name
+                product.brand = item['brand']
+                product.brand_id = item['siteBrandId']
+                product.rating = item['rating']
+                product.feedbacks = item['feedbacks']
+                product.parsed_at = datetime.now(timezone.utc)
+                if self.query is None and self.category.wb_id not in product.categories:
+                    product.categories.append(self.category.wb_id)
+                
+                sales_fbo = 0
+                sales_fbs = 0
+                last_stat = product.productstat_set.first()
+                if last_stat.date.date() != datetime.now(timezone.utc).date():
                     # Если последняя цена вчерашняя то посчитать разницу остатков и
                     # записать как количество продаж
                     # sales = product.quantity - quantity
-                    if product.quantity_fbo is not None:
-                        sales_fbo = product.quantity_fbo - quantity_fbo
-                    if product.quantity_fbs is not None:
-                        sales_fbs = product.quantity_fbs - quantity_fbs
+                    if last_stat.quantity_fbo is not None:
+                        sales_fbo = last_stat.quantity_fbo - quantity_fbo
+                    if last_stat.quantity_fbs is not None:
+                        sales_fbs = last_stat.quantity_fbs - quantity_fbs
                     # если цифра отрицательная то вероятно поступление
                     # на склад и расчет не получится
                     # if sales < 0:
@@ -518,92 +494,42 @@ class Parser(object):
                     if sales_fbs < 0:
                         sales_fbs = 0
 
-                if product.name != item['name'].strip():
-                    product.name = item['name'].strip()
-                    self.text_process(product)
-
-                product.name = item['name']
-                product.brand = item['brand']
-                product.brand_id = item['siteBrandId']
-                # product.subject_id = item['subjectId']
-                product.rating = item['rating']
-                product.feedbacks = item['feedbacks']
-                # product.is_new = item.get('isNew', False)
-
-                product.price = price
-                # product.priceU = item.get('priceU') / 100
-                # product.quantity = quantity
-                product.quantity_fbo = quantity_fbo
-                product.quantity_fbs = quantity_fbs
-                # product.sales = sales
-                product.sales_fbo = sales_fbo
-                product.sales_fbs = sales_fbs
-                product.profit_fbo = sales_fbo * price
-                product.profit_fbs = sales_fbs * price
-                product.parsed_at = datetime.now(timezone.utc)
-
-                if last_sale and last_sale.date.date() == datetime.now(
-                        timezone.utc).date():
-                    # last_sale.sales_fbo = sales_fbo
-                    # last_sale.sales_fbs = sales_fbs
-                    # last_sale.price = price
-                    # last_sale.profit_fbo = sales_fbo * price
-                    # last_sale.profit_fbs = sales_fbs * price
-                    # last_sale.quantity_fbo = quantity_fbo
-                    # last_sale.quantity_fbs = quantity_fbs
-                    # last_sale.date = datetime.now(timezone.utc)
-                    # last_sale.save()
-                    pass
-                else:
-                    product.sale_set.create(
-                        # sales=sales,
+                    product.productstat_set.create(
                         sales_fbo=sales_fbo,
                         sales_fbs=sales_fbs,
                         price=price,
-                        # profit=sales * price,
+                        priceU=priceU,
                         profit_fbo=sales_fbo * price,
                         profit_fbs=sales_fbs * price,
-                        # quantity=quantity,
                         quantity_fbo=quantity_fbo,
                         quantity_fbs=quantity_fbs,
                         date=datetime.now(timezone.utc)
                     )
-
-                if self.query is None and self.category.wb_id not in product.categories:
-                    product.categories.append(self.category.wb_id)
-
-                # self.get_old_data(product)
                 self.product_calculate(product)
                 product.save()
 
-            elif detail and item.get('name', '').strip():
+            else:
                 product = Product(
                     articul=item['id'],
-                    name=item['name'],
+                    name=name,
                     brand=item['brand'],
                     brand_id=item['siteBrandId'],
                     categories=[self.category.wb_id],
-                    # subject_id=item['subjectId'],
                     rating=item['rating'],
                     feedbacks=item['feedbacks'],
-                    # is_new=item.get('isNew', False),
+                    priceU=priceU,
                     price=price,
-                    quantity_fbo=quantity_fbo,
-                    quantity_fbs=quantity_fbs,
                     parsed_at=datetime.now(timezone.utc),
                 )
                 self.text_process(product)
                 product.save()
-                product.sale_set.create(
+                product.productstat_set.create(
                     quantity_fbo=quantity_fbo,
                     quantity_fbs=quantity_fbs,
                     price=price,
+                    priceU=priceU,
                     date=datetime.now(timezone.utc)
                 )
-                # print('get_old_data', product.articul)
-                # self.get_old_data(product)
-                # self.product_calculate(product)
-                # product.save()
 
     def parse_search(self, data):
         print('parse_search', self.query)
@@ -666,37 +592,39 @@ class Parser(object):
         # - Оборот в категории месяц назад и сейчас отличается
         # не более чем на +-10%
         # Если все условия пройдены - то информация о нише и топ 50 товарах
-        # отправляются в раздел ""топ категории"" для декады делим месяц на три
-
-        # class Stat(models.Model):
-        #     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-        #     date = models.DateTimeField(auto_now=True)
-        #     fb = models.CharField(max_length=3)
-        #     period = models.IntegerField()
-        #     product_first_profit = models.BigIntegerField(blank=True, null=True)
-        #     product_ten_profit = models.BigIntegerField(blank=True, null=True)
-        #     products_count = models.IntegerField(blank=True, null=True)
-        #     products_price = models.IntegerField(blank=True, null=True)
-        #     products_solded = models.IntegerField(blank=True, null=True)
-        #     products_profit = models.BigIntegerField(blank=True, null=True)
-        #     products_solded_rel = models.IntegerField(blank=True, null=True)
-        #     sellers_solded_rel = models.IntegerField(blank=True, null=True)
-        #     top = models.BooleanField(blank=True, null=True)
+        # отправляются в раздел ""топ категории""
+        update = {}
+        product_ids = Product.objects.filter(
+            categories__contains=[category.wb_id]).values_list('id', flat=True)
+        update['products_count'] = product_ids.count()
+        productstats = ProductStat.objects.filter(
+            parsing_id=self.config.current_parsing_id,
+            product_id__in=product_ids)
+        agg = productstats.aggregate(Sum('profit_fbo'), Avg('price'))
+        update['price'] = agg['price__avg']
+        
         for period in [7, 14, 30]:
-            end_prev_period = (datetime.now(timezone.utc) - timedelta(
-                days=period)).replace(hour=0, minute=0, second=0, 
-                                      microsecond=0)
-            start_prev_period = self.end_prev_period - timedelta(days=period)
-            print(category.name)
             for fb in ['fbo', 'fbs']:
+                field = f'profit_{period}_{fb}'
+                pstats = productstats.order_by('-{field}').values()
+                update[field] = sum([pstat[field] for pstat in pstats])
+                if update['products_count'] > 300:
+                    continue
+                if pstats[0][field] < self.profit_first_top / 30 * period:
+                    continue
+                if pstats[9][field] < self.profit_ten_top / 30 * period:
+                    continue
+                update[f'top_{period}_{fb}'] = True
+
+                # .aggregate(Sum(field))
+                
                 stat = Stat(
                     category=category, 
                     date=datetime.now(timezone.utc),
                     fb=fb,
                     period=period,
                 )
-                products = Product.objects.prefetch_related('sale_set').filter(
-                    categories__contains=[category.wb_id])
+                
                 # last_sales = product.sale_set.all()[:30]
                 stat.products_count = products.count()
                 
@@ -782,6 +710,13 @@ class Parser(object):
             category.calculated = True
             category.save()
             print(category)
+        CategoryStat.objects.filter(pk=stat.id).update(**update)
+        stat = category.categorystat_set.filter(
+        parsing_id=self.config.current_parsing_id).first()
+        if stat is None:
+            stat = category.categorystat_set.create(
+                parsing_id=self.config.current_parsing_id)
+        stat.save()
 
     def calculate_queries(self):
         query = Query.objects.filter(
