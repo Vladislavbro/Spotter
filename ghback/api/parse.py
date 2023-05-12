@@ -1,7 +1,7 @@
 import requests
 # from api.mongo_models import Categories, Products, Config, Queries
 from django.forms.models import model_to_dict
-from django.db.models import Sum, Avg
+from django.db.models import Sum, Avg, Q, Count
 from api.models import Category, Product, Config, Query, ProductStat, CategoryStat
 from time import sleep
 from datetime import datetime, timedelta, timezone
@@ -597,125 +597,109 @@ class Parser(object):
         product_ids = Product.objects.filter(
             categories__contains=[category.wb_id]).values_list('id', flat=True)
         update['products_count'] = product_ids.count()
-        productstats = ProductStat.objects.filter(
-            parsing_id=self.config.current_parsing_id,
-            product_id__in=product_ids)
-        agg = productstats.aggregate(Sum('profit_fbo'), Avg('price'))
-        update['price'] = agg['price__avg']
+        last_agg = ProductStat.objects.select_related('product').filter(
+            parsing_id=self.config.last_parsing_id,
+            product_id__in=product_ids
+        ).aggregate(
+            sold_7_fbo=Count('sales_7_fbo', filter=Q(sales_7_fbo__gt=0)),
+            sold_14_fbo=Count('sales_14_fbo', filter=Q(sales_14_fbo__gt=0)),
+            sold_30_fbo=Count('sales_30_fbo', filter=Q(sales_30_fbo__gt=0)),
+            sold_7_fbs=Count('sales_7_fbs', filter=Q(sales_7_fbs__gt=0)),
+            sold_14_fbs=Count('sales_14_fbs', filter=Q(sales_14_fbs__gt=0)),
+            sold_30_fbs=Count('sales_30_fbs', filter=Q(sales_30_fbs__gt=0)),
+            sellers_solded_7_fbo=Count('product__brand_id', filter=Q(
+                sales_7_fbo__gt=0), distinct=True),
+            sellers_solded_7_fbs=Count('product__brand_id', filter=Q(
+                sales_7_fbs__gt=0), distinct=True),
+            sellers_solded_14_fbo=Count('product__brand_id', filter=Q(
+                sales_14_fbo__gt=0), distinct=True),
+            sellers_solded_14_fbs=Count('product__brand_id', filter=Q(
+                sales_14_fbs__gt=0), distinct=True),
+            sellers_solded_30_fbo=Count('product__brand_id', filter=Q(
+                sales_30_fbo__gt=0), distinct=True),
+            sellers_solded_30_fbs=Count('product__brand_id', filter=Q(
+                sales_30_fbs__gt=0), distinct=True),
+        )
+        update['products_solded_7_fbo'] = last_agg['sold_7_fbo'] / len(product_ids) * 100
+        update['products_solded_7_fbs'] = last_agg['sold_7_fbs'] / len(product_ids) * 100
+        update['products_solded_14_fbo'] = last_agg['sold_14_fbo'] / len(product_ids) * 100
+        update['products_solded_14_fbs'] = last_agg['sold_14_fbs'] / len(product_ids) * 100
+        update['products_solded_30_fbo'] = last_agg['sold_30_fbo'] / len(product_ids) * 100
+        update['products_solded_30_fbs'] = last_agg['sold_30_fbs'] / len(product_ids) * 100
+        update['sellers_solded_7_fbo'] = last_agg['sellers_solded_7_fbo']
+        update['sellers_solded_7_fbs'] = last_agg['sellers_solded_7_fbs']
+        update['sellers_solded_14_fbo'] = last_agg['sellers_solded_14_fbo']
+        update['sellers_solded_14_fbs'] = last_agg['sellers_solded_14_fbs']
+        update['sellers_solded_30_fbo'] = last_agg['sellers_solded_30_fbo']
+        update['sellers_solded_30_fbs'] = last_agg['sellers_solded_30_fbs']
         
         for period in [7, 14, 30]:
+            start = (datetime.now() - timedelta(days=period)).replace(
+                hour=0, minute=0, second=0, microsecond=0).timestamp()
+            parsing_ids = Config.objects.filter(
+                current_parsing_id__gte=start
+            ).values_list('current_parsing_id', flat=True)
+            if len(parsing_ids) == 0:
+                continue
+            productstats = ProductStat.objects.select_related('product').filter(
+                parsing_id__in=parsing_ids,
+                product_id__in=product_ids
+            )
+            agg = productstats.aggregate(
+                Avg('price'),
+                Sum('profit_fbo'),
+                Sum('profit_fbs'),
+                sellers=Count('product__brand_id', distinct=True),
+            )
+            update[f'price_avg_{period}'] = agg['price__avg']
+            update[f'profit_{period}_fbo'] = agg['profit_fbo__sum']
+            update[f'profit_{period}_fbs'] = agg['profit_fbs__sum']
+            update[f'sellers_count_{period}'] = agg['sellers']
+
+            if update['products_count'] > 300:
+                continue
+
+            prev_parsing = Config.objects.filter(
+                current_parsing_id__lt=start).first()
+            prev_stat = CategoryStat.objects.filter(
+                category_id=category.id,
+                parsing_id=prev_parsing.current_parsing_id).first()
+
             for fb in ['fbo', 'fbs']:
                 field = f'profit_{period}_{fb}'
-                pstats = productstats.order_by('-{field}').values()
-                update[field] = sum([pstat[field] for pstat in pstats])
-                if update['products_count'] > 300:
-                    continue
+                pstats = productstats.order_by('-{field}')[:9].values()
+                # update[field] = sum([pstat[field] for pstat in pstats])
+                # - Оборот первого товара не меньше 500к
                 if pstats[0][field] < self.profit_first_top / 30 * period:
                     continue
+                # оборот десятого товара не меньше 100к
                 if pstats[9][field] < self.profit_ten_top / 30 * period:
                     continue
+                # - Количество товаров с продажами: не меньше 20%
+                if update[f'products_solded_{period}_{fb}'] < 20:
+                    continue
+                # - Оборот в категории месяц назад и сейчас отличается
+                # не более чем на +-10%
+                if prev_stat is None:
+                    continue
+                _prev_stat = model_to_dict(prev_stat)
+                if update[field] < _prev_stat[field] * 0.9:
+                    continue
+                if update[field] > _prev_stat[field] * 1.1:
+                    continue
+                # - Средний чек в категории месяц назад и сейчас отличается не более
+                # чем на +-10%
+                if update[f'price_avg_{period}'] < _prev_stat[f'price_avg_{period}'] * 0.9:
+                    continue
+                if update[f'price_avg_{period}'] > _prev_stat[f'price_avg_{period}'] * 1.1:
+                    continue
                 update[f'top_{period}_{fb}'] = True
-
-                # .aggregate(Sum(field))
-                
-                stat = Stat(
-                    category=category, 
-                    date=datetime.now(timezone.utc),
-                    fb=fb,
-                    period=period,
-                )
-                
-                # last_sales = product.sale_set.all()[:30]
-                stat.products_count = products.count()
-                
-                # products[11].sale_set.filter(date__gte=start_prev_period, date__lt=end_prev_period).count()
-
-                top_products = products.exclude(
-                    current_hom_sales=None).order_by('-current_hom_sales')[0:50]
-                stat.products_solded = products.filter(
-                    current_hom_sales__gt=0).count()
-            
-            category.products_with_sales = products.filter(
-                current_hom_sales__gt=0).count()
-            category.profit_period = self.get_sum([
-                [s.profit or ((s.sales or 0) * (s.price or p.price or 0))
-                for s in p.sale_set.filter(date__gte=self.end_prev_period)]
-                for p in products])
-            category.profit_prev_period = self.get_sum([
-                [s.profit or ((s.sales or 0) * (s.price or p.price or 0))
-                for s in p.sale_set.filter(
-                    date__gte=self.start_prev_period,
-                    date__lt=self.end_prev_period)]
-                for p in products])
-
-            category.sellers = len(list(set([p.brand_id for p in products])))
-            category.sellers_with_sales = len(list(set([
-                p.brand_id for p
-                in products.filter(current_hom_sales__gt=0)])))
-            category.avg_price_prev_period = self.get_avg([
-                [s.price for s in p.sale_set.filter(
-                    price__gt=0, date__gte=self.start_prev_period,
-                    date__lt=self.end_prev_period)] for p in products])
-            category.avg_price_period = self.get_avg([
-                [s.price for s in p.sale_set.filter(
-                    price__gt=0, date__gte=self.end_prev_period)]
-                for p in products])
-            category.sales_period = self.get_sum([
-                [(s.sales or 0) for s in p.sale_set.filter(
-                    date__gte=self.end_prev_period)
-                ] for p in products])
-
-            category.first_product_price = top_products[0].price
-            category.first_product_sales = top_products[0].current_hom_sales
-            category.first_product_profit = (
-                (top_products[0].current_hom_sales or 0)
-                *
-                (top_products[0].price or 0)
-            )
-            category.ten_product_price = top_products[9].price
-            category.ten_product_sales = top_products[9].current_hom_sales
-            category.ten_product_profit = (
-                (top_products[9].current_hom_sales or 0)
-                *
-                (top_products[9].price or 0)
-            )
-            category.rel_sellers = category.sellers_with_sales / category.sellers
-            category.rel_sales = category.products_with_sales / category.products_count
-
-            if category.first_product_profit >= self.profit_first_top:
-                category.first_product_profit_top = True
-            if category.ten_product_profit >= self.profit_ten_top:
-                category.ten_product_profit_top = True
-            if category.rel_sales >= 1/5:
-                category.rel_sales_top = True
-            if (
-                    category.avg_price_period >=
-                    category.avg_price_prev_period * 0.9 and
-                    category.avg_price_period <=
-                    category.avg_price_prev_period * 1.1):
-                category.avg_price_top = True
-            if (
-                    category.profit_period >=
-                    category.profit_prev_period * 0.9 and
-                    category.profit_period <=
-                    category.profit_prev_period * 1.1):
-                category.profit_top = True
-            if (
-                    category.first_product_profit_top and
-                    category.ten_product_profit_top and
-                    category.rel_sales_top and
-                    category.avg_price_top and
-                    category.profit_top):
-                category.top = True
-            category.calculated = True
-            category.save()
-            print(category)
-        CategoryStat.objects.filter(pk=stat.id).update(**update)
         stat = category.categorystat_set.filter(
-        parsing_id=self.config.current_parsing_id).first()
+            parsing_id=self.config.current_parsing_id).first()
         if stat is None:
             stat = category.categorystat_set.create(
                 parsing_id=self.config.current_parsing_id)
+        CategoryStat.objects.filter(pk=stat.id).update(**update)
         stat.save()
 
     def calculate_queries(self):
