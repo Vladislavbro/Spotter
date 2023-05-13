@@ -133,26 +133,26 @@ class Parser(object):
         categories = Category.objects.filter(parse=True)
         for category in categories:
             self.category = category
-            products = Product.objects.filter(
-                categories__contains=[self.category.wb_id])
-            top_products = products.filter(
-                last_hom_profit__gte=10000/3,
-                current_hom_sales__gt=0,
-            ).exclude(root=None).order_by('-current_hom_sales')[0:50]
-            for top in top_products:
-                features = top.features
+            product_ids = Product.objects.filter(
+                categories__contains=[self.category.wb_id]
+            ).exclude(root=None).values_list('id', flat=True)
+            pstats = ProductStat.objects.select_related('product').filter(
+                parsing_id=self.config.current_parsing_id,
+                product_id__in=product_ids).order_by('-profit_30_fbo')[0:50]
+            for pstat in pstats:
+                features = pstats.product.features
                 features.sort()
                 q = Query.objects.filter(
-                    root=top.root,
+                    root=pstats.product.root,
                     features=features,
-                    current_parsing_id=self.config.current_parsing_id
+                    parsing_id=self.config.current_parsing_id
                 ).first()
                 if q is None:
                     q = Query(
-                        root=top.root,
+                        root=pstats.product.root,
                         features=features,
                         category_id=category.id,
-                        current_parsing_id=self.config.current_parsing_id
+                        parsing_id=self.config.current_parsing_id
                     )
                     q.save()
                     print(q.root, q.features)
@@ -597,6 +597,8 @@ class Parser(object):
         product_ids = Product.objects.filter(
             categories__contains=[category.wb_id]).values_list('id', flat=True)
         update['products_count'] = product_ids.count()
+        if len(update['products_count'] == 0):
+            return
         last_agg = ProductStat.objects.select_related('product').filter(
             parsing_id=self.config.last_parsing_id,
             product_id__in=product_ids
@@ -632,7 +634,10 @@ class Parser(object):
         update['sellers_solded_14_fbs'] = last_agg['sellers_solded_14_fbs']
         update['sellers_solded_30_fbo'] = last_agg['sellers_solded_30_fbo']
         update['sellers_solded_30_fbs'] = last_agg['sellers_solded_30_fbs']
-        
+        productstats_current = ProductStat.objects.filter(
+            parsing_id=self.config.current_parsing_ids,
+            product_id__in=product_ids
+        )
         for period in [7, 14, 30]:
             start = (datetime.now() - timedelta(days=period)).replace(
                 hour=0, minute=0, second=0, microsecond=0).timestamp()
@@ -667,7 +672,7 @@ class Parser(object):
 
             for fb in ['fbo', 'fbs']:
                 field = f'profit_{period}_{fb}'
-                pstats = productstats.order_by('-{field}')[:9].values()
+                pstats = productstats_current.order_by('-{field}')[:9].values()
                 # update[field] = sum([pstat[field] for pstat in pstats])
                 # - Оборот первого товара не меньше 500к
                 if pstats[0][field] < self.profit_first_top / 30 * period:
@@ -700,7 +705,6 @@ class Parser(object):
             stat = category.categorystat_set.create(
                 parsing_id=self.config.current_parsing_id)
         CategoryStat.objects.filter(pk=stat.id).update(**update)
-        stat.save()
 
     def calculate_queries(self):
         query = Query.objects.filter(
@@ -732,101 +736,103 @@ class Parser(object):
         pass
 
     def calculate_query(self, query):
-        end_prev_7 = (
-            datetime.now(timezone.utc) - timedelta(days=7)).replace(
-            hour=0, minute=0, second=0, microsecond=0)
-        start_prev_7 = end_prev_7 - timedelta(days=7)
-        end_prev_14 = (datetime.now(timezone.utc) - timedelta(
-            days=14)).replace(hour=0, minute=0, second=0, microsecond=0)
-        start_prev_14 = end_prev_14 - timedelta(days=14)
-        end_prev_30 = (datetime.now(timezone.utc) - timedelta(
-            days=30)).replace(hour=0, minute=0, second=0, microsecond=0)
-        start_prev_30 = end_prev_30 - timedelta(days=30)
-        products = Product.objects.prefetch_related('sale_set').filter(
-            root=query.root,
-            features=query.features,
-        ).order_by('-current_hom_sales')
-        # products = Product.objects.prefetch_related('sale_set').filter(
-        #     articul__in=query.articuls
-        # ).order_by('-current_hom_sales')
-        # .fields(slice__sizes=[-30, 30])
-        products_count = products.count()
-        print('calculate_query', products_count)
-        query.products_count = products_count
-        if products_count >= 10 and products_count <= 2500:
-            query.first_product_hom_profit = (
-                (products[0].current_hom_sales or 0)
-                *
-                (products[0].price or 0)
+        update = {}
+        product_ids = Product.objects.filter(
+            root=query.root, features_contains=query.features
+        ).values_list('id', flat=True)
+        update['products_count'] = product_ids.count()
+        if len(update['products_count'] == 0):
+            return
+        last_agg = ProductStat.objects.filter(
+            parsing_id=self.config.last_parsing_id,
+            product_id__in=product_ids
+        ).aggregate(
+            sold_7_fbo=Count('sales_7_fbo', filter=Q(sales_7_fbo__gt=0)),
+            sold_14_fbo=Count('sales_14_fbo', filter=Q(sales_14_fbo__gt=0)),
+            sold_30_fbo=Count('sales_30_fbo', filter=Q(sales_30_fbo__gt=0)),
+            sold_7_fbs=Count('sales_7_fbs', filter=Q(sales_7_fbs__gt=0)),
+            sold_14_fbs=Count('sales_14_fbs', filter=Q(sales_14_fbs__gt=0)),
+            sold_30_fbs=Count('sales_30_fbs', filter=Q(sales_30_fbs__gt=0)),
+        )
+        update['products_solded_7_fbo'] = last_agg['sold_7_fbo'] / len(product_ids) * 100
+        update['products_solded_7_fbs'] = last_agg['sold_7_fbs'] / len(product_ids) * 100
+        update['products_solded_14_fbo'] = last_agg['sold_14_fbo'] / len(product_ids) * 100
+        update['products_solded_14_fbs'] = last_agg['sold_14_fbs'] / len(product_ids) * 100
+        update['products_solded_30_fbo'] = last_agg['sold_30_fbo'] / len(product_ids) * 100
+        update['products_solded_30_fbs'] = last_agg['sold_30_fbs'] / len(product_ids) * 100
+
+        productstats_current = ProductStat.objects.filter(
+            parsing_id=self.config.current_parsing_ids,
+            product_id__in=product_ids
+        )
+        for period in [7, 14, 30]:
+            start = (datetime.now() - timedelta(days=period)).replace(
+                hour=0, minute=0, second=0, microsecond=0).timestamp()
+            parsing_ids = Config.objects.filter(
+                current_parsing_id__gte=start
+            ).values_list('current_parsing_id', flat=True)
+            if len(parsing_ids) == 0:
+                continue
+            productstats = ProductStat.objects.filter(
+                parsing_id__in=parsing_ids,
+                product_id__in=product_ids
             )
-            query.ten_product_hom_profit = (
-                (products[9].current_hom_sales or 0)
-                *
-                (products[9].price or 0)
+            agg = productstats.aggregate(
+                Avg('price'),
+                Sum('profit_fbo'),
+                Sum('profit_fbs'),
             )
-            query.products_with_sales = products.filter(
-                current_hom_sales__gt=0).count()
-            query.rel_products_with_sales = int(
-                query.products_with_sales * 100 / query.products_count)
-            query.avg_price_prev_period = self.get_avg(
-                [[s.price for s in p.sale_set.filter(
-                    price__gt=0, date__gte=self.start_prev_period,
-                    date__lt=self.end_prev_period)] for p in products]
+            update[f'price_avg_{period}'] = agg['price__avg']
+            update[f'profit_{period}_fbo'] = agg['profit_fbo__sum']
+            update[f'profit_{period}_fbs'] = agg['profit_fbs__sum']
+
+            start_prev = (start - timedelta(days=period))
+            parsing_ids_prev = Config.objects.filter(
+                current_parsing_id__gte=start_prev,
+                current_parsing_id__lt=start,
+            ).values_list('current_parsing_id', flat=True)
+            productstats_prev = ProductStat.objects.filter(
+                parsing_id__in=parsing_ids_prev,
+                product_id__in=product_ids
             )
-            query.avg_price_period = self.get_avg(
-                [[s.price for s in p.sale_set.filter(
-                    price__gt=0, date__gte=self.end_prev_period)] 
-                    for p in products]
+            agg_prev = productstats_prev.aggregate(
+                Avg('price'),
+                Sum('profit_fbo'),
+                Sum('profit_fbs'),
             )
-            query.profit_prev_period = self.get_sum(
-                [[s.profit or ((s.sales or 0) *
-                               (s.price or p.price or 0))
-                  for s in p.sale_set.filter(
-                      date__gte=self.start_prev_period,
-                      date__lt=self.end_prev_period)]
-                 for p in products]
-            )
-            query.profit_period = self.get_sum(
-                [[s.profit or ((s.sales or 0) *
-                               (s.price or p.price or 0))
-                  for s in p.sale_set.filter(
-                      date__gte=self.end_prev_period)]
-                 for p in products]
-            )
-            # Оборот первого не меньше 500к -> 300к
-            if query.first_product_hom_profit >= 300000 / 2:
-                query.first_product_profit_top = True
-            # оборот десятого не меньше 100к -> 70к
-            if query.ten_product_hom_profit >= 70000 / 2:
-                query.ten_product_profit_top = True
-            # Количество товаров с продажами: не меньше 20%
-            if query.products_with_sales / products.count() >= 1/5:
-                query.products_with_sales_top = True
-            # Средний чек в категории месяц назад и сейчас
-            # отличается не более чем на +/- 10% -> 40%
-            if (
-                    query.avg_price_period >=
-                    query.avg_price_prev_period * 0.6 and
-                    query.avg_price_period <=
-                    query.avg_price_prev_period * 1.4):
-                query.avg_price_top = True
-            # Оборот в категории месяц назад и сейчас отличается
-            # не более чем на +/- 10%
-            if (
-                    query.profit_period >= query.profit_prev_period * 0.6 and
-                    query.profit_period <= query.profit_prev_period * 1.4):
-                query.profit_top = True
-            if (
-                    query.first_product_profit_top and
-                    query.ten_product_profit_top and
-                    query.products_with_sales_top and
-                    query.avg_price_top and
-                    query.profit_top):
-                query.top = True
-        query.calculated = True
-        # print(model_to_dict(query))
-        query.save()
-        print(query)
+            for fb in ['fbo', 'fbs']:
+                field = f'profit_{period}_{fb}'
+                pstats = productstats_current.order_by('-{field}')[:9].values()
+                update[f'product_1_{field}'] = pstats[0][field]
+                if len(pstats) < 11:
+                    continue
+                update[f'product_10_{field}'] = pstats[9][field]
+                if len(pstats) > 2500:
+                    continue
+                # Оборот первого не меньше 300к в месяц
+                if update[f'product_1_{field}'] < 300000 * period / 30:
+                    continue
+                # оборот десятого не меньше 70к в месяц
+                if update[f'product_10_{field}'] < 70000 * period / 30:
+                    continue
+                # Количество товаров с продажами: не меньше 20%
+                if update[f'products_solded_{period}_{fb}'] < 20:
+                    continue
+                # Средний чек в категории месяц назад и сейчас
+                # отличается не более чем на +/- 40%
+                if update[f'price_avg_{period}'] < agg_prev['price__avg'] * 0.6:
+                    continue
+                if update[f'price_avg_{period}'] > agg_prev['price__avg'] * 1.4:
+                    continue
+                # Оборот в категории месяц назад и сейчас отличается
+                # не более чем на +/- 10%
+                if update[field] < agg_prev[f'profit_{fb}__sum'] * 0.9:
+                    continue
+                if update[field] > agg_prev[f'profit_{fb}__sum'] * 1.1:
+                    continue
+                update[f'top_{period}_{fb}'] = True
+        update['calculated'] = True
+        Query.objects.filter(pk=query.id).update(**update)
 
     def calculate_products(self):
         # "Товары в этот раздел отбираются по следующему принципу:
