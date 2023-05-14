@@ -501,6 +501,7 @@ class Parser(object):
                         sales_fbs = 0
 
                     pstat = product.productstat_set.create(
+                        parsing_id=self.config.current_parsing_id,
                         sales_fbo=sales_fbo,
                         sales_fbs=sales_fbs,
                         price=price,
@@ -530,6 +531,7 @@ class Parser(object):
                 self.text_process(product)
                 product.save()
                 product.productstat_set.create(
+                    parsing_id=self.config.current_parsing_id,
                     quantity_fbo=quantity_fbo,
                     quantity_fbs=quantity_fbs,
                     price=price,
