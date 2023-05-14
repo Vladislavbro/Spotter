@@ -110,9 +110,9 @@ class Parser(object):
         if self.config.parsing_done is not True:
             self.notify('Парсинг категорий начался')
             self.get_category()
-            # elif self.config.queries_done is not True:
-            #     self.notify('Парсинг запросов начался')
-            #     self.get_query()
+        elif self.config.queries_done is not True:
+            self.notify('Создаются поисковые запросы')
+            self.create_queries()
         elif self.config.queries_calculated is not True:
             self.notify('Расчет запросов начался')
             self.calculate_queries()
@@ -134,7 +134,6 @@ class Parser(object):
             self.get_category()
 
     def create_queries(self):
-        self.notify('Создаются поисковые запросы')
         categories = Category.objects.filter(parse=True)
         for category in categories:
             self.category = category
@@ -145,7 +144,7 @@ class Parser(object):
                 parsing_id=self.config.current_parsing_id,
                 product_id__in=product_ids).order_by('-profit_30_fbo')[0:50]
             for pstat in pstats:
-                features = pstats.product.features
+                features = pstat.product.features
                 features.sort()
                 q = Query.objects.filter(
                     root=pstat.product.root,
@@ -247,8 +246,9 @@ class Parser(object):
             )
             self.config.parsing_done = True
             self.config.save()
-            self.create_queries()
-            return self.calculate_query()
+            # self.create_queries()
+            # return self.calculate_query()
+            return self.processing()
         else:
             if self.category.last_parsed_page:
                 self.page = self.category.last_parsed_page + 1
