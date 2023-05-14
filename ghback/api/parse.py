@@ -421,7 +421,7 @@ class Parser(object):
                             )
             product.mongo_transfered = True
 
-    def product_calculate(self, product):
+    def product_calculate(self, product, pstat):
         start = (datetime.now(timezone.utc) - timedelta(days=30)).replace(
             hour=0, minute=0, second=0, microsecond=0)
         last_stats = product.productstat_set.filter(
@@ -439,7 +439,7 @@ class Parser(object):
                               for stat in data])
                 update[f'sales_{period}_{fb}'] = sales
                 update[f'profit_{period}_{fb}'] = profit
-        product.productstat_set.first().update(**update)
+        product.productstat_set.filter(pk=pstat.id).update(**update)
 
     def parse_products(self, products):
         ids = [p['id'] for p in products]
@@ -500,7 +500,7 @@ class Parser(object):
                     if sales_fbs < 0:
                         sales_fbs = 0
 
-                    product.productstat_set.create(
+                    pstat = product.productstat_set.create(
                         sales_fbo=sales_fbo,
                         sales_fbs=sales_fbs,
                         price=price,
@@ -511,7 +511,7 @@ class Parser(object):
                         quantity_fbs=quantity_fbs,
                         date=datetime.now(timezone.utc)
                     )
-                self.product_calculate(product)
+                    self.product_calculate(product, pstat)
                 product.save()
 
             else:
