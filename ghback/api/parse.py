@@ -710,6 +710,8 @@ class Parser(object):
             stat = category.categorystat_set.create(
                 parsing_id=self.config.current_parsing_id)
         CategoryStat.objects.filter(pk=stat.id).update(**update)
+        category.calculated = True
+        category.save()
 
     def calculate_queries(self):
         query = Query.objects.filter(

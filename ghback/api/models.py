@@ -69,6 +69,7 @@ class Category(models.Model):
     current_parsing_id = models.IntegerField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     products_calculated = models.BooleanField(blank=True, null=True)
+    calculated = models.BooleanField(blank=True, null=True)
 
     class Meta():
         indexes = [
