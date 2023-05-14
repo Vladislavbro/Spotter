@@ -482,13 +482,14 @@ class Parser(object):
                 sales_fbo = 0
                 sales_fbs = 0
                 last_stat = product.productstat_set.first()
-                if last_stat.date.date() != datetime.now(timezone.utc).date():
-                    # Если последняя цена вчерашняя то посчитать разницу остатков и
-                    # записать как количество продаж
+                if last_stat is None or (last_stat.date.date() 
+                                         != datetime.now(timezone.utc).date()):
+                    # Если последняя цена вчерашняя то посчитать 
+                    # разницу остатков и записать как количество продаж
                     # sales = product.quantity - quantity
-                    if last_stat.quantity_fbo is not None:
+                    if last_stat and last_stat.quantity_fbo is not None:
                         sales_fbo = last_stat.quantity_fbo - quantity_fbo
-                    if last_stat.quantity_fbs is not None:
+                    if last_stat and last_stat.quantity_fbs is not None:
                         sales_fbs = last_stat.quantity_fbs - quantity_fbs
                     # если цифра отрицательная то вероятно поступление
                     # на склад и расчет не получится
