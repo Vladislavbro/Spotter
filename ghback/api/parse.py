@@ -62,7 +62,7 @@ class Parser(object):
     def __init__(self):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
-        self.set_period_dates()
+        # self.set_period_dates()
         self.get_wirehouses()
         self.processing()
 
@@ -148,13 +148,13 @@ class Parser(object):
                 features = pstats.product.features
                 features.sort()
                 q = Query.objects.filter(
-                    root=pstats.product.root,
+                    root=pstat.product.root,
                     features=features,
                     parsing_id=self.config.current_parsing_id
                 ).first()
                 if q is None:
                     q = Query(
-                        root=pstats.product.root,
+                        root=pstat.product.root,
                         features=features,
                         category_id=category.id,
                         parsing_id=self.config.current_parsing_id
