@@ -683,7 +683,7 @@ class Parser(object):
 
             for fb in ['fbo', 'fbs']:
                 field = f'profit_{period}_{fb}'
-                pstats = productstats_current.order_by('-{field}')[:9].values()
+                pstats = productstats_current.order_by(f'-{field}')[:9].values()
                 # update[field] = sum([pstat[field] for pstat in pstats])
                 # - Оборот первого товара не меньше 500к
                 if pstats[0][field] < self.profit_first_top / 30 * period:
@@ -813,7 +813,7 @@ class Parser(object):
             )
             for fb in ['fbo', 'fbs']:
                 field = f'profit_{period}_{fb}'
-                pstats = productstats_current.order_by('-{field}')[:9].values()
+                pstats = productstats_current.order_by(f'-{field}')[:9].values()
                 update[f'product_1_{field}'] = pstats[0][field]
                 if len(pstats) < 11:
                     continue
