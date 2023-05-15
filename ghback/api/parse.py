@@ -749,7 +749,7 @@ class Parser(object):
     def calculate_query(self, query):
         update = {}
         product_ids = Product.objects.filter(
-            root=query.root, features_contains=query.features
+            root=query.root, features__contains=query.features
         ).values_list('id', flat=True)
         update['products_count'] = product_ids.count()
         if len(update['products_count'] == 0):
