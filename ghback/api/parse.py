@@ -752,7 +752,7 @@ class Parser(object):
             root=query.root, features__contains=query.features
         ).values_list('id', flat=True)
         update['products_count'] = product_ids.count()
-        if len(update['products_count'] == 0):
+        if update['products_count'] == 0:
             return
         last_agg = ProductStat.objects.filter(
             parsing_id=self.config.current_parsing_id,
@@ -773,7 +773,7 @@ class Parser(object):
         update['products_solded_30_fbs'] = last_agg['sold_30_fbs'] / len(product_ids) * 100
 
         productstats_current = ProductStat.objects.filter(
-            parsing_id=self.config.current_parsing_ids,
+            parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
         )
         for period in [7, 14, 30]:
