@@ -125,13 +125,13 @@ class Parser(object):
         else:
             self.config.calculated = True
             self.config.save()
-            date = datetime.now(timezone.utc)
             self.config = Config(
-                current_parsing_id=int(date.timestamp()),
+                current_parsing_id=int(
+                    datetime.now(timezone.utc).timestamp()),
             )
             self.config.save()
             self.notify('Новый цикл начался')
-            self.get_category()
+            self.processing()
 
     def create_queries(self):
         categories = Category.objects.filter(parse=True)
@@ -160,6 +160,9 @@ class Parser(object):
                     )
                     q.save()
                     print(q.root, q.features)
+        self.config.queries_done = True
+        self.config.save()
+        self.processing()
 
     def update_category(self, child):
         category = Category.objects.filter(wb_id=child['id']).first()
