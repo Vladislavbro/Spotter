@@ -722,13 +722,11 @@ class Parser(object):
     def calculate_queries(self):
         query = Query.objects.filter(
             parsing_id=self.config.current_parsing_id,
-            products_count__gte=1,
         ).exclude(calculated=True).first()
         while query:
             self.calculate_query(query)
             query = Query.objects.filter(
                 parsing_id=self.config.current_parsing_id,
-                products_count__gte=1,
             ).exclude(calculated=True).first()
         self.config.queries_calculated = True
         self.config.save()
@@ -845,6 +843,7 @@ class Parser(object):
                     continue
                 update[f'top_{period}_{fb}'] = True
         update['calculated'] = True
+        print('query calculated', update)
         Query.objects.filter(pk=query.id).update(**update)
 
     def calculate_products(self):
