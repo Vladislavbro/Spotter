@@ -646,7 +646,7 @@ class Parser(object):
         update['sellers_solded_30_fbo'] = last_agg['sellers_solded_30_fbo']
         update['sellers_solded_30_fbs'] = last_agg['sellers_solded_30_fbs']
         productstats_current = ProductStat.objects.filter(
-            parsing_id=self.config.current_parsing_ids,
+            parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
         )
         for period in [7, 14, 30]:
