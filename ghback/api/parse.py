@@ -651,9 +651,9 @@ class Parser(object):
         )
         for period in [7, 14, 30]:
             start = (datetime.now() - timedelta(days=period)).replace(
-                hour=0, minute=0, second=0, microsecond=0).timestamp()
+                hour=0, minute=0, second=0, microsecond=0)
             parsing_ids = Config.objects.filter(
-                current_parsing_id__gte=start
+                current_parsing_id__gte=start.timestamp()
             ).values_list('current_parsing_id', flat=True)
             if len(parsing_ids) == 0:
                 continue
@@ -676,7 +676,7 @@ class Parser(object):
                 continue
 
             prev_parsing = Config.objects.filter(
-                current_parsing_id__lt=start).first()
+                current_parsing_id__lt=start.timestamp()).first()
             prev_stat = CategoryStat.objects.filter(
                 category_id=category.id,
                 parsing_id=prev_parsing.current_parsing_id).first()
@@ -778,9 +778,9 @@ class Parser(object):
         )
         for period in [7, 14, 30]:
             start = (datetime.now() - timedelta(days=period)).replace(
-                hour=0, minute=0, second=0, microsecond=0).timestamp()
+                hour=0, minute=0, second=0, microsecond=0)
             parsing_ids = Config.objects.filter(
-                current_parsing_id__gte=start
+                current_parsing_id__gte=start.timestamp()
             ).values_list('current_parsing_id', flat=True)
             if len(parsing_ids) == 0:
                 continue
@@ -799,7 +799,7 @@ class Parser(object):
 
             start_prev = (start - timedelta(days=period))
             parsing_ids_prev = Config.objects.filter(
-                current_parsing_id__gte=start_prev,
+                current_parsing_id__gte=start_prev.timestamp(),
                 current_parsing_id__lt=start,
             ).values_list('current_parsing_id', flat=True)
             productstats_prev = ProductStat.objects.filter(
