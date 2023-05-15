@@ -608,7 +608,7 @@ class Parser(object):
         product_ids = Product.objects.filter(
             categories__contains=[category.wb_id]).values_list('id', flat=True)
         update['products_count'] = product_ids.count()
-        if len(update['products_count'] == 0):
+        if len(update['products_count']) == 0:
             return
         last_agg = ProductStat.objects.select_related('product').filter(
             parsing_id=self.config.last_parsing_id,
