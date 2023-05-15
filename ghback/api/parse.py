@@ -800,7 +800,7 @@ class Parser(object):
             start_prev = (start - timedelta(days=period))
             parsing_ids_prev = Config.objects.filter(
                 current_parsing_id__gte=start_prev.timestamp(),
-                current_parsing_id__lt=start,
+                current_parsing_id__lt=start.timestamp(),
             ).values_list('current_parsing_id', flat=True)
             productstats_prev = ProductStat.objects.filter(
                 parsing_id__in=parsing_ids_prev,
