@@ -611,7 +611,7 @@ class Parser(object):
         if update['products_count'] == 0:
             return
         last_agg = ProductStat.objects.select_related('product').filter(
-            parsing_id=self.config.last_parsing_id,
+            parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
         ).aggregate(
             sold_7_fbo=Count('sales_7_fbo', filter=Q(sales_7_fbo__gt=0)),
@@ -757,7 +757,7 @@ class Parser(object):
         if len(update['products_count'] == 0):
             return
         last_agg = ProductStat.objects.filter(
-            parsing_id=self.config.last_parsing_id,
+            parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
         ).aggregate(
             sold_7_fbo=Count('sales_7_fbo', filter=Q(sales_7_fbo__gt=0)),
