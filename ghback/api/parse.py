@@ -610,6 +610,9 @@ class Parser(object):
         update['products_count'] = product_ids.count()
         print('calculate_category', update)
         if update['products_count'] == 0:
+            CategoryStat.objects.filter(pk=stat.id).update(**update)
+            category.calculated = True
+            category.save()
             return
         productstats_current = ProductStat.objects.filter(
             parsing_id=self.config.current_parsing_id,
