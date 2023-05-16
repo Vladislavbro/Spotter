@@ -608,12 +608,14 @@ class Parser(object):
         product_ids = Product.objects.filter(
             categories__contains=[category.wb_id]).values_list('id', flat=True)
         update['products_count'] = product_ids.count()
+        print('calculate_category', update)
         if update['products_count'] == 0:
             return
-        last_agg = ProductStat.objects.select_related('product').filter(
+        productstats_current = ProductStat.objects.filter(
             parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
-        ).aggregate(
+        )
+        last_agg = productstats_current.aggregate(
             sold_7_fbo=Count('sales_7_fbo', filter=Q(sales_7_fbo__gt=0)),
             sold_14_fbo=Count('sales_14_fbo', filter=Q(sales_14_fbo__gt=0)),
             sold_30_fbo=Count('sales_30_fbo', filter=Q(sales_30_fbo__gt=0)),
@@ -645,11 +647,11 @@ class Parser(object):
         update['sellers_solded_14_fbs'] = last_agg['sellers_solded_14_fbs']
         update['sellers_solded_30_fbo'] = last_agg['sellers_solded_30_fbo']
         update['sellers_solded_30_fbs'] = last_agg['sellers_solded_30_fbs']
-        productstats_current = ProductStat.objects.filter(
-            parsing_id=self.config.current_parsing_id,
-            product_id__in=product_ids
-        )
+        print('---')
+        print(update)
+        print('---')
         for period in [7, 14, 30]:
+            print('period', period)
             start = (datetime.now() - timedelta(days=period)).replace(
                 hour=0, minute=0, second=0, microsecond=0)
             parsing_ids = Config.objects.filter(
@@ -667,6 +669,7 @@ class Parser(object):
                 Sum('profit_fbs'),
                 sellers=Count('product__brand_id', distinct=True),
             )
+            print('agg', agg)
             update[f'price_avg_{period}'] = agg['price__avg']
             update[f'profit_{period}_fbo'] = agg['profit_fbo__sum']
             update[f'profit_{period}_fbs'] = agg['profit_fbs__sum']
