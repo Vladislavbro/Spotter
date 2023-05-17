@@ -270,6 +270,11 @@ def queries_top(request):
             current_parsing_id__gte=date,
             current_parsing_id__lt=date + 86400,
         ).first()
+        if config is None:
+            return JsonResponse({
+                'total': 0,
+                'items': []
+            })
     else:
         config = Config.objects.filter(calculated=True).first()
     items = Query.objects.filter(
