@@ -258,8 +258,8 @@ def categories_list(request):
 
 def queries_top(request):
     period = int(request.GET.get('period', '30'))
-    fb = int(request.GET.get('fb', 'fbo'))
-    page = int(request.GET.get('page'))
+    fb = request.GET.get('fb', 'fbo')
+    page = int(request.GET.get('page', '1'))
     sort = request.GET.get('sort')
     direction = request.GET.get('direction')
     if direction == 'desc':
@@ -274,7 +274,8 @@ def queries_top(request):
     )
     field = f'top_{period}_{fb}'
     items = items.filter(**{ field: True})
-    items = items.order_by(f'{direction}{sort}')
+    if sort is not None:
+        items = items.order_by(f'{direction}{sort}')
     total = items.count()
     items = items[((page - 1) * 100):page * 100]
 
