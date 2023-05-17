@@ -268,7 +268,7 @@ def queries_top(request):
         direction = ''
     config = Config.objects.filter(calculated=True).first()
     items = Query.objects.filter(
-        current_parsing_id=config.current_parsing_id,
+        parsing_id=config.current_parsing_id,
         products_count__lte=2500,
         products_count__gte=10,
     )
