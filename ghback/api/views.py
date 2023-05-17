@@ -262,19 +262,28 @@ def queries_top(request):
     page = int(request.GET.get('page', '1'))
     sort = request.GET.get('sort')
     direction = request.GET.get('direction')
-    if direction == 'desc':
-        direction = '-'
+    dateTo = request.GET.get('date')
+    if dateTo:
+        date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
+        config = Config.objects.filter(
+            calculated=True,
+            current_parsing_id__gte=date,
+            current_parsing_id__lt=date + 86400,
+        ).first()
     else:
-        direction = ''
-    config = Config.objects.filter(calculated=True).first()
+        config = Config.objects.filter(calculated=True).first()
     items = Query.objects.filter(
         parsing_id=config.current_parsing_id,
         products_count__lte=2500,
         products_count__gte=10,
     )
-    field = f'top_{period}_{fb}'
-    items = items.filter(**{ field: True})
+    # field = f'top_{period}_{fb}'
+    # items = items.filter(**{ field: True})
     if sort is not None:
+        if direction == 'desc':
+            direction = '-'
+        else:
+            direction = ''
         items = items.order_by(f'{direction}{sort}')
     total = items.count()
     items = items[((page - 1) * 100):page * 100]
