@@ -257,6 +257,8 @@ def categories_list(request):
 
 
 def queries_top(request):
+    period = int(request.GET.get('period', '30'))
+    fb = int(request.GET.get('fb', 'fbo'))
     page = int(request.GET.get('page'))
     sort = request.GET.get('sort')
     direction = request.GET.get('direction')
@@ -269,40 +271,26 @@ def queries_top(request):
         current_parsing_id=config.current_parsing_id,
         products_count__lte=2500,
         products_count__gte=10,
-        # top=True,
     )
+    field = f'top_{period}_{fb}'
+    items = items.filter(**{ field: True})
     items = items.order_by(f'{direction}{sort}')
     total = items.count()
     items = items[((page - 1) * 100):page * 100]
+
     return JsonResponse({
         'total': total,
         'items': [{
-            'id': i.id,
-            'name': i.root + ' ' + ' '.join(i.features),
-            'root': i.root,
-            'features': ' '.join(i.features),
-            'products_count': i.products_count,
-            'first_product_hom_profit': i.first_product_hom_profit,
-            'ten_product_hom_profit': i.ten_product_hom_profit,
-            'products_with_sales': i.products_with_sales,
-            'rel_products_with_sales': i.rel_products_with_sales,
-            'avg_price_prev_period': i.avg_price_prev_period,
-            'avg_price_period': i.avg_price_period,
-            'profit_prev_period': i.profit_prev_period,
-            'profit_period': i.profit_period,
-            'sellers': i.sellers,
-            'sellers_with_sales': i.sellers_with_sales,
-            'sales_period': i.sales_period,
-            'last_parsed_page': i.last_parsed_page,
-            'current_parsing_id': i.current_parsing_id,
-            'top': i.top,
-            'ten_product_profit_top': i.ten_product_profit_top,
-            'first_product_profit_top': i.first_product_profit_top,
-            'products_with_sales_top': i.products_with_sales_top,
-            'profit_top': i.profit_top,
-            'avg_price_top': i.avg_price_top,
-            'rel_sales_top': i.rel_sales_top,
-        } for i in items]
+            'id': i['id'],
+            'root': i['root'],
+            'features': ' '.join(i['features']),
+            'products_count': i['products_count'],
+            'products_solded': i[f'products_solded_{period}_{fb}'],
+            'product_1_profit': i[f'product_1_profit_{period}_{fb}'],
+            'product_10_profit': i[f'product_10_profit_{period}_{fb}'],
+            'price_avg': i[f'price_avg_{period}'],
+            'profit': i[f'profit_{period}_{fb}'],
+        } for i in items.values()]
     })
 
 
