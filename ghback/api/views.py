@@ -16,7 +16,7 @@ from api.parse import Parser
 from api.migrate import Migrate
 from api.mongo_models import Categories, Products, Queries
 from api.mongo_models import Config as ConfigMongo
-from api.models import Category, Product, Config, Query
+from api.models import Category, Product, Config, Query, CategoryStat
 
 
 def me(request):
@@ -241,18 +241,42 @@ def parser(request):
 def get_children(category, categories):
     return [{
         **c,
-        'children': get_children(c, categories)
+        'items': get_children(c, categories)
     } for c in categories if c.get('parent') == category['wb_id']]
 
 
+# def calc_stat(category):
+#     category['']
+#     category['items']
+
 def categories_list(request):
+    period = int(request.GET.get('period', '30'))
+    fb = request.GET.get('fb', 'fbo')
+    dateTo = request.GET.get('date')
+    if dateTo:
+        date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
+        config = Config.objects.filter(
+            calculated=True,
+            current_parsing_id__gte=date,
+            current_parsing_id__lt=date + 86400,
+        ).first()
+    if config is None:
+        config = Config.objects.filter(calculated=True).first()
+
     out = []
     categories = Category.objects.all().values()
-    for root in [c for c in categories if c.get('parent') is None]:
-        root['children'] = get_children(root, categories)
+    category_ids = [c['id'] for c in categories]
+    stats = CategoryStat.objects.filter(
+        category_id__in=category_ids,
+        parsing_id=config.current_parsing_id)
+    roots = [c for c in categories if c.get('parent') is None]
+    for root in roots:
+        root['items'] = get_children(root, categories)
+        # calc_stat(root)
         out.append(root)
     return JsonResponse({
-        'categories': out
+        'total': categories.count(),
+        'items': out
     })
 
 
@@ -310,12 +334,28 @@ def queries_top(request):
 
 
 def export_queries(request):
-    config = Config.objects(calculated=True).first()
+    period = int(request.GET.get('period', '30'))
+    fb = request.GET.get('fb', 'fbo')
+    page = int(request.GET.get('page', '1'))
+    sort = request.GET.get('sort')
+    direction = request.GET.get('direction')
+    dateTo = request.GET.get('date')
+    config = None
+    if dateTo:
+        date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
+        config = Config.objects.filter(
+            calculated=True,
+            current_parsing_id__gte=date,
+            current_parsing_id__lt=date + 86400,
+        ).first()
+    if config is None:
+        config = Config.objects.filter(calculated=True).first()
     items = Queries.objects(
-        # current_parsing_id=config.current_parsing_id,
-        current_parsing_id=1672043096,
+        current_parsing_id=config.current_parsing_id,
         root__ne=None
     )
+    field = f'top_{period}_{fb}'
+    items = items.filter(**{ field: True})
     fields = ['Корень', 'Характеристики', 'Кол-во товаров',
               'Товары с продажами', 'Товары с продажами',
               'Оборот первого товара', 'Оборот десятого товара',

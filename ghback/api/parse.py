@@ -781,6 +781,7 @@ class Parser(object):
             parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
         )
+        deleteQuery = True
         for period in [7, 14, 30]:
             start = (datetime.now() - timedelta(days=period)).replace(
                 hour=0, minute=0, second=0, microsecond=0)
@@ -847,9 +848,13 @@ class Parser(object):
                 if update[field] > agg_prev[f'profit_{fb}__sum'] * 1.1:
                     continue
                 update[f'top_{period}_{fb}'] = True
-        update['calculated'] = True
-        print('query calculated', update)
-        Query.objects.filter(pk=query.id).update(**update)
+                deleteQuery = False
+        if deleteQuery:
+            query.delete()
+        else:
+            update['calculated'] = True
+            print('query calculated TOP', update)
+            Query.objects.filter(pk=query.id).update(**update)
 
     def calculate_products(self):
         # "Товары в этот раздел отбираются по следующему принципу:
