@@ -253,6 +253,7 @@ def categories_list(request):
     period = int(request.GET.get('period', '30'))
     fb = request.GET.get('fb', 'fbo')
     dateTo = request.GET.get('date')
+    config = None
     if dateTo:
         date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
         config = Config.objects.filter(
@@ -262,7 +263,6 @@ def categories_list(request):
         ).first()
     if config is None:
         config = Config.objects.filter(calculated=True).first()
-
     out = []
     categories = Category.objects.all().values()
     category_ids = [c['id'] for c in categories]
