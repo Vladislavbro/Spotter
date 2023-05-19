@@ -54,6 +54,8 @@ class Config(models.Model):
 
 class Category(models.Model):
     mongo_id = models.CharField(max_length=24, blank=True, null=True)
+    parsed_ids = ArrayField(ArrayField(models.IntegerField(blank=True)),
+                            default=[])
     name = models.CharField(max_length=200)
     wb_id = models.IntegerField()
     parent = models.IntegerField(blank=True, null=True)

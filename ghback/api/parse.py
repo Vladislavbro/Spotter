@@ -737,6 +737,21 @@ class Parser(object):
         self.config.save()
         self.processing()
 
+    def update_parsed_parent(self, category, parent):
+        if category.id not in parent.parsed_ids:
+            parent.parsed_ids.append(category.id)
+            parent.save()
+        parent = Category.objects.filter(wb_id=parent.parent).first()
+        if parent:
+            self.update_parsed_parent(category, parent)
+
+    def update_category_tree(self):
+        Category.objects.all().update(parsed_ids=[])
+        for category in Category.objects.filter(parse=True):
+            parent = Category.objects.filter(wb_id=category.parent).first()
+            if parent:
+                self.update_parsed_parent(category, parent)
+
     def calculate_categories(self):
         category = Category.objects.filter(parse=True).exclude(
             calculated=True).first()
@@ -744,6 +759,11 @@ class Parser(object):
             self.calculate_category(category)
             category = Category.objects.filter(parse=True).exclude(
                 calculated=True).first()
+        # categories = Category.objects.all().values()
+        # category_ids = [c['id'] for c in categories]
+        # stats = CategoryStat.objects.filter(
+        #     category_id__in=category_ids,
+        #     parsing_id=self.config.current_parsing_id)
         self.config.categories_calculated = True
         self.config.save()
         self.processing()
