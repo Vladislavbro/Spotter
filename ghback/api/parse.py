@@ -750,6 +750,7 @@ class Parser(object):
         for category in Category.objects.filter(parse=True):
             parent = Category.objects.filter(wb_id=category.parent).first()
             if parent:
+                print(parent.name, category.name)
                 self.update_parsed_parent(category, parent)
 
     def calculate_categories(self):
