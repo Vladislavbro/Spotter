@@ -605,8 +605,13 @@ class Parser(object):
         # Если все условия пройдены - то информация о нише и топ 50 товарах
         # отправляются в раздел ""топ категории""
         update = {}
-        product_ids = Product.objects.filter(
-            categories__contains=[category.wb_id]).values_list('id', flat=True)
+        if len(category.parsed_ids):
+            products = Product.objects.filter(
+                categories__contains=category.parsed_ids)
+        else:
+            products = Product.objects.filter(
+                categories__contains=[category.wb_id])
+        product_ids = products.values_list('id', flat=True)
         update['products_count'] = product_ids.count()
         print('calculate_category', update)
         if update['products_count'] == 0:
@@ -765,6 +770,12 @@ class Parser(object):
         # stats = CategoryStat.objects.filter(
         #     category_id__in=category_ids,
         #     parsing_id=self.config.current_parsing_id)
+        category = Category.objects.filter(
+            parsed_ids__len__gt=0).exclude(calculated=True).first()
+        while category:
+            self.calculate_category(category)
+            category = Category.objects.filter(
+                parsed_ids__len__gt=0).exclude(calculated=True).first()
         self.config.categories_calculated = True
         self.config.save()
         self.processing()
