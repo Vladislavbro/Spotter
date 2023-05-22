@@ -681,16 +681,13 @@ class Parser(object):
             update[f'profit_{period}_fbo'] = agg['profit_fbo__sum']
             update[f'profit_{period}_fbs'] = agg['profit_fbs__sum']
             update[f'sellers_count_{period}'] = agg['sellers']
-
             if update['products_count'] > 300:
                 continue
-
             prev_parsing = Config.objects.filter(
                 current_parsing_id__lt=start.timestamp()).first()
             prev_stat = CategoryStat.objects.filter(
                 category_id=category.id,
                 parsing_id=prev_parsing.current_parsing_id).first()
-
             for fb in ['fbo', 'fbs']:
                 field = f'profit_{period}_{fb}'
                 pstats = productstats_current.order_by(f'-{field}')[:9].values()
@@ -744,7 +741,7 @@ class Parser(object):
 
     def update_parsed_parent(self, category, parent):
         if category.id not in parent.parsed_ids:
-            parent.parsed_ids.append(category.id)
+            parent.parsed_ids.append(category.wb_id)
             parent.save()
         parent = Category.objects.filter(wb_id=parent.parent).first()
         if parent:
