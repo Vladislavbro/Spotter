@@ -63,7 +63,6 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.set_period_dates()
-        self.get_wirehouses()
         self.processing()
 
     def get_wirehouses(self):
@@ -109,6 +108,7 @@ class Parser(object):
     def processing(self):
         if self.config.parsing_done is not True:
             self.notify('Парсинг категорий начался')
+            self.get_wirehouses()
             self.get_category()
         elif self.config.queries_done is not True:
             self.notify('Создаются поисковые запросы')
@@ -119,9 +119,9 @@ class Parser(object):
         elif self.config.categories_calculated is not True:
             self.notify('Расчет категорий начался')
             self.calculate_categories()
-        elif self.config.products_calculated is not True:
-            self.notify('Расчет топ товаров начался')
-            self.calculate_products()
+        # elif self.config.products_calculated is not True:
+        #     self.notify('Расчет топ товаров начался')
+        #     self.calculate_products()
         else:
             self.config.calculated = True
             self.config.save()
@@ -247,6 +247,7 @@ class Parser(object):
                 last_parsed_page_at=None,
                 start_parsing_at=None,
             )
+            Category.objects.exclude(parse=True).update(calculated=False)
             self.config.parsing_done = True
             self.config.save()
             # self.create_queries()
@@ -878,12 +879,12 @@ class Parser(object):
                     continue
                 update[f'top_{period}_{fb}'] = True
                 deleteQuery = False
-        if deleteQuery:
-            query.delete()
-        else:
-            update['calculated'] = True
-            print('query calculated TOP', update)
-            Query.objects.filter(pk=query.id).update(**update)
+        # if deleteQuery:
+        #     query.delete()
+        # else:
+        update['calculated'] = True
+        print('query calculated TOP', update)
+        Query.objects.filter(pk=query.id).update(**update)
 
     def calculate_products(self):
         # "Товары в этот раздел отбираются по следующему принципу:

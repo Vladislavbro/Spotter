@@ -1,15 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import ArrayField, HStoreField
-
-# Create your models here.
-
-# class Users(Document):
-#     telegram_id = IntField()
-#     last_name = StringField()
-#     first_name = StringField()
-#     username = StringField()
-#     created_at = DateTimeField()
+from django.contrib.postgres.fields import ArrayField
 
 
 class Customer(models.Model):
