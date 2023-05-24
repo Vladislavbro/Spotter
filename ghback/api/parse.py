@@ -475,6 +475,7 @@ class Parser(object):
                     product.name = name
                     self.text_process(product)
                 product.name = name
+                product.supplier_id = item['supplierId']
                 product.brand = item['brand']
                 product.brand_id = item['siteBrandId']
                 product.rating = item['rating']
@@ -523,6 +524,7 @@ class Parser(object):
                 product = Product(
                     articul=item['id'],
                     name=name,
+                    supplier_id=item['supplierId'],
                     brand=item['brand'],
                     brand_id=item['siteBrandId'],
                     categories=[self.category.wb_id],
@@ -608,7 +610,7 @@ class Parser(object):
         update = {}
         if len(category.parsed_ids):
             products = Product.objects.filter(
-                categories__contains=category.parsed_ids)
+                categories__overlap=category.parsed_ids)
         else:
             products = Product.objects.filter(
                 categories__contains=[category.wb_id])
@@ -675,7 +677,7 @@ class Parser(object):
                 Avg('price'),
                 Sum('profit_fbo'),
                 Sum('profit_fbs'),
-                sellers=Count('product__brand_id', distinct=True),
+                sellers=Count('product__supplier_id', distinct=True),
             )
             print('agg', agg)
             update[f'price_avg_{period}'] = agg['price__avg']
@@ -879,12 +881,12 @@ class Parser(object):
                     continue
                 update[f'top_{period}_{fb}'] = True
                 deleteQuery = False
-        # if deleteQuery:
-        #     query.delete()
-        # else:
-        update['calculated'] = True
-        print('query calculated TOP', update)
-        Query.objects.filter(pk=query.id).update(**update)
+        if deleteQuery:
+            query.delete()
+        else:
+            update['calculated'] = True
+            print('query calculated TOP', update)
+            Query.objects.filter(pk=query.id).update(**update)
 
     def calculate_products(self):
         # "Товары в этот раздел отбираются по следующему принципу:

@@ -166,6 +166,11 @@ class Query(models.Model):
         ]
 
 
+class Supplier(models.Model):
+    wb_id = models.IntegerField()
+    name = models.CharField(max_length=200)
+
+
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING,
                                  blank=True, null=True)
@@ -180,6 +185,7 @@ class Product(models.Model):
                                                       blank=True)), default=[])
     brand = models.CharField(max_length=200, blank=True, null=True)
     brand_id = models.IntegerField(blank=True, null=True)
+    supplier_id = models.IntegerField(blank=True, null=True)
     categories = ArrayField(ArrayField(models.IntegerField(blank=True)),
                             default=[])
     rating = models.FloatField(blank=True, null=True)

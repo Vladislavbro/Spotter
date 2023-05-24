@@ -5,8 +5,9 @@ from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import AnonymousUser, User
 from django.forms.models import model_to_dict
+from django.db.models import Avg, Sum, Count, Q
 from api.models import Customer, Order, Config
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.views.decorators.csrf import csrf_exempt
 # from dateutil.relativedelta import relativedelta
 import threading
@@ -15,9 +16,9 @@ import csv
 from api.parse import Parser
 from api.migrate import Migrate
 from api.mongo_models import Categories, Products, Queries
-from api.mongo_models import Config as ConfigMongo
-from api.models import Category, Product, Config, Query, CategoryStat
-
+from api.models import (Category, Product, ProductStat, 
+                        Config, Query, CategoryStat)
+from api.parse import nlp
 
 def me(request):
     print(' --- me --- ', request.get_host())
@@ -333,7 +334,91 @@ def queries_top(request):
     })
 
 
-def export_queries(request):
+def queries_search(request):
+    view = request.GET.get('view')
+    query = request.GET.get('query')
+    doc = nlp(query)
+    root = [w for w in doc if w.dep_ == 'ROOT'][0]
+    if root.tag_ != 'NOUN':
+        nsubj = [w for w in doc if w.dep_ == 'nsubj']
+        if len(nsubj):
+            root = nsubj[0]
+    query_root = root.lemma_
+    features = list(set([w.lemma_ for w in doc if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
+    features.sort()
+    query_features = features
+    period = int(request.GET.get('period', '30'))
+    fb = request.GET.get('fb', 'fbo')
+    page = int(request.GET.get('page', '1'))
+    sort = request.GET.get('sort')
+    direction = request.GET.get('direction')
+    dateTo = request.GET.get('date')
+    if dateTo:
+        date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
+        config = Config.objects.filter(
+            calculated=True,
+            current_parsing_id__gte=date,
+            current_parsing_id__lt=date + 86400,
+        ).first()
+        if config is None:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'За выбранную дату нет данных'
+            })
+    else:
+        config = Config.objects.filter(calculated=True).first()
+    product_ids = Product.objects.filter(
+        root=query_root,
+        features__contains=query_features
+    ).values_list('id', flat=True)
+    total = product_ids.count()
+    if total > 1000:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Найдено товаров {total}. Уточните запрос'
+        })
+    productstats = ProductStat.objects.prefetch_related('product').filter(
+        parsing_id=config.current_parsing_id,
+        product_id__in=product_ids
+    )
+    # field = f'top_{period}_{fb}'
+    # items = items.filter(**{ field: True})
+    if view == 'products':
+        if sort is not None:
+            if direction == 'desc':
+                direction = '-'
+            else:
+                direction = ''
+            productstats = productstats.order_by(f'{direction}{sort}')
+        return JsonResponse({
+            'total': total,
+            'items': productstats[((page - 1) * 100):page * 100].values(
+                'id', 'price', 'priceU', f'profit_{period}_{fb}', 
+                f'sales_{period}_{fb}', 'product__name', 'product__articul', 
+                'product__name', 'product__rating', 'product__feedbacks',
+            )
+        })
+    elif view == 'summary':
+        sales_field = f'sales_{period}_{fb}__gt'
+        curr_stat = productstats.aggregate(
+            Avg('price'), 
+            Count(f'sales_org', filter=Q(**{ sales_field: 0}))
+        )
+        start = (datetime.now() - timedelta(days=period)).replace(
+                hour=0, minute=0, second=0, microsecond=0)
+        prev_parsing = Config.objects.filter(
+                current_parsing_id__lt=start.timestamp()).first()
+        prev_productstats = ProductStat.objects.filter(
+                product_id__in=product_ids,
+                parsing_id=prev_parsing.current_parsing_id)
+        prev_stat = prev_productstats.aggregate(Avg('price'))
+        return JsonResponse({
+            'price_avg_diff': curr_stat['price__avg'] / prev_stat['price__avg'],
+            'sales_org': curr_stat['sales_org__count'] / total,
+        })
+
+
+def queries_export(request):
     period = int(request.GET.get('period', '30'))
     fb = request.GET.get('fb', 'fbo')
     page = int(request.GET.get('page', '1'))
