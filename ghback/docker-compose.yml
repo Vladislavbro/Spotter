@@ -14,6 +14,7 @@ services:
   #     - ./data/db:/var/lib/postgres
   db:
     image: postgres
+    shm_size: 1g
     restart: always
     ports:
       - '5432:5432'
