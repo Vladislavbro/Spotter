@@ -645,12 +645,12 @@ class Parser(object):
             sellers_solded_30_fbs=Count('product__supplier_id', filter=Q(
                 sales_30_fbs__gt=0), distinct=True),
         )
-        update['products_solded_7_fbo'] = last_agg['sold_7_fbo'] / len(product_ids) * 100
-        update['products_solded_7_fbs'] = last_agg['sold_7_fbs'] / len(product_ids) * 100
-        update['products_solded_14_fbo'] = last_agg['sold_14_fbo'] / len(product_ids) * 100
-        update['products_solded_14_fbs'] = last_agg['sold_14_fbs'] / len(product_ids) * 100
-        update['products_solded_30_fbo'] = last_agg['sold_30_fbo'] / len(product_ids) * 100
-        update['products_solded_30_fbs'] = last_agg['sold_30_fbs'] / len(product_ids) * 100
+        update['products_solded_7_fbo'] = last_agg['sold_7_fbo']  # / len(product_ids) * 100
+        update['products_solded_7_fbs'] = last_agg['sold_7_fbs']  # / len(product_ids) * 100
+        update['products_solded_14_fbo'] = last_agg['sold_14_fbo']  # / len(product_ids) * 100
+        update['products_solded_14_fbs'] = last_agg['sold_14_fbs']  # / len(product_ids) * 100
+        update['products_solded_30_fbo'] = last_agg['sold_30_fbo']  # / len(product_ids) * 100
+        update['products_solded_30_fbs'] = last_agg['sold_30_fbs']  # / len(product_ids) * 100
         update['sellers_solded_7_fbo'] = last_agg['sellers_solded_7_fbo']
         update['sellers_solded_7_fbs'] = last_agg['sellers_solded_7_fbs']
         update['sellers_solded_14_fbo'] = last_agg['sellers_solded_14_fbo']
