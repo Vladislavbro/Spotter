@@ -239,17 +239,20 @@ def parser(request):
     })
 
 
-def get_children(category, categories, stats):
+def get_children(category, categories, stats, period, fb):
     return [{
         **c,
-        'items': get_children(c, categories, stats),
-        'stat': [s for s in stats if s['category_id'] == category['id']]
+        'items': get_children(c, categories, stats, period, fb),
+        'stat': [{
+            'products_count': s['products_count'],
+            'products_solded': s[f'products_solded_{period}_{fb}'],
+            'sellers_count': s[f'sellers_count_{period}'],
+            'sellers_solded': s[f'sellers_solded_{period}_{fb}'],
+            'profit': s[f'profit_{period}_{fb}'],
+            'price_avg': s[f'price_avg_{period}'],
+        } for s in stats if s['category_id'] == category['id']]
     } for c in categories if c.get('parent') == category['wb_id']]
 
-
-# def calc_stat(category):
-#     category['']
-#     category['items']
 
 def categories_list(request):
     period = int(request.GET.get('period', '30'))
@@ -275,7 +278,7 @@ def categories_list(request):
             parsing_id=config.current_parsing_id).values()
     roots = [c for c in categories if c.get('parent') is None]
     for root in roots:
-        root['items'] = get_children(root, categories, stats)
+        root['items'] = get_children(root, categories, stats, period, fb)
         # calc_stat(root)
         out.append(root)
     return JsonResponse({
