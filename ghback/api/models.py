@@ -248,26 +248,3 @@ class ProductStat(models.Model):
             models.Index(fields=['-parsing_id']),
             models.Index(fields=['-profit_30_fbo']),
         ]
-
-
-class Sale(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField(blank=True, null=True, default=0)
-    quantity_fbo = models.IntegerField(blank=True, null=True, default=0)
-    quantity_fbs = models.IntegerField(blank=True, null=True, default=0)
-    sales = models.IntegerField(blank=True, null=True, default=0)
-    # fulfilment by operator
-    sales_fbo = models.IntegerField(blank=True, null=True, default=0)
-    # fulfilment by seller
-    sales_fbs = models.IntegerField(blank=True, null=True, default=0)
-    profit = models.BigIntegerField(blank=True, null=True, default=0)
-    profit_fbo = models.BigIntegerField(blank=True, null=True, default=0)
-    profit_fbs = models.BigIntegerField(blank=True, null=True, default=0)
-    price = models.IntegerField(blank=True, null=True, default=0)
-    date = models.DateTimeField(blank=True, null=True)
-
-    class Meta():
-        ordering = ['-date']
-        indexes = [
-            models.Index(fields=['-date']),
-        ]
