@@ -264,7 +264,7 @@ def categories_list(request):
             # current_parsing_id__lt=date + 86400,
         ).first()
     out = []
-    categories = Category.objects.values()
+    categories = Category.objects.values('id', 'name', 'parent', 'wb_id')
     category_ids = [c['id'] for c in categories]
     if config is None:
         # config = Config.objects.filter(calculated=True).first()
