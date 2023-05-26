@@ -27,7 +27,6 @@ class Order(models.Model):
 
 
 class Config(models.Model):
-    mongo_id = models.CharField(max_length=24, blank=True, null=True)
     thread_id = models.IntegerField(blank=True, null=True)
     parsing_date = models.BigIntegerField(blank=True, null=True)
     current_parsing_id = models.IntegerField(blank=True, null=True)
@@ -44,7 +43,6 @@ class Config(models.Model):
 
 
 class Category(models.Model):
-    mongo_id = models.CharField(max_length=24, blank=True, null=True)
     parsed_ids = ArrayField(ArrayField(models.IntegerField(blank=True)),
                             default=[])
     name = models.CharField(max_length=200)
@@ -200,13 +198,8 @@ class Product(models.Model):
         indexes = [
             models.Index(fields=['articul']),
             models.Index(fields=['categories']),
-            # models.Index(fields=['queries']),
             models.Index(fields=['parsed_at']),
             models.Index(fields=['root', 'features']),
-            # models.Index(fields=['current_hom_sales']),
-            # models.Index(fields=['hom_sales_growth']),
-            # models.Index(fields=['-sales']),
-            # models.Index(fields=['category_id', 'last_parsing_id']),
         ]
 
 
@@ -234,12 +227,6 @@ class ProductStat(models.Model):
     profit_30_fbs = models.BigIntegerField(blank=True, null=True, default=0)
     price = models.IntegerField(blank=True, null=True)
     priceU = models.IntegerField(blank=True, null=True)
-    # price_7 = models.IntegerField()
-    # priceU_7 = models.IntegerField()
-    # price_14 = models.IntegerField()
-    # priceU_14 = models.IntegerField()
-    # price_30 = models.IntegerField()
-    # priceU_30 = models.IntegerField()
 
     class Meta():
         ordering = ['-parsing_id']

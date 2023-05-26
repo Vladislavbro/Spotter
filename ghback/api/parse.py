@@ -632,17 +632,17 @@ class Parser(object):
             sold_7_fbs=Count('sales_7_fbs', filter=Q(sales_7_fbs__gt=0)),
             sold_14_fbs=Count('sales_14_fbs', filter=Q(sales_14_fbs__gt=0)),
             sold_30_fbs=Count('sales_30_fbs', filter=Q(sales_30_fbs__gt=0)),
-            sellers_solded_7_fbo=Count('product__brand_id', filter=Q(
+            sellers_solded_7_fbo=Count('product__supplier_id', filter=Q(
                 sales_7_fbo__gt=0), distinct=True),
-            sellers_solded_7_fbs=Count('product__brand_id', filter=Q(
+            sellers_solded_7_fbs=Count('product__supplier_id', filter=Q(
                 sales_7_fbs__gt=0), distinct=True),
-            sellers_solded_14_fbo=Count('product__brand_id', filter=Q(
+            sellers_solded_14_fbo=Count('product__supplier_id', filter=Q(
                 sales_14_fbo__gt=0), distinct=True),
-            sellers_solded_14_fbs=Count('product__brand_id', filter=Q(
+            sellers_solded_14_fbs=Count('product__supplier_id', filter=Q(
                 sales_14_fbs__gt=0), distinct=True),
-            sellers_solded_30_fbo=Count('product__brand_id', filter=Q(
+            sellers_solded_30_fbo=Count('product__supplier_id', filter=Q(
                 sales_30_fbo__gt=0), distinct=True),
-            sellers_solded_30_fbs=Count('product__brand_id', filter=Q(
+            sellers_solded_30_fbs=Count('product__supplier_id', filter=Q(
                 sales_30_fbs__gt=0), distinct=True),
         )
         update['products_solded_7_fbo'] = last_agg['sold_7_fbo'] / len(product_ids) * 100

@@ -239,10 +239,11 @@ def parser(request):
     })
 
 
-def get_children(category, categories):
+def get_children(category, categories, stats):
     return [{
         **c,
-        'items': get_children(c, categories)
+        'items': get_children(c, categories, stats),
+        'stat': [s for s in stats if s['category_id'] == category['id']]
     } for c in categories if c.get('parent') == category['wb_id']]
 
 
@@ -260,19 +261,21 @@ def categories_list(request):
         config = Config.objects.filter(
             calculated=True,
             current_parsing_id__gte=date,
-            current_parsing_id__lt=date + 86400,
+            # current_parsing_id__lt=date + 86400,
         ).first()
-    if config is None:
-        config = Config.objects.filter(calculated=True).first()
     out = []
-    categories = Category.objects.all().values()
+    categories = Category.objects.values()
     category_ids = [c['id'] for c in categories]
-    stats = CategoryStat.objects.filter(
-        category_id__in=category_ids,
-        parsing_id=config.current_parsing_id)
+    if config is None:
+        # config = Config.objects.filter(calculated=True).first()
+        stats = []
+    else:
+        stats = CategoryStat.objects.filter(
+            category_id__in=category_ids,
+            parsing_id=config.current_parsing_id).values()
     roots = [c for c in categories if c.get('parent') is None]
     for root in roots:
-        root['items'] = get_children(root, categories)
+        root['items'] = get_children(root, categories, stats)
         # calc_stat(root)
         out.append(root)
     return JsonResponse({
@@ -429,29 +432,43 @@ def queries_search(request):
                 parsing_id=prev_parsing.current_parsing_id)
         prev_stat = prev_productstats.aggregate(Avg('price'))
         return JsonResponse({
-            # 1 Стабильность среднего чека - изменение среднего чека в течение месяца
-            'price_avg_diff': curr_stat['price__avg'] / prev_stat['price__avg'],
-            # 2 Монополия - объем продаж у топ 10 продавцов по обороту в данной нише относительного общего оборота по нише
-            'monopoly': top_supplier_profit / curr_stat[f'profit_30_{fb}__sum'],
-            # 3 Оценка потенциала органических продаж - процент товаров с продажами от общего количества товаров
+            # 1 Стабильность среднего чека - изменение среднего чека 
+            # в течение месяца
+            'price_avg_diff': (curr_stat['price__avg'] / 
+                               prev_stat['price__avg']),
+            # 2 Монополия - объем продаж у топ 10 продавцов по обороту в 
+            # данной нише относительного общего оборота по нише
+            'monopoly': (top_supplier_profit / 
+                         curr_stat[f'profit_30_{fb}__sum']),
+            # 3 Оценка потенциала органических продаж - процент товаров 
+            # с продажами от общего количества товаров
             'sales_org': curr_stat['sales_org__count'] / total,
             # 4 Среднее количество продаж у товаров
             'sales_avg': curr_stat[f'sales_30_{fb}__avg'],
             # 5 Конкурентный ассортимент - количество товаров в нише
             'products_count': total,
-            # 6 Оценка тренда продаж - сравнение среднесуточного оборота в начале и конца периода
-            # 7 Объем рынка - оборот в нише в месяц. При изменении периода на 14 или 7 дней показатели делятся на 2 и 4 соответственно
+            # 6 Оценка тренда продаж - сравнение среднесуточного оборота 
+            # в начале и конца периода
+            # 7 Объем рынка - оборот в нише в месяц. При изменении периода 
+            # на 14 или 7 дней показатели делятся на 2 и 4 соответственно
             'profit': curr_stat[f'profit_30_{fb}__sum'],
-            # 8 Востребованность ниши - изменение количества продавцов с начала периода
+            # 8 Востребованность ниши - изменение количества продавцов 
+            # с начала периода
             'suppliers': curr_stat['product__supplier_id__count'],
             # 9 Объем рынка (динамика)
-            # 10 LP - Упущенная выручка в нише - для каждого товара считается как:  количество дней без продаж * среднее количество продаж товара в день. По нише считается как сумма упущенной выручки всех товаров в нише
+            # 10 LP - Упущенная выручка в нише - для каждого товара считается 
+            # как:  количество дней без продаж * среднее количество продаж 
+            # товара в день. По нише считается как сумма упущенной выручки 
+            # всех товаров в нише
             # 11 Объем рынка у топ 10 (динамика)
             # 12 SPP - Процент товаров с продажами (динамика)
-            # 13 Средняя скорость продаж - среднее количество продаж в день по всем товарам, считается как: общее количество продаж ÷ общее количество товаров ÷ 30 (дней)
+            # 13 Средняя скорость продаж - среднее количество продаж в день по 
+            # всем товарам, считается как: общее количество продаж ÷ общее 
+            # количество товаров ÷ 30 (дней)
             'sales_speed_avg': curr_stat[f'sales_30_{fb}__sum'] / total / 30,
             # 14 Средний оборот на продавца
-            'supplier_profit_avg': curr_stat[f'profit_30_{fb}__sum'] / curr_stat['product__supplier_id__count'],
+            'supplier_profit_avg': (curr_stat[f'profit_30_{fb}__sum'] / 
+                                    curr_stat['product__supplier_id__count']),
             # 15 SPS - процент продавцов с продажами
             'supplier_sold_count': curr_stat['sup_sold_count'],
         })
