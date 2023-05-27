@@ -1,13 +1,10 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Это описание апи веб-сервера приложения Goods Hunter написанного на django.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.",
+        "description0": "You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.",
+        "description": "Это описание апи веб-сервера приложения Goods Hunter написанного на django.",
         "version": "0.1.0",
         "title": "Goods Hunter",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "email": "apiteam@swagger.io"
-        },
         "license": {
             "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -25,6 +22,77 @@
         "https"
     ],
     "paths": {
+        "/categories": {
+            "get": {
+                "tags": [
+                    "Списки"
+                ],
+                "summary": "Категории",
+                "description": "",
+                "operationId": "categories",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Сортировка",
+                        "type": "string",
+                        "enum": [
+                            "products_count",
+                            "sellers_count",
+                            "products_solded",
+                            "sellers_solded",
+                            "price_avg",
+                            "profit"
+                        ]
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Направление сортировки",
+                        "type": "string",
+                        "enum": [
+                            "desc",
+                            "asc"
+                        ]
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "fb",
+                        "in": "query",
+                        "description": "FBO / FBS",
+                        "type": "string",
+                        "enum": [
+                            "fbo", 
+                            "fbs"
+                        ]
+                    },
+                    {
+                        "name": "dateTo",
+                        "required": true,
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/queries/top": {
             "get": {
                 "tags": [

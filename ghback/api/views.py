@@ -283,6 +283,7 @@ def categories_list(request):
         out.append(root)
     return JsonResponse({
         'total': categories.count(),
+        'date': config.current_parsing_id if config else None,
         'items': out
     })
 
