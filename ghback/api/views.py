@@ -400,11 +400,11 @@ def queries_search(request):
             productstats = productstats.order_by(f'{direction}{sort}')
         return JsonResponse({
             'total': total,
-            'items': productstats[((page - 1) * 100):page * 100].values(
+            'items': list(productstats[((page - 1) * 100):page * 100].values(
                 'id', 'price', 'priceU', f'profit_{period}_{fb}', 
                 f'sales_{period}_{fb}', 'product__name', 'product__articul', 
                 'product__name', 'product__rating', 'product__feedbacks',
-            )
+            ))
         })
     elif view == 'summary':
         sales_field = f'sales_30_{fb}__gt'
@@ -454,7 +454,7 @@ def queries_search(request):
             Sum(f'profit_7_{fb}'),
             product_solded=Count('pk', filter=Q(**{sales_field: 0})),
         )
-        return JsonResponse({
+        stat = {
             # 1 Стабильность среднего чека - изменение среднего чека 
             # в течение месяца
             'price_avg_diff': (curr_stat['price__avg'] / prev_stat['price__avg']) if prev_stat['price__avg'] else None,
@@ -490,7 +490,8 @@ def queries_search(request):
             # 11 Объем рынка у топ 10 (динамика)
             'profit_top_sup': top_supplier_agg[f'profit_30_{fb}__sum'],
             # 12 SPP - Процент товаров с продажами (динамика)
-            'product_solded': curr_stat['product_solded'] / f_w_stat['product_solded'],
+            'product_solded': (curr_stat['product_solded'] / 
+                               f_w_stat['product_solded']),
             # 13 Средняя скорость продаж - среднее количество продаж в день по 
             # всем товарам, считается как: общее количество продаж ÷ общее 
             # количество товаров ÷ 30 (дней)
@@ -500,7 +501,14 @@ def queries_search(request):
                                     curr_stat['product__supplier_id__count']),
             # 15 SPS - процент продавцов с продажами
             'supplier_sold_count': curr_stat['sup_sold_count'],
-        })
+        }
+        # stat['score'] = 0
+        # if stat['price_avg_diff'] is not None:
+        #     if stat['price_avg_diff'] < 0.9:
+        #         stat['score'] -= 1
+        #     elif stat['price_avg_diff'] >= 0.9 and stat['price_avg_diff'] <= 1.1:
+        #         stat['score'] += 1
+        return JsonResponse(stat)
 
 
 def queries_export(request):
