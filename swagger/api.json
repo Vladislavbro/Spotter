@@ -93,6 +93,101 @@
                 }
             }
         },
+        "/queries/search": {
+            "get": {
+                "tags": [
+                    "Списки"
+                ],
+                "summary": "Перспективность ниши, товары",
+                "description": "",
+                "operationId": "queriesSearch",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "Искомый запрос",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "view",
+                        "in": "query",
+                        "description": "Запрос статистики или списка товаров",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "summary",
+                            "products"
+                        ]
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Номер страницы, работает с view == 'products'",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Сортировка, работает с view == 'products'",
+                        "type": "string",
+                        "enum": [
+                            "sales",
+                            "price",
+                            "pricU",
+                            "profit",
+                            "product__feedbacks",
+                            "product__rating",
+                        ]
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Направление сортировки, работает с view == 'products'",
+                        "type": "string",
+                        "enum": [
+                            "desc",
+                            "asc"
+                        ]
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "fb",
+                        "in": "query",
+                        "description": "FBO / FBS",
+                        "type": "string",
+                        "enum": [
+                            "fbo", 
+                            "fbs"
+                        ]
+                    },
+                    {
+                        "name": "dateTo",
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
         "/queries/top": {
             "get": {
                 "tags": [
@@ -211,6 +306,10 @@
         }
     },
     "definitions": {
+        "ApiResponseAny": {
+            "type": "object",
+            "properties": {}
+        },
         "ApiResponse": {
             "type": "object",
             "properties": {
