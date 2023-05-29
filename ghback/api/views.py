@@ -354,6 +354,7 @@ def queries_search(request):
     features = list(set([w.lemma_ for w in doc if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
     features.sort()
     query_features = features
+    # root, features = 'рубашка', ['белый', 'офисный']
     period = int(request.GET.get('period', '30'))
     fb = request.GET.get('fb', 'fbo')
     page = int(request.GET.get('page', '1'))
@@ -407,34 +408,52 @@ def queries_search(request):
         })
     elif view == 'summary':
         sales_field = f'sales_30_{fb}__gt'
+        sales_field_week = f'sales_7_{fb}__gt'
         curr_stat = productstats.aggregate(
             Avg('price'),
             Avg(f'sales_30_{fb}'),
             Sum(f'sales_30_{fb}'),
             Sum(f'profit_30_{fb}'),
+            Sum(f'profit_lost_{fb}'),
+            Sum(f'profit_7_{fb}'),
             Count('product__supplier_id', distinct=True),
             sales_org=Count('pk', filter=Q(**{sales_field: 0})),
+            product_solded=Count('pk', filter=Q(**{sales_field_week: 0})),
             sup_sold_count=Count('product__supplier_id', 
                                  filter=Q(**{sales_field: 0}), distinct=True),
-            
         )
         supplier_ids = list(curr_stat.exclude(
             product__supplier_id=None
         ).order_by(f'-profit_30_{fb}').values_list(
             'product__supplier_id', flat=True)[:50])
         top_supplier_ids = list(set(supplier_ids))[:10]
-        top_supplier_profit = curr_stat.filter(
+        top_supplier_agg = curr_stat.filter(
             product__supplier_id__in=top_supplier_ids
-        ).aggregate(Sum(f'profit_30_{fb}'))[f'profit_30_{fb}__sum']
+        ).aggregate(Sum(f'profit_30_{fb}'))
         #
         start = (datetime.now() - timedelta(days=30)).replace(
                 hour=0, minute=0, second=0, microsecond=0)
         prev_parsing = Config.objects.filter(
-                current_parsing_id__lt=start.timestamp()).first()
-        prev_productstats = ProductStat.objects.filter(
-                product_id__in=product_ids,
-                parsing_id=prev_parsing.current_parsing_id)
-        prev_stat = prev_productstats.aggregate(Avg('price'))
+            current_parsing_id__lt=start.timestamp()).first()
+        prev_stat = ProductStat.objects.filter(
+            product_id__in=product_ids,
+            parsing_id=prev_parsing.current_parsing_id
+        ).aggregate(Avg('price'))
+        # f_w - first_week
+        f_w_date = (datetime.now() - timedelta(days=21)).replace(
+            hour=0, minute=0, second=0, microsecond=0).timestamp()
+        f_w_config = Config.objects.filter(
+            calculated=True,
+            current_parsing_id__gte=f_w_date,
+        ).first()
+        sales_field = f'sales_7_{fb}__gt'
+        f_w_stat = ProductStat.objects.filter(
+            product_id__in=product_ids,
+            parsing_id=f_w_config.current_parsing_id
+        ).aggregate(
+            Sum(f'profit_7_{fb}'),
+            product_solded=Count('pk', filter=Q(**{sales_field: 0})),
+        )
         return JsonResponse({
             # 1 Стабильность среднего чека - изменение среднего чека 
             # в течение месяца
@@ -442,7 +461,7 @@ def queries_search(request):
                                prev_stat['price__avg']),
             # 2 Монополия - объем продаж у топ 10 продавцов по обороту в 
             # данной нише относительного общего оборота по нише
-            'monopoly': (top_supplier_profit / 
+            'monopoly': (top_supplier_agg[f'profit_30_{fb}__sum'] / 
                          curr_stat[f'profit_30_{fb}__sum']),
             # 3 Оценка потенциала органических продаж - процент товаров 
             # с продажами от общего количества товаров
@@ -451,8 +470,10 @@ def queries_search(request):
             'sales_avg': curr_stat[f'sales_30_{fb}__avg'],
             # 5 Конкурентный ассортимент - количество товаров в нише
             'products_count': total,
-            # 6 Оценка тренда продаж - сравнение среднесуточного оборота 
+            # 6 Оценка тренда продаж - сравнение среднесуточного оборота
             # в начале и конца периода
+            'sales_trend': (curr_stat[f'profit_7_{fb}__sum'] / 
+                            f_w_stat[f'profit_7_{fb}__sum']),
             # 7 Объем рынка - оборот в нише в месяц. При изменении периода 
             # на 14 или 7 дней показатели делятся на 2 и 4 соответственно
             'profit': curr_stat[f'profit_30_{fb}__sum'],
@@ -460,12 +481,17 @@ def queries_search(request):
             # с начала периода
             'suppliers': curr_stat['product__supplier_id__count'],
             # 9 Объем рынка (динамика)
+            'volume': (curr_stat[f'profit_7_{fb}__sum'] / 
+                       f_w_stat[f'profit_7_{fb}__sum']),
             # 10 LP - Упущенная выручка в нише - для каждого товара считается 
             # как:  количество дней без продаж * среднее количество продаж 
             # товара в день. По нише считается как сумма упущенной выручки 
             # всех товаров в нише
+            'profit_lost': curr_stat[f'profit_lost_{fb}'],
             # 11 Объем рынка у топ 10 (динамика)
+            'profit_top_sup': top_supplier_agg[f'profit_30_{fb}__sum'],
             # 12 SPP - Процент товаров с продажами (динамика)
+            'product_solded': curr_stat['product_solded'] / f_w_stat['product_solded'],
             # 13 Средняя скорость продаж - среднее количество продаж в день по 
             # всем товарам, считается как: общее количество продаж ÷ общее 
             # количество товаров ÷ 30 (дней)

@@ -106,6 +106,9 @@ class CategoryStat(models.Model):
     top_30_fbo = models.BooleanField(blank=True, null=True)
     top_30_fbs = models.BooleanField(blank=True, null=True)
 
+    class Meta():
+        ordering = ['-parsing_id']
+
 
 class Query(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
@@ -211,6 +214,8 @@ class ProductStat(models.Model):
     quantity_fbs = models.IntegerField(blank=True, null=True, default=0)
     sales_fbo = models.IntegerField(blank=True, null=True, default=0)
     sales_fbs = models.IntegerField(blank=True, null=True, default=0)
+    profit_lost_fbo = models.BigIntegerField(blank=True, null=True, default=0)
+    profit_lost_fbs = models.BigIntegerField(blank=True, null=True, default=0)
     sales_7_fbo = models.IntegerField(blank=True, null=True, default=0)
     sales_7_fbs = models.IntegerField(blank=True, null=True, default=0)
     sales_14_fbo = models.IntegerField(blank=True, null=True, default=0)
