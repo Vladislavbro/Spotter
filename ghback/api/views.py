@@ -486,7 +486,7 @@ def queries_search(request):
             # как:  количество дней без продаж * среднее количество продаж 
             # товара в день. По нише считается как сумма упущенной выручки 
             # всех товаров в нише
-            'profit_lost': curr_stat[f'profit_lost_{fb}'],
+            'profit_lost': curr_stat[f'profit_lost_{fb}__sum'],
             # 11 Объем рынка у топ 10 (динамика)
             'profit_top_sup': top_supplier_agg[f'profit_30_{fb}__sum'],
             # 12 SPP - Процент товаров с продажами (динамика)
