@@ -464,7 +464,7 @@ def queries_search(request):
                          curr_stat[f'profit_30_{fb}__sum']),
             # 3 Оценка потенциала органических продаж - процент товаров 
             # с продажами от общего количества товаров
-            'sales_org': curr_stat['sales_org__count'] / total,
+            'sales_org': curr_stat['sales_org'] / total,
             # 4 Среднее количество продаж у товаров
             'sales_avg': curr_stat[f'sales_30_{fb}__avg'],
             # 5 Конкурентный ассортимент - количество товаров в нише
