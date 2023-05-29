@@ -422,12 +422,12 @@ def queries_search(request):
             sup_sold_count=Count('product__supplier_id', 
                                  filter=Q(**{sales_field: 0}), distinct=True),
         )
-        supplier_ids = list(curr_stat.exclude(
+        supplier_ids = list(productstats.exclude(
             product__supplier_id=None
         ).order_by(f'-profit_30_{fb}').values_list(
             'product__supplier_id', flat=True)[:50])
         top_supplier_ids = list(set(supplier_ids))[:10]
-        top_supplier_agg = curr_stat.filter(
+        top_supplier_agg = productstats.filter(
             product__supplier_id__in=top_supplier_ids
         ).aggregate(Sum(f'profit_30_{fb}'))
         #
