@@ -457,8 +457,7 @@ def queries_search(request):
         return JsonResponse({
             # 1 Стабильность среднего чека - изменение среднего чека 
             # в течение месяца
-            'price_avg_diff': (curr_stat['price__avg'] / 
-                               prev_stat['price__avg']),
+            'price_avg_diff': (curr_stat['price__avg'] / prev_stat['price__avg']) if prev_stat['price__avg'] else None,
             # 2 Монополия - объем продаж у топ 10 продавцов по обороту в 
             # данной нише относительного общего оборота по нише
             'monopoly': (top_supplier_agg[f'profit_30_{fb}__sum'] / 
