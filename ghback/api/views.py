@@ -354,7 +354,7 @@ def queries_search(request):
     features = list(set([w.lemma_ for w in doc if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
     features.sort()
     query_features = features
-    # root, features = 'рубашка', ['белый', 'офисный']
+    # query_root, query_features = 'рубашка', ['белый', 'офисный']
     period = int(request.GET.get('period', '30'))
     fb = request.GET.get('fb', 'fbo')
     dateTo = request.GET.get('date')
@@ -389,6 +389,23 @@ def queries_search(request):
     # field = f'top_{period}_{fb}'
     # items = items.filter(**{ field: True})
     response = {}
+    if 'graphs' in view:
+        start = (datetime.now() - timedelta(days=30)).replace(
+                hour=0, minute=0, second=0, microsecond=0).timestamp()
+        end = datetime.now().timestamp()
+        productstats = ProductStat.objects.prefetch_related('product').filter(
+            parsing_id__gte=start,
+            parsing_id__lt=end,
+            product_id__in=product_ids
+        )
+        response['graphs'] = productstats.values('parsing_id').annotate(
+            price=Avg('price'), 
+            profit=Sum('profit_30_fbo'), 
+            sales=Sum('sales_30_fbo'), 
+            products=Count('pk'), 
+            sellers=Count('product__supplier_id', distinct=True), 
+            brands=Count('product__brand_id', distinct=True)
+        )
     if 'products' in view:
         page = int(request.GET.get('page', '1'))
         per_page = int(request.GET.get('per_page', '100'))
