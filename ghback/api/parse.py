@@ -434,7 +434,7 @@ class Parser(object):
         for fb in ['fbo', 'fbs']:
             sales_zero_count = len([s for s in last_stats 
                                     if s[f'sales_{fb}'] == 0])
-            sales_avg = self.get_avg([s['sales_{fb}'] for s 
+            sales_avg = self.get_avg([s[f'sales_{fb}'] for s 
                                       in last_stats if s[f'sales_{fb}'] > 0])
             update['profit_lost_{fb}'] = sales_zero_count * sales_avg
         for period in [7, 14, 30]:
