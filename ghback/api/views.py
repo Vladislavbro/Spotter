@@ -398,14 +398,14 @@ def queries_search(request):
             parsing_id__lt=end,
             product_id__in=product_ids
         )
-        response['graphs'] = productstats.values('parsing_id').annotate(
+        response['graphs'] = list(productstats.values('parsing_id').annotate(
             price=Avg('price'), 
             profit=Sum('profit_30_fbo'), 
             sales=Sum('sales_30_fbo'), 
             products=Count('pk'), 
             sellers=Count('product__supplier_id', distinct=True), 
             brands=Count('product__brand_id', distinct=True)
-        )
+        ))
     if 'products' in view:
         page = int(request.GET.get('page', '1'))
         per_page = int(request.GET.get('per_page', '100'))
