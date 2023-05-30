@@ -434,9 +434,10 @@ class Parser(object):
         for fb in ['fbo', 'fbs']:
             sales_zero_count = len([s for s in last_stats 
                                     if s[f'sales_{fb}'] == 0])
-            sales_avg = self.get_avg([s[f'sales_{fb}'] for s 
-                                      in last_stats if s[f'sales_{fb}'] > 0])
-            update[f'profit_lost_{fb}'] = sales_zero_count * sales_avg
+            sales = [s[f'sales_{fb}'] for s in last_stats if s[f'sales_{fb}'] > 0]
+            if len(sales):
+                sales_avg = sum(sales) / len(sales)
+                update[f'profit_lost_{fb}'] = sales_zero_count * sales_avg
         for period in [7, 14, 30]:
             start_period = (datetime.now(timezone.utc) - timedelta(
                 days=period)).replace(hour=0, minute=0, second=0, 
@@ -553,7 +554,7 @@ class Parser(object):
 
     def parse_search(self, data):
         print('parse_search', self.query)
-        if len(data.get('data', {}).get('products', [])) > 0:
+        if len(data.get('data', {}).get('products', [])):
             products = data['data']['products']
             ids = self.query.articuls + [p['id'] for p in products]
             self.query.articuls = ids
