@@ -1,6 +1,6 @@
 import json
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import AnonymousUser, User
@@ -258,6 +258,7 @@ def categories_list(request):
     period = int(request.GET.get('period', '30'))
     fb = request.GET.get('fb', 'fbo')
     dateTo = request.GET.get('date')
+    sort = request.GET.get('sort')
     config = None
     if dateTo:
         date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
@@ -267,7 +268,21 @@ def categories_list(request):
             # current_parsing_id__lt=date + 86400,
         ).first()
     out = []
-    categories = Category.objects.values('id', 'name', 'parent', 'wb_id')
+    categories = Category.objects.all()
+    sort = request.GET.get('sort')
+    if sort is not None:
+        direction = request.GET.get('direction')
+        if direction == 'desc':
+            direction = '-'
+        else:
+            direction = ''
+        if sort == 'products_count':
+            categories = categories.order_by(f'{direction}products_count')
+        elif sort in ['price_avg', 'sellers_count']:
+            categories = categories.order_by(f'{direction}{sort}_{period}')
+        elif sort in ['products_solded', 'sellers_solded', 'profit']:
+            categories = categories.order_by(f'{direction}{sort}_{period}_{fb}')
+    categories = categories.values('id', 'name', 'parent', 'wb_id')
     category_ids = [c['id'] for c in categories]
     if config is None:
         # config = Config.objects.filter(calculated=True).first()
@@ -290,10 +305,9 @@ def categories_list(request):
 
 def queries_top(request):
     period = int(request.GET.get('period', '30'))
+    output = request.GET.get('output')
     fb = request.GET.get('fb', 'fbo')
     page = int(request.GET.get('page', '1'))
-    sort = request.GET.get('sort')
-    direction = request.GET.get('direction')
     dateTo = request.GET.get('date')
     if dateTo:
         date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
@@ -311,34 +325,82 @@ def queries_top(request):
         config = Config.objects.filter(calculated=True).first()
     items = Query.objects.filter(
         parsing_id=config.current_parsing_id,
-        products_count__lte=2500,
-        products_count__gte=10,
+        # products_count__lte=2500,
+        # products_count__gte=10,
     )
+    if request.GET.get('products_count'):
+        start = request.GET['products_count'].split(';')[0]
+        if start:
+            items = items.filter(products_count__gte=int(start))
+        end = request.GET['products_count'].split(';')[1]
+        if end:
+            items = items.filter(products_count__lte=int(end))
+    if request.GET.get('price_avg'):
+        start = request.GET['price_avg'].split(';')[0]
+        if start:
+            field = f'price_avg_{period}__gte'
+            items = items.filter(**{field: start})
+        end = request.GET['price_avg'].split(';')[1]
+        if end:
+            field = f'price_avg_{period}__lte'
+            items = items.filter(**{field: end})
+    if request.GET.get('profit'):
+        start = request.GET['profit'].split(';')[0]
+        if start:
+            field = f'profit_{period}_{fb}__gte'
+            items = items.filter(**{field: start})
+        end = request.GET['profit'].split(';')[1]
+        if end:
+            field = f'profit_{period}_{fb}__lte'
+            items = items.filter(**{field: end})
+    for n in [1, 10]:
+        if request.GET.get(f'product_{n}_profit'):
+            start = request.GET[f'product_{n}_profit'].split(';')[0]
+            if start:
+                field = f'product_{n}_profit_{period}_{fb}__gte'
+                items = items.filter(**{field: start})
+            end = request.GET[f'product_{n}_profit'].split(';')[1]
+            if end:
+                field = f'product_{n}__profit_{period}_{fb}__lte'
+                items = items.filter(**{field: end})
     # field = f'top_{period}_{fb}'
     # items = items.filter(**{ field: True})
+    sort = request.GET.get('sort')
+    direction = request.GET.get('direction')
     if sort is not None:
         if direction == 'desc':
             direction = '-'
         else:
             direction = ''
+        if sort == 'price_avg':
+            sort += f'_{period}'
+        if 'profit' in sort:
+            sort += f'_{period}_{fb}'
         items = items.order_by(f'{direction}{sort}')
-    total = items.count()
-    items = items[((page - 1) * 100):page * 100]
-
-    return JsonResponse({
-        'total': total,
-        'items': [{
-            'id': i['id'],
-            'root': i['root'],
-            'features': ' '.join(i['features']),
-            'products_count': i['products_count'],
-            'products_solded': i[f'products_solded_{period}_{fb}'],
-            'product_1_profit': i[f'product_1_profit_{period}_{fb}'],
-            'product_10_profit': i[f'product_10_profit_{period}_{fb}'],
-            'price_avg': i[f'price_avg_{period}'],
-            'profit': i[f'profit_{period}_{fb}'],
-        } for i in items.values()]
-    })
+    if output == 'json':
+        total = items.count()
+        items = items[((page - 1) * 100):page * 100]
+        return JsonResponse({
+            'total': total,
+            'items': [{
+                'id': i['id'],
+                'root': i['root'],
+                'features': ' '.join(i['features']),
+                'products_count': i['products_count'],
+                'products_solded': i[f'products_solded_{period}_{fb}'],
+                'product_1_profit': i[f'product_1_profit_{period}_{fb}'],
+                'product_10_profit': i[f'product_10_profit_{period}_{fb}'],
+                'price_avg': i[f'price_avg_{period}'],
+                'profit': i[f'profit_{period}_{fb}'],
+            } for i in items.values()]
+        })
+    elif output == 'csv':
+        return queries_export(items, dateTo, period, fb)
+    else:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Не задан формат вывода'
+        })
 
 
 def queries_search(request):
@@ -400,8 +462,8 @@ def queries_search(request):
         )
         response['graphs'] = list(productstats.values('parsing_id').annotate(
             price=Avg('price'), 
-            profit=Sum('profit_30_fbo'), 
-            sales=Sum('sales_30_fbo'), 
+            profit=Sum(f'profit_{period}_{fb}'), 
+            sales=Sum(f'sales_{period}_{fb}'), 
             products=Count('pk'), 
             sellers=Count('product__supplier_id', distinct=True), 
             brands=Count('product__brand_id', distinct=True)
@@ -580,42 +642,28 @@ def queries_export(request):
             f"attachment; filename={filename}"})
 
 
-def export_categories():
-    config = Config.objects(calculated=True).first()
-    items = Categories.objects(parse=True).all()
-    fields = ['Наименование', 'Кол-во товаров',
-              'Товары с продажами', 'Товары с продажами',
+def export_queries(items, dateTo, period, fb):
+    fields = ['Наименование', 'Кол-во товаров', 'Товары с продажами', 
               'Оборот первого товара', 'Оборот десятого товара',
-              'Средняя цена пред', 'Средняя цена тек', 'Изменение оборота',
-              'Количество продавцов', 'Продавцы с продажами',
-              'Продавцы с продажами', 'Топ', 'Топ товар 1', 'Топ товар 10',
-              'Топ товары с продажами', 'Топ средний чек', 'Топ оборот']
+              'Средняя цена', 'Оборот']
     rows = [
-        [i.name, i.products_count, i.products_with_sales,
-         int(i.products_with_sales * 100 / i.products_count) if i.products_count else 0,
-         i.first_product_hom_profit, i.ten_product_hom_profit,
-         i.avg_price_prev_period, i.avg_price_period,
-         int(i.avg_price_period * 100 / i.avg_price_prev_period),
-         i.sellers, i.sellers_with_sales,
-         int(i.sellers_with_sales * 100 / i.sellers),
-         i.top, i.first_product_profit_top, i.ten_product_profit_top,
-         i.rel_sales_top, i.avg_price_top, i.profit_top]
-        for i in items
+        [i['name'], i['products_count'], i[f'products_solded_{period}_{fb}'],
+         i[f'product_1_profit_{period}_{fb}'], 
+         i[f'product_10_profit_{period}_{fb}'],
+         i[f'price_avg_{period}'], i[f'profit_{period}_{fb}']] for i in items.values()
     ]
-    filename = f'{config.current_parsing_id}-categories.csv'
+    filename = f'Топ_запросы_{dateTo}_{period}_{fb}.csv'
     file_path = f'export/{filename}'
     with open(file_path, 'w') as f:
         write = csv.writer(f)
         write.writerow(fields)
         write.writerows(rows)
-    f = open(file_path, 'r')
-    content = f.read()
-    return Response(
-        content,
-        mimetype="text/csv",
-        headers={
-            "Content-disposition":
-            f"attachment; filename={filename}"})
+    # f = open(file_path, 'r')
+    # content = f.read()
+    with open(file_path) as f:
+        response = HttpResponse(f, content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response
 
 
 def get_child_ids(category, ids):

@@ -31,9 +31,21 @@
                 "description": "",
                 "operationId": "categories",
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "text/csv"
                 ],
                 "parameters": [
+                    {
+                        "name": "output",
+                        "in": "query",
+                        "description": "Формат вывода",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "json",
+                            "csv"
+                        ]
+                    },
                     {
                         "name": "sort",
                         "in": "query",
@@ -115,13 +127,16 @@
                     {
                         "name": "view",
                         "in": "query",
-                        "description": "Запрос статистики и/или списка товаров",
+                        "description": "Запрос статистики, списка товаров, графиков. Вместе или раздельно",
                         "required": true,
                         "type": "string",
                         "enum": [
                             "summary",
                             "products",
-                            "'summary,products'"
+                            "graphs",
+                            "'summary,products'",
+                            "'summary,products,graphs'",
+                            "..."
                         ]
                     },
                     {
@@ -205,14 +220,25 @@
                 "description": "",
                 "operationId": "topQueries",
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "text/csv",
                 ],
                 "parameters": [
                     {
+                        "name": "output",
+                        "in": "query",
+                        "description": "Формат вывода",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "json",
+                            "csv"
+                        ]
+                    },
+                    {
                         "name": "page",
                         "in": "query",
-                        "description": "Номер страницы",
-                        "required": true,
+                        "description": "Номер страницы для формата json",
                         "type": "integer",
                         "format": "int64"
                     },
@@ -223,33 +249,11 @@
                         "type": "string",
                         "enum": [
                             "products_count",
-                            "products_solded_7_fbo",
-                            "products_solded_7_fbs",
-                            "products_solded_14_fbo",
-                            "products_solded_14_fbs",
-                            "products_solded_30_fbo",
-                            "products_solded_30_fbs",
-                            "product_1_profit_7_fbo",
-                            "product_1_profit_7_fbs",
-                            "product_1_profit_14_fbo",
-                            "product_1_profit_14_fbs",
-                            "product_1_profit_30_fbo",
-                            "product_1_profit_30_fbs",
-                            "product_10_profit_7_fbo",
-                            "product_10_profit_7_fbs",
-                            "product_10_profit_14_fbo",
-                            "product_10_profit_14_fbs",
-                            "product_10_profit_30_fbo",
-                            "product_10_profit_30_fbs",
-                            "price_avg_7",
-                            "price_avg_14",
-                            "price_avg_30",
-                            "profit_7_fbo",
-                            "profit_7_fbs",
-                            "profit_14_fbo",
-                            "profit_14_fbs",
-                            "profit_30_fbo",
-                            "profit_30_fbs"
+                            "products_solded",
+                            "product_1_profit",
+                            "product_10_profit",
+                            "price_avg",
+                            "profit"
                         ]
                     },
                     {
@@ -283,6 +287,36 @@
                         "name": "dateTo",
                         "in": "query",
                         "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    },
+                    {
+                        "name": "products_count",
+                        "in": "query",
+                        "description": "Фильтр количества товаров в формате 'от;до', например '100;200', ';100', '300;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "price_avg",
+                        "in": "query",
+                        "description": "Фильтр средней цены товаров в формате 'от;до', например '1000;2000', ';1000', '3000;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "profit",
+                        "in": "query",
+                        "description": "Фильтр оборота товаров в формате 'от;до', например '10000;20000', ';10000', '30000;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "product_1_profit",
+                        "in": "query",
+                        "description": "Фильтр оборота первого товара в формате 'от;до', например '10000;20000', ';10000', '30000;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "product_10_profit",
+                        "in": "query",
+                        "description": "Фильтр оборота десятого товара в формате 'от;до', например '10000;20000', ';10000', '30000;'",
                         "type": "string"
                     }
                 ],
