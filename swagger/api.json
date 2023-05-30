@@ -115,18 +115,26 @@
                     {
                         "name": "view",
                         "in": "query",
-                        "description": "Запрос статистики или списка товаров",
+                        "description": "Запрос статистики и/или списка товаров",
                         "required": true,
                         "type": "string",
                         "enum": [
                             "summary",
-                            "products"
+                            "products",
+                            "'summary,products'"
                         ]
                     },
                     {
                         "name": "page",
                         "in": "query",
                         "description": "Номер страницы, работает с view == 'products'",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Количество товаров в ответе, работает с view == 'products'",
                         "type": "integer",
                         "format": "int64"
                     },

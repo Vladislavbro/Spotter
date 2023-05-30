@@ -952,5 +952,3 @@ class Parser(object):
         category.products_calculated = True
         category.save()
 
-
-# parser = Parser()
