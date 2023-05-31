@@ -505,14 +505,15 @@ def queries_search(request):
             product_id__in=product_ids
         )
         response['graphs'] = list(productstats.values('parsing_id').annotate(
-            price=Avg('price'), 
-            profit=Sum(f'profit_{period}_{fb}'), 
-            sales=Sum(f'sales_{period}_{fb}'), 
-            products=Count('pk'), 
-            sellers=Count('product__supplier_id', distinct=True), 
+            price=Avg('price'),
+            profit=Sum(f'profit_{period}_{fb}'),
+            sales=Sum(f'sales_{period}_{fb}'),
+            products=Count('pk'),
+            sellers=Count('product__supplier_id', distinct=True),
             brands=Count('product__brand_id', distinct=True)
         ))
     if 'products' in view:
+        output = int(request.GET.get('output', 'json'))
         page = int(request.GET.get('page', '1'))
         per_page = int(request.GET.get('per_page', '100'))
         sort = request.GET.get('sort')
@@ -523,6 +524,27 @@ def queries_search(request):
             else:
                 direction = ''
             productstats = productstats.order_by(f'{direction}{sort}')
+        if output == 'csv':
+            fields = ['Наименование', 'Кол-во товаров', 'Товары с продажами', 
+                    'Оборот первого товара', 'Оборот десятого товара',
+                    'Средняя цена', 'Оборот']
+            rows = list(productstats.values(
+                'product__name', 'product__articul', 'product__rating', 
+                'product__feedbacks', 'price', 'priceU', 'product__supplier_id', 
+                'product__brand_id', f'profit_{period}_{fb}', f'sales_{period}_{fb}'
+            ))
+            filename = f'{query}_{dateTo}_{period}_{fb}.csv'
+            file_path = f'export/{filename}'
+            with open(file_path, 'w') as f:
+                write = csv.writer(f)
+                write.writerow(fields)
+                write.writerows(rows)
+            # f = open(file_path, 'r')
+            # content = f.read()
+            with open(file_path) as f:
+                response = HttpResponse(f, content_type='text/csv')
+                response['Content-Disposition'] = f'attachment; filename={filename}'
+                return response
         response['total'] = total
         response['items'] = list(productstats[((page - 1) * per_page):page * per_page].values(
             'id', 'price', 'priceU', f'profit_{period}_{fb}', 
@@ -626,64 +648,6 @@ def queries_search(request):
         #     elif stat['price_avg_diff'] >= 0.9 and stat['price_avg_diff'] <= 1.1:
         #         stat['score'] += 1
     return JsonResponse(response)
-
-
-def queries_export(request):
-    period = int(request.GET.get('period', '30'))
-    fb = request.GET.get('fb', 'fbo')
-    page = int(request.GET.get('page', '1'))
-    sort = request.GET.get('sort')
-    direction = request.GET.get('direction')
-    dateTo = request.GET.get('date')
-    config = None
-    if dateTo:
-        date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
-        config = Config.objects.filter(
-            calculated=True,
-            current_parsing_id__gte=date,
-            current_parsing_id__lt=date + 86400,
-        ).first()
-    if config is None:
-        config = Config.objects.filter(calculated=True).first()
-    items = Queries.objects(
-        current_parsing_id=config.current_parsing_id,
-        root__ne=None
-    )
-    field = f'top_{period}_{fb}'
-    items = items.filter(**{ field: True})
-    fields = ['Корень', 'Характеристики', 'Кол-во товаров',
-              'Товары с продажами', 'Товары с продажами',
-              'Оборот первого товара', 'Оборот десятого товара',
-              'Средняя цена пред', 'Средняя цена тек', 'Изменение оборота',
-              'Количество продавцов', 'Продавцы с продажами',
-              'Продавцы с продажами', 'Топ', 'Топ товар 1', 'Топ товар 10',
-              'Топ товары с продажами', 'Топ средний чек', 'Топ оборот']
-    rows = [
-        [i.root, i.features, i.products_count, i.products_with_sales,
-         int((i.products_with_sales or 0) * 100 / i.products_count) if i.products_count else 0,
-         i.first_product_hom_profit, i.ten_product_hom_profit,
-         i.avg_price_prev_period, i.avg_price_period,
-         int((i.avg_price_period or 0) * 100 / i.avg_price_prev_period) if i.avg_price_prev_period else 0,
-         i.sellers, i.sellers_with_sales,
-         int((i.sellers_with_sales or 0) * 100 / i.sellers) if i.sellers else 0,
-         i.top, i.first_product_profit_top, i.ten_product_profit_top,
-         i.products_with_sales_top, i.avg_price_top, i.profit_top]
-        for i in items
-    ]
-    filename = f'{config.current_parsing_id}-queries.csv'
-    file_path = f'export/{filename}'
-    with open(file_path, 'w') as f:
-        write = csv.writer(f)
-        write.writerow(fields)
-        write.writerows(rows)
-    f = open(file_path, 'r')
-    content = f.read()
-    return Response(
-        content,
-        mimetype="text/csv",
-        headers={
-            "Content-disposition":
-            f"attachment; filename={filename}"})
 
 
 def export_queries(items, dateTo, period, fb):
