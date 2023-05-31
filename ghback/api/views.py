@@ -682,7 +682,7 @@ def product(request, articul):
             hour=0, minute=0, second=0)
     else:
         end = datetime.now()
-        start = end - timedelta(days=period).replace(
+        start = (end - timedelta(days=period)).replace(
             hour=0, minute=0, second=0)
     product = Product.objects.filter(articul=articul).first()
     stats = product.productstat_set.filter(
