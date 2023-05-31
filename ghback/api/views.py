@@ -512,7 +512,7 @@ def queries_search(request):
             rows = [list(row) for row in productstats.values_list(
                 'product__name', 'product__articul', 'product__rating', 
                 'product__feedbacks', 'price', 'priceU', 'product__supplier_id', 
-                'product__brand_id', f'profit_{period}_{fb}', f'sales_{period}_{fb}', flat=True
+                'product__brand_id', f'profit_{period}_{fb}', f'sales_{period}_{fb}'
             )]
             filename = f'{query}_{dateTo}_{period}_{fb}.csv'
             file_path = f'export/{filename}'
