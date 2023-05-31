@@ -506,13 +506,14 @@ def queries_search(request):
                 direction = ''
             productstats = productstats.order_by(f'{direction}{sort}')
         if output == 'csv':
-            fields = ['Наименование', 'Кол-во товаров', 'Товары с продажами', 
-                    'Оборот первого товара', 'Оборот десятого товара',
-                    'Средняя цена', 'Оборот']
+            fields = ['Наименование', 'Артикул', 'Рейтинг', 'Отзывов', 'Цена', 
+                      'Цена без скидки', 'Продавец', 'Бренд', 'Оборот', 
+                      'Продаж']
             rows = [list(row) for row in productstats.values_list(
                 'product__name', 'product__articul', 'product__rating', 
-                'product__feedbacks', 'price', 'priceU', 'product__supplier_id', 
-                'product__brand_id', f'profit_{period}_{fb}', f'sales_{period}_{fb}'
+                'product__feedbacks', 'price', 'priceU', 
+                'product__supplier_id', 'product__brand_id', 
+                f'profit_{period}_{fb}', f'sales_{period}_{fb}'
             )]
             filename = f'{query}_{dateTo}_{period}_{fb}.csv'
             file_path = f'export/{filename}'
