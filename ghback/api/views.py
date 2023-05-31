@@ -255,6 +255,7 @@ def get_children(category, categories, stats, period, fb):
 
 
 def categories_list(request):
+    output = request.GET.get('output', 'json')
     period = int(request.GET.get('period', '30'))
     fb = request.GET.get('fb', 'fbo')
     dateTo = request.GET.get('date')
@@ -296,16 +297,19 @@ def categories_list(request):
         root['items'] = get_children(root, categories, stats, period, fb)
         # calc_stat(root)
         out.append(root)
-    return JsonResponse({
-        'total': categories.count(),
-        'date': config.current_parsing_id if config else None,
-        'items': out
-    })
+    if output == 'json':
+        return JsonResponse({
+            'total': categories.count(),
+            'date': config.current_parsing_id if config else None,
+            'items': out
+        })
+    elif output == 'csv':
+        return queries_export(out, dateTo, period, fb)
 
 
 def queries_top(request):
     period = int(request.GET.get('period', '30'))
-    output = request.GET.get('output')
+    output = request.GET.get('output', 'json')
     fb = request.GET.get('fb', 'fbo')
     page = int(request.GET.get('page', '1'))
     dateTo = request.GET.get('date')
