@@ -698,7 +698,7 @@ def product(request, articul):
             'created_at': product.created_at.timestamp(),
             'price': product.price,
             'priceU': product.priceU,
-            'categories': product.categories,
+            'categories': [],
             'supplier_id': product.supplier_id,
             'brand_id': product.brand_id,
             'brand': product.brand,
@@ -710,6 +710,13 @@ def product(request, articul):
                 'priceU': stat.priceU,
             } for stat in stats]
         }
+        parent = Category.objects.filter(wb_id=product.categories[0]).first()
+        while parent:
+            out['categories'].insert(0, {
+                'id': parent.wb_id,
+                'name': parent.name,
+            })
+            parent = Category.objects.filter(wb_id=parent.parent).first()
         return JsonResponse(out)
     else:
         return JsonResponse({
