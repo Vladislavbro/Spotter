@@ -686,8 +686,8 @@ def product(request, articul):
             hour=0, minute=0, second=0)
     product = Product.objects.filter(articul=articul).first()
     stats = product.productstat_set.filter(
-        parsing_id__gte=start,
-        parsing_id__lte=end,
+        parsing_id__gte=start.timestamp(),
+        parsing_id__lte=end.timestamp(),
     )
     if product:
         out = {
