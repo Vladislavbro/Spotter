@@ -492,8 +492,6 @@ def queries_search(request):
         parsing_id=config.current_parsing_id,
         product_id__in=product_ids
     )
-    # field = f'top_{period}_{fb}'
-    # items = items.filter(**{ field: True})
     response = {}
     if 'products' in view:
         output = request.GET.get('output', 'json')
@@ -511,29 +509,28 @@ def queries_search(request):
             fields = ['Наименование', 'Кол-во товаров', 'Товары с продажами', 
                     'Оборот первого товара', 'Оборот десятого товара',
                     'Средняя цена', 'Оборот']
-            rows = list(productstats.values(
+            rows = [list(row) for row in productstats.values_list(
                 'product__name', 'product__articul', 'product__rating', 
                 'product__feedbacks', 'price', 'priceU', 'product__supplier_id', 
-                'product__brand_id', f'profit_{period}_{fb}', f'sales_{period}_{fb}'
-            ))
+                'product__brand_id', f'profit_{period}_{fb}', f'sales_{period}_{fb}', flat=True
+            )]
             filename = f'{query}_{dateTo}_{period}_{fb}.csv'
             file_path = f'export/{filename}'
             with open(file_path, 'w') as f:
                 write = csv.writer(f)
                 write.writerow(fields)
                 write.writerows(rows)
-            # f = open(file_path, 'r')
-            # content = f.read()
             with open(file_path) as f:
                 response = HttpResponse(f, content_type='text/csv')
                 response['Content-Disposition'] = f'attachment; filename={filename}'
                 return response
-        response['total'] = total
-        response['items'] = list(productstats[((page - 1) * per_page):page * per_page].values(
-            'id', 'price', 'priceU', f'profit_{period}_{fb}', 
-            f'sales_{period}_{fb}', 'product__name', 'product__articul', 
-            'product__name', 'product__rating', 'product__feedbacks',
-        ))
+        else:
+            response['total'] = total
+            response['items'] = list(productstats[((page - 1) * per_page):page * per_page].values(
+                'id', 'price', 'priceU', f'profit_{period}_{fb}', 
+                f'sales_{period}_{fb}', 'product__name', 'product__articul', 
+                'product__name', 'product__rating', 'product__feedbacks',
+            ))
     if 'graphs' in view:
         start = (datetime.now() - timedelta(days=30)).replace(
                 hour=0, minute=0, second=0, microsecond=0).timestamp()
