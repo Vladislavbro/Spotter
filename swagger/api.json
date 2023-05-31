@@ -140,6 +140,16 @@
                         ]
                     },
                     {
+                        "name": "format",
+                        "in": "query",
+                        "description": "Формат вывода, работает с view == 'products'",
+                        "type": "string",
+                        "enum": [
+                            "json",
+                            "csv"
+                        ]
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "description": "Номер страницы, работает с view == 'products'",
@@ -329,7 +339,53 @@
                     }
                 }
             }
-        }
+        },
+        "/products/:articul": {
+            "get": {
+                "tags": [
+                    "Товар"
+                ],
+                "summary": "Данные по товару",
+                "description": "",
+                "operationId": "getProduct",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "fb",
+                        "in": "query",
+                        "description": "FBO / FBS",
+                        "type": "string",
+                        "enum": [
+                            "fbo", 
+                            "fbs"
+                        ]
+                    },
+                    {
+                        "name": "dateTo",
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
     },
     "securityDefinitions": {
         "api_key": {

@@ -18,6 +18,7 @@ urlpatterns = [
     path('categories', views.categories_list, name='categories_list'),
     path('queries/top', views.queries_top, name='queries_top'),
     path('queries/search', views.queries_search, name='queries_search'),
+    path('products/<int:articul>', views.product, name='product'),
     path('data', views.data, name='data'),
     path('products', views.products, name='products'),
     path('transfer/config', views.transfer_config, name='transfer_config'),

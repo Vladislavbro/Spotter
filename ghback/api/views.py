@@ -15,7 +15,6 @@ import csv
 # import requests
 from api.parse import Parser
 from api.migrate import Migrate
-from api.mongo_models import Categories, Products, Queries
 from api.models import (Category, Product, ProductStat, 
                         Config, Query, CategoryStat)
 from api.parse import nlp
@@ -672,45 +671,51 @@ def export_queries(items, dateTo, period, fb):
         return response
 
 
-def get_child_ids(category, ids):
-    for child in Categories.objects(parent=category.wb_id):
-        ids.append(child.wb_id)
-        get_child_ids(child, ids)
-    return ids
-
-
-def category(request, id):
-    category_ = Categories.objects.get(pk=id)
-    products = Products.objects(
-        categories__in=[category_.wb_id]
-    )
-    sort = request.args.get('sort')
-    if sort:
-        products = products.order_by(f'-{sort}')
+def product(request, articul):
+    period = int(request.GET.get('period', '30'))
+    # fb = request.GET.get('fb', 'fbo')
+    dateTo = request.GET.get('date')
+    if dateTo:
+        end = datetime.strptime(dateTo, '%Y-%m-%d').replace(
+            hour=23, minute=59, second=59)
+        start = end - timedelta(days=period).replace(
+            hour=0, minute=0, second=0)
     else:
-        products = products.order_by('-current_hom_profit')
-    products = products[0:100]
-    return {
-        'category': json.loads(category_.to_json()),
-        'products': json.loads(products.to_json()),
-    }
-
-
-def data(request):
-    return {
-        'products': json.loads(Products.objects.filter(to_sort=True, inner_rating__gt=0).order_by('-inner_rating').limit(30).to_json()),
-        'totalPages': int(Products.objects.filter(to_sort=True, inner_rating__gt=0).count() / 30),
-        'categories': json.loads(Categories.objects.to_json()),
-    }
-
-
-def products(request):
-    page = int(request.GET.get('page'))
-    skip = (page - 1) * 30
-    products = Products.objects.filter(to_sort=True, inner_rating__gt=0).order_by('-inner_rating').skip(skip).limit(30)
-    return {
-        'products': json.loads(products.to_json()),
-    }
+        end = datetime.now()
+        start = end - timedelta(days=period).replace(
+            hour=0, minute=0, second=0)
+    product = Product.objects.filter(articul=articul).first()
+    stats = product.productstat_set.filter(
+        parsing_id__gte=start,
+        parsing_id__lte=end,
+    )
+    if product:
+        out = {
+            'name': product.name,
+            'articul': product.articul,
+            'rating': product.rating,
+            'feedbacks': product.feedbacks,
+            'created_at': product.created_at.timestamp(),
+            'price': product.price,
+            'priceU': product.priceU,
+            'categories': product.categories,
+            'supplier_id': product.supplier_id,
+            'brand_id': product.brand_id,
+            'brand': product.brand,
+            'stats': [{
+                'date': stat.parsing_id,
+                'profit_fbo': stat.profit_fbo,
+                'profit_fbs': stat.profit_fbs,
+                'price': stat.price,
+                'priceU': stat.priceU,
+            } for stat in stats]
+        }
+        return JsonResponse(out)
+    else:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Товар с артикулом {articul} отсутствует в БД'
+        })
 
 
 @csrf_exempt
