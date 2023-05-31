@@ -496,7 +496,7 @@ def queries_search(request):
     # items = items.filter(**{ field: True})
     response = {}
     if 'products' in view:
-        output = int(request.GET.get('output', 'json'))
+        output = request.GET.get('output', 'json')
         page = int(request.GET.get('page', '1'))
         per_page = int(request.GET.get('per_page', '100'))
         sort = request.GET.get('sort')
