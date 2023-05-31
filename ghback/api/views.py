@@ -439,7 +439,7 @@ def queries_top(request):
             } for i in items.values()]
         })
     elif output == 'csv':
-        return queries_export(items, dateTo, period, fb)
+        return export_queries(items, dateTo, period, fb)
     else:
         return JsonResponse({
             'status': 'error',
@@ -495,23 +495,6 @@ def queries_search(request):
     # field = f'top_{period}_{fb}'
     # items = items.filter(**{ field: True})
     response = {}
-    if 'graphs' in view:
-        start = (datetime.now() - timedelta(days=30)).replace(
-                hour=0, minute=0, second=0, microsecond=0).timestamp()
-        end = datetime.now().timestamp()
-        productstats = ProductStat.objects.prefetch_related('product').filter(
-            parsing_id__gte=start,
-            parsing_id__lt=end,
-            product_id__in=product_ids
-        )
-        response['graphs'] = list(productstats.values('parsing_id').annotate(
-            price=Avg('price'),
-            profit=Sum(f'profit_{period}_{fb}'),
-            sales=Sum(f'sales_{period}_{fb}'),
-            products=Count('pk'),
-            sellers=Count('product__supplier_id', distinct=True),
-            brands=Count('product__brand_id', distinct=True)
-        ))
     if 'products' in view:
         output = int(request.GET.get('output', 'json'))
         page = int(request.GET.get('page', '1'))
@@ -550,6 +533,23 @@ def queries_search(request):
             'id', 'price', 'priceU', f'profit_{period}_{fb}', 
             f'sales_{period}_{fb}', 'product__name', 'product__articul', 
             'product__name', 'product__rating', 'product__feedbacks',
+        ))
+    if 'graphs' in view:
+        start = (datetime.now() - timedelta(days=30)).replace(
+                hour=0, minute=0, second=0, microsecond=0).timestamp()
+        end = datetime.now().timestamp()
+        productstats = ProductStat.objects.prefetch_related('product').filter(
+            parsing_id__gte=start,
+            parsing_id__lt=end,
+            product_id__in=product_ids
+        )
+        response['graphs'] = list(productstats.values('parsing_id').annotate(
+            price=Avg('price'),
+            profit=Sum(f'profit_{period}_{fb}'),
+            sales=Sum(f'sales_{period}_{fb}'),
+            products=Count('pk'),
+            sellers=Count('product__supplier_id', distinct=True),
+            brands=Count('product__brand_id', distinct=True)
         ))
     if 'summary' in view:
         sales_field = f'sales_30_{fb}__gt'

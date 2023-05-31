@@ -17,7 +17,6 @@ urlpatterns = [
     path('parser', views.parser, name='parser'),
     path('categories', views.categories_list, name='categories_list'),
     path('queries/top', views.queries_top, name='queries_top'),
-    path('queries/export', views.queries_export, name='queries_export'),
     path('queries/search', views.queries_search, name='queries_search'),
     path('data', views.data, name='data'),
     path('products', views.products, name='products'),
