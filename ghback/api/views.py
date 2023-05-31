@@ -20,6 +20,7 @@ from api.models import (Category, Product, ProductStat,
                         Config, Query, CategoryStat)
 from api.parse import nlp
 
+
 def me(request):
     print(' --- me --- ', request.get_host())
     if request.user.is_authenticated:
@@ -260,9 +261,9 @@ def get_rows(rows, category, categories, stats, period, fb, parent=None):
         name = parent['name'] + ' > ' + category['name']
     else:
         name = category['name']
-    if len(stat) == 0:
-        rows.append([name, None, None, None, None, None, None])
-    else:
+    if len(stat):
+        # rows.append([name, None, None, None, None, None, None])
+        # else:
         stat = stat[0]
         rows.append([
             name,
