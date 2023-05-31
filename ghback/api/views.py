@@ -748,11 +748,42 @@ def brand(request, brandId):
     return JsonResponse({
         'graphs': list(productstats.values('parsing_id').annotate(
             price=Avg('price'),
-            profit_fbo=Sum(f'profit_fbo'),
-            profit_fbs=Sum(f'profit_fbs'),
-            sales_fbo=Sum(f'sales_fbo'),
-            sales_fbs=Sum(f'sales_fbs'),
-    ))
+            profit_fbo=Sum('profit_fbo'),
+            profit_fbs=Sum('profit_fbs'),
+            sales_fbo=Sum('sales_fbo'),
+            sales_fbs=Sum('sales_fbs'),
+        ))
+    })
+
+
+def supplier(request, supplierId):
+    period = int(request.GET.get('period', '30'))
+    dateTo = request.GET.get('date')
+    if dateTo:
+        end = datetime.strptime(dateTo, '%Y-%m-%d').replace(
+            hour=23, minute=59, second=59)
+        start = (end - timedelta(days=period)).replace(
+            hour=0, minute=0, second=0)
+    else:
+        end = datetime.now()
+        start = (end - timedelta(days=period)).replace(
+            hour=0, minute=0, second=0)
+    product_ids = Product.objects.filter(
+        supplier_id=supplierId,
+    ).values_list('id', flat=True)
+    productstats = ProductStat.objects.prefetch_related('product').filter(
+        parsing_id__gte=start,
+        parsing_id__lte=end,
+        product_id__in=product_ids
+    )
+    return JsonResponse({
+        'graphs': list(productstats.values('parsing_id').annotate(
+            price=Avg('price'),
+            profit_fbo=Sum('profit_fbo'),
+            profit_fbs=Sum('profit_fbs'),
+            sales_fbo=Sum('sales_fbo'),
+            sales_fbs=Sum('sales_fbs'),
+        ))
     })
 
 
