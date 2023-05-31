@@ -12,12 +12,7 @@
     },
     "host": "https://spotter.fun",
     "basePath": "/api",
-    "tags": [
-        {
-            "name": "Списки",
-            "description": "Запросы, категории, товары"
-        }
-    ],
+    "tags": [],
     "schemes": [
         "https"
     ],
@@ -25,7 +20,7 @@
         "/categories": {
             "get": {
                 "tags": [
-                    "Списки"
+                    "Категории"
                 ],
                 "summary": "Категории",
                 "description": "",
@@ -108,7 +103,7 @@
         "/queries/search": {
             "get": {
                 "tags": [
-                    "Списки"
+                    "Поиск"
                 ],
                 "summary": "Перспективность ниши, товары",
                 "description": "",
@@ -224,7 +219,7 @@
         "/queries/top": {
             "get": {
                 "tags": [
-                    "Списки"
+                    "Топ ниши"
                 ],
                 "summary": "Топ ниши",
                 "description": "",
@@ -340,7 +335,7 @@
                 }
             }
         },
-        "/products/:articul": {
+        "/products/{articul}": {
             "get": {
                 "tags": [
                     "Товар"
@@ -353,21 +348,18 @@
                 ],
                 "parameters": [
                     {
+                        "name": "articul",
+                        "required": true,
+                        "in": "path",
+                        "description": "Артикул товара",
+                        "type": "number"
+                    },
+                    {
                         "name": "period",
                         "in": "query",
                         "description": "Период данных",
                         "type": "number",
                         "enum": [7, 14, 30]
-                    },
-                    {
-                        "name": "fb",
-                        "in": "query",
-                        "description": "FBO / FBS",
-                        "type": "string",
-                        "enum": [
-                            "fbo", 
-                            "fbs"
-                        ]
                     },
                     {
                         "name": "dateTo",
@@ -386,6 +378,92 @@
                 }
             }
         },
+        "/brands/{id}": {
+            "get": {
+                "tags": [
+                    "Бренд"
+                ],
+                "summary": "Данные по бренду",
+                "description": "",
+                "operationId": "getBrand",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "description": "Id бренда",
+                        "type": "number"
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "dateTo",
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/suppliers/{id}": {
+            "get": {
+                "tags": [
+                    "Продавец"
+                ],
+                "summary": "Данные по продавцу",
+                "description": "",
+                "operationId": "getSupplier",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "description": "Id продавца",
+                        "type": "number"
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "dateTo",
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        }
     },
     "securityDefinitions": {
         "api_key": {

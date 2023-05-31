@@ -542,8 +542,8 @@ def queries_search(request):
         )
         response['graphs'] = list(productstats.values('parsing_id').annotate(
             price=Avg('price'),
-            profit=Sum(f'profit_{period}_{fb}'),
-            sales=Sum(f'sales_{period}_{fb}'),
+            profit=Sum(f'profit_{fb}'),
+            sales=Sum(f'sales_{fb}'),
             products=Count('pk'),
             sellers=Count('product__supplier_id', distinct=True),
             brands=Count('product__brand_id', distinct=True)
@@ -723,6 +723,37 @@ def product(request, articul):
             'status': 'error',
             'message': f'Товар с артикулом {articul} отсутствует в БД'
         })
+
+
+def brand(request, brandId):
+    period = int(request.GET.get('period', '30'))
+    dateTo = request.GET.get('date')
+    if dateTo:
+        end = datetime.strptime(dateTo, '%Y-%m-%d').replace(
+            hour=23, minute=59, second=59)
+        start = (end - timedelta(days=period)).replace(
+            hour=0, minute=0, second=0)
+    else:
+        end = datetime.now()
+        start = (end - timedelta(days=period)).replace(
+            hour=0, minute=0, second=0)
+    product_ids = Product.objects.filter(
+        brand_id=brandId,
+    ).values_list('id', flat=True)
+    productstats = ProductStat.objects.prefetch_related('product').filter(
+        parsing_id__gte=start,
+        parsing_id__lte=end,
+        product_id__in=product_ids
+    )
+    return JsonResponse({
+        'graphs': list(productstats.values('parsing_id').annotate(
+            price=Avg('price'),
+            profit_fbo=Sum(f'profit_fbo'),
+            profit_fbs=Sum(f'profit_fbs'),
+            sales_fbo=Sum(f'sales_fbo'),
+            sales_fbs=Sum(f'sales_fbs'),
+    ))
+    })
 
 
 @csrf_exempt
