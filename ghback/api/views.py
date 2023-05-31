@@ -678,7 +678,7 @@ def product(request, articul):
     if dateTo:
         end = datetime.strptime(dateTo, '%Y-%m-%d').replace(
             hour=23, minute=59, second=59)
-        start = end - timedelta(days=period).replace(
+        start = (end - timedelta(days=period)).replace(
             hour=0, minute=0, second=0)
     else:
         end = datetime.now()
