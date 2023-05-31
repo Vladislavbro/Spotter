@@ -254,6 +254,30 @@ def get_children(category, categories, stats, period, fb):
     } for c in categories if c.get('parent') == category['wb_id']]
 
 
+def get_rows(rows, category, categories, stats, period, fb, parent=None):
+    stat = [s for s in stats if s['category_id'] == category['id']]
+    if parent:
+        name = parent['name'] + ' > ' + category['name']
+    else:
+        name = category['name']
+    if len(stat) == 0:
+        rows.append([name, None, None, None, None, None, None])
+    else:
+        stat = stat[0]
+        rows.append([
+            name,
+            stat['products_count'],
+            stat[f'sellers_count_{period}'],
+            stat[f'profit_{period}_{fb}'],
+            stat[f'price_avg_{period}'],
+            stat[f'sellers_solded_{period}_{fb}'],
+            stat[f'products_solded_{period}_{fb}'],
+        ])
+    children = [c for c in categories if c.get('parent') == category['wb_id']]
+    for child in children:
+        get_rows(rows, child, categories, stats, period, fb, category)
+
+
 def categories_list(request):
     output = request.GET.get('output', 'json')
     period = int(request.GET.get('period', '30'))
@@ -293,18 +317,33 @@ def categories_list(request):
             category_id__in=category_ids,
             parsing_id=config.current_parsing_id).values()
     roots = [c for c in categories if c.get('parent') is None]
-    for root in roots:
-        root['items'] = get_children(root, categories, stats, period, fb)
-        # calc_stat(root)
-        out.append(root)
     if output == 'json':
+        for root in roots:
+            root['items'] = get_children(root, categories, stats, period, fb)
+            # calc_stat(root)
+            out.append(root)
         return JsonResponse({
             'total': categories.count(),
             'date': config.current_parsing_id if config else None,
             'items': out
         })
     elif output == 'csv':
-        return queries_export(out, dateTo, period, fb)
+        fields = ['Категория', 'Товары, шт.', 'Продавцов, шт.', 
+                  'Оборот', 'Средняя цена', 'Продавцы с продажами',
+                  'Товары с продажами']
+        rows = []
+        for root in roots:
+            get_rows(rows, root, categories, stats, period, fb)
+        filename = f'Категории_{dateTo}_{period}_{fb}.csv'
+        file_path = f'export/{filename}'
+        with open(file_path, 'w') as f:
+            write = csv.writer(f)
+            write.writerow(fields)
+            write.writerows(rows)
+        with open(file_path) as f:
+            response = HttpResponse(f, content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename={filename}'
+            return response
 
 
 def queries_top(request):
