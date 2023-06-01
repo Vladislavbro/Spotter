@@ -741,8 +741,8 @@ def brand(request, brandId):
         brand_id=brandId,
     ).values_list('id', flat=True)
     productstats = ProductStat.objects.prefetch_related('product').filter(
-        parsing_id__gte=start,
-        parsing_id__lte=end,
+        parsing_id__gte=start.timestamp(),
+        parsing_id__lte=end.timestamp(),
         product_id__in=product_ids
     )
     return JsonResponse({
@@ -772,8 +772,8 @@ def supplier(request, supplierId):
         supplier_id=supplierId,
     ).values_list('id', flat=True)
     productstats = ProductStat.objects.prefetch_related('product').filter(
-        parsing_id__gte=start,
-        parsing_id__lte=end,
+        parsing_id__gte=start.timestamp(),
+        parsing_id__lte=end.timestamp(),
         product_id__in=product_ids
     )
     return JsonResponse({
@@ -785,6 +785,11 @@ def supplier(request, supplierId):
             sales_fbs=Sum('sales_fbs'),
         ))
     })
+
+
+def search(request):
+    query = request.GET.get('query')
+    return JsonResponse({'query': query})
 
 
 @csrf_exempt

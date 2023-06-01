@@ -20,6 +20,7 @@ urlpatterns = [
     path('products/<int:articul>', views.product, name='product'),
     path('brands/<int:brandId>', views.brand, name='brand'),
     path('suppliers/<int:supplierId>', views.supplier, name='supplier'),
+    path('search', views.search, name='search'),
     path('transfer/config', views.transfer_config, name='transfer_config'),
     path('transfer/category', views.transfer_category, name='transfer_category'),
     path('transfer/query', views.transfer_query, name='transfer_query'),
