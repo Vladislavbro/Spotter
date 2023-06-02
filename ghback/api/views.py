@@ -808,7 +808,7 @@ def search(request):
     for name in names:
         name = re.sub(r'\W', ' ', name['name'])
         name = re.sub(r'\s+', ' ', name)
-        words = name['name'].lower().split(' ')
+        words = name.lower().split(' ')
         if root in words:
             variant = []
             index = words.index(root)
