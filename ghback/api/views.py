@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 # from dateutil.relativedelta import relativedelta
 import threading
 import csv
+import re
 # import requests
 from api.parse import Parser
 from api.migrate import Migrate
@@ -805,6 +806,8 @@ def search(request):
     # words = [n['name'].lower().split(' ') for n in names]
     variants = []
     for name in names:
+        name = re.sub(r'\W', ' ', name)
+        name = re.sub(r'\s+', ' ', name)
         words = name['name'].lower().split(' ')
         if root in words:
             variant = []
