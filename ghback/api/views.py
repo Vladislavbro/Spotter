@@ -814,9 +814,9 @@ def search(request):
             index = words.index(root)
             variant.append(words[index])
             if index + 1 < len(words):
-                if len(words[index + 1]) > 3:
+                if len(words[index + 1]) > 2:
                     variant.append(words[index + 1])
-                elif len(words) > index + 2:
+                elif len(words) > index + 2 and len(words[index + 1]) > 2:
                     variant += words[index + 1:index + 3]
             if len(variant) > 1:
                 variants.append(' '.join(variant))
