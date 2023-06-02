@@ -463,6 +463,315 @@
                     }
                 }
             }
+        },
+        "/search": {
+            "get": {
+                "tags": [
+                    "Поиск"
+                ],
+                "summary": "Подсказки для поиска",
+                "description": "",
+                "operationId": "getVariants",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "query",
+                        "required": true,
+                        "in": "query",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Информация о текущем пользователе",
+                "description": "",
+                "operationId": "getUser",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/log_in": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Авторизация",
+                "description": "",
+                "operationId": "logIn",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "username",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/log_out": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Удаление сессии",
+                "description": "",
+                "operationId": "logOut",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signup": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Регистрация пользователя",
+                "description": "",
+                "operationId": "signup",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "username",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "first_name",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "last_name",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "password_confirm",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "order": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Оформление подписки",
+                "description": "",
+                "operationId": "order",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "amount",
+                        "description": "Сумма за подписку",
+                        "required": true,
+                        "in": "body",
+                        "type": "number"
+                    },
+                    {
+                        "name": "subscribe_type",
+                        "description": "Тип подписки trial или premium",
+                        "required": true,
+                        "in": "body",
+                        "type": "string",
+                        "enum": [
+                            "trial", "premium"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "accounts": {
+            "get": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Список аккаунтов",
+                "description": "",
+                "operationId": "accounts",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            }
+        },
+        "account": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Добавление или обновление пользователя",
+                "description": "",
+                "operationId": "account",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "description": "Если есть параметр id то обновление, если нет - то добавление",
+                        "in": "body",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "email",
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "username",
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "first_name",
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "last_name",
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "in": "body",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            }
+        },
+        "account/{id}/delete": {
+            "delete": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Удаление пользователя",
+                "description": "",
+                "operationId": "deleteAccount",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -611,6 +920,40 @@
                     "type": "boolean"
                 },
                 "top_30_fbs": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "customer__subscribe_type": {
+                    "description": "trial или premium",
+                    "type": "string"
+                },
+                "customer__subscribe_until": {
+                    "description": "В формате unix timestamp",
+                    "type": "integer"
+                },
+                "is_staff": {
+                    "type": "boolean"
+                },
+                "is_superuser": {
                     "type": "boolean"
                 }
             }
