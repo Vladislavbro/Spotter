@@ -806,7 +806,7 @@ def search(request):
     # words = [n['name'].lower().split(' ') for n in names]
     variants = []
     for name in names:
-        name = re.sub(r'\W', ' ', name)
+        name = re.sub(r'\W', ' ', name['name'])
         name = re.sub(r'\s+', ' ', name)
         words = name['name'].lower().split(' ')
         if root in words:
