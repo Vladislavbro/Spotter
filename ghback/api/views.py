@@ -814,8 +814,12 @@ def search(request):
             index = words.index(root)
             variant.append(words[index])
             if index + 1 < len(words):
-                variant.append(words[index + 1])
-            variants.append(' '.join(variant))
+                if len(words[index + 1]) > 3:
+                    variant.append(words[index + 1])
+                elif len(words) > index + 2:
+                    variant += words[index + 1:index + 3]
+            if len(variant) > 1:
+                variants.append(' '.join(variant))
     return JsonResponse({
         'query': query,
         'features': features,
