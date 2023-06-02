@@ -789,7 +789,36 @@ def supplier(request, supplierId):
 
 def search(request):
     query = request.GET.get('query')
-    return JsonResponse({'query': query})
+    doc = nlp(query)
+    root = [w for w in doc if w.dep_ == 'ROOT'][0]
+    if root.tag_ != 'NOUN':
+        nsubj = [w for w in doc if w.dep_ == 'nsubj']
+        if len(nsubj):
+            root = nsubj[0]
+    root = root.lemma_
+    features = list(set([w.lemma_ for w in doc 
+                         if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
+    features.sort()
+    names = list(Product.objects.filter(
+        root=root, features__contains=features
+    ).values('name').distinct()[:100])
+    # words = [n['name'].lower().split(' ') for n in names]
+    variants = []
+    for name in names:
+        words = name['name'].lower().split(' ')
+        if root in words:
+            variant = []
+            index = words.index(root)
+            variant.append(words[index])
+            if index + 1 < len(words):
+                variant.append(words[index + 1])
+            variants.append(' '.join(variant))
+    return JsonResponse({
+        'query': query,
+        'features': features,
+        'root': root,
+        'variants': list(set(variants))
+    })
 
 
 @csrf_exempt
