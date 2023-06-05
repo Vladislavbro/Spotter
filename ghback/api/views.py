@@ -594,7 +594,8 @@ def queries_search(request):
         f_p_stat = ProductStat.objects.prefetch_related('product').filter(
             product_id__in=product_ids,
             parsing_id=f_p_config.current_parsing_id
-        ).aggregate(
+        )
+        f_p_stat_agg = f_p_stat.aggregate(
             Sum(f'profit_14_{fb}'),
             Count('product__supplier_id', distinct=True),
             product_solded=Count('pk', filter=Q(**{sales_field: 0})),
@@ -642,7 +643,7 @@ def queries_search(request):
             response['scoring'] -= 1
         # 6 Оценка тренда продаж - сравнение среднесуточного оборота
         # в начале и конца периода
-        response['sales_trend'] = (curr_stat[f'profit_14_{fb}__sum'] / f_p_stat[f'profit_14_{fb}__sum'])
+        response['sales_trend'] = (curr_stat[f'profit_14_{fb}__sum'] / f_p_stat_agg[f'profit_14_{fb}__sum'])
         if response['sales_trend'] <= 0.9:
             response['scoring'] -= 1
         elif response['sales_trend'] > 1.1:
@@ -659,13 +660,13 @@ def queries_search(request):
         # 8 Востребованность ниши - изменение количества продавцов 
         # с начала периода
         response['suppliers'] = curr_stat['product__supplier_id__count']
-        response['suppliers_diff'] = curr_stat['product__supplier_id__count'] / f_p_stat['product__supplier_id__count']
+        response['suppliers_diff'] = curr_stat['product__supplier_id__count'] / f_p_stat_agg['product__supplier_id__count']
         if response['suppliers_diff'] < 0.9:
             response['scoring'] -= 1
         if response['suppliers_diff'] <= 1.1:
             response['scoring'] += 1
         # 9 Объем рынка (динамика)
-        response['volume'] = (curr_stat[f'profit_14_{fb}__sum'] / f_p_stat[f'profit_14_{fb}__sum'])
+        response['volume'] = (curr_stat[f'profit_14_{fb}__sum'] / f_p_stat_agg[f'profit_14_{fb}__sum'])
         if response['volume'] >= 1.1:
             response['scoring'] += 1
         if response['volume'] <= 0.9:
@@ -685,7 +686,7 @@ def queries_search(request):
         if response['profit_top_sup_diff'] >= 1.1:
             response['scoring'] -= 1
         # 12 SPP - Процент товаров с продажами (динамика)
-        response['product_solded_diff'] = (curr_stat['product_solded'] / f_p_stat['product_solded'])
+        response['product_solded_diff'] = (curr_stat['product_solded'] / f_p_stat_agg['product_solded'])
         if response['product_solded_diff'] >= 1.1:
             response['scoring'] += 1
         elif response['product_solded_diff'] <= 0.9:
