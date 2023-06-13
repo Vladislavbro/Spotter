@@ -34,6 +34,7 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8080',
+    'http://localhost:3020',
     'https://spotter.fun',
     'https://test.spotter.fun',
 ]
