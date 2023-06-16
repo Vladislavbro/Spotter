@@ -20,6 +20,9 @@ import os
 from urllib import request
 import asyncio
 import pytz
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
 
 utc = pytz.UTC
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -46,6 +49,7 @@ class Parser(object):
     start_prev_period = None
     profit_first_top = 500000
     profit_ten_top = 100000
+    driver = None
     wirehouses = [169537, 205985, 117414, 209209, 117419, 210557, 
                   146666, 214951, 117866, 206844, 209207, 117442, 
                   205104, 205349, 159402, 130744, 204939, 144649, 
@@ -63,6 +67,19 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.set_period_dates()
+        options = Options()
+        userAgent = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                    'AppleWebKit/537.36 (KHTML, like Gecko) '
+                    'Chrome/112.0.0.0 Safari/537.36')
+        options.add_argument(f'user-agent={userAgent}')
+        options.add_argument('window-size=1200,800')
+        options.add_argument('--headless')
+        proxy = choice(proxies)
+        options.proxy = {
+            'http': proxy,
+            'https': proxy,
+        }
+        self.driver = webdriver.Chrome(options=options)
         self.processing()
 
     def get_wirehouses(self):
@@ -490,7 +507,6 @@ class Parser(object):
                 product.parsed_at = datetime.now(timezone.utc)
                 if self.query is None and self.category.wb_id not in product.categories:
                     product.categories.append(self.category.wb_id)
-                
                 sales_fbo = 0
                 sales_fbs = 0
                 last_stat = product.productstat_set.first()
@@ -511,7 +527,6 @@ class Parser(object):
                         sales_fbo = 0
                     if sales_fbs < 0:
                         sales_fbs = 0
-
                     pstat = product.productstat_set.create(
                         parsing_id=self.config.current_parsing_id,
                         sales_fbo=sales_fbo,
@@ -526,7 +541,6 @@ class Parser(object):
                     )
                     self.product_calculate(product, pstat)
                 product.save()
-
             else:
                 product = Product(
                     articul=item['id'],
@@ -551,6 +565,12 @@ class Parser(object):
                     priceU=priceU,
                     date=datetime.now(timezone.utc)
                 )
+            # if product.basket is None:
+            #     self.get_product_basket(product)
+
+    def get_product_basket(self, product):
+        url = f'https://www.wildberries.ru/catalog/{product.articul}/detail.aspx'
+        self.driver.get(url)
 
     def parse_search(self, data):
         print('parse_search', self.query)

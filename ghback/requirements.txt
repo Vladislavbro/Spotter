@@ -11,3 +11,4 @@ spacy
 nltk
 pymystem3
 pytz
+selenium-wire
