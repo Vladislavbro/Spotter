@@ -72,8 +72,6 @@ class CategoryStat(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now=True)
     parsing_id = models.IntegerField(blank=True, null=True)
-    # period = models.IntegerField()
-    # fb = models.CharField(max_length=3)
     products_count = models.IntegerField(blank=True, null=True)
     products_solded_7_fbo = models.IntegerField(blank=True, null=True)
     products_solded_7_fbs = models.IntegerField(blank=True, null=True)
@@ -153,14 +151,6 @@ class Query(models.Model):
     top_30_fbs = models.BooleanField(blank=True, null=True)
     calculated = models.BooleanField(blank=True, null=True)
 
-    # avg_price_prev_period = models.IntegerField(blank=True, null=True)
-    # avg_price_period = models.IntegerField(blank=True, null=True)
-    # profit_prev_period = models.BigIntegerField(blank=True, null=True)
-    # profit_period = models.BigIntegerField(blank=True, null=True)
-    # sales_period = models.IntegerField(blank=True, null=True)
-    # sellers = models.IntegerField(blank=True, null=True)
-    # sellers_with_sales = models.IntegerField(blank=True, null=True)
-
     class Meta():
         indexes = [
             models.Index(fields=['-parsing_id'])
@@ -170,12 +160,22 @@ class Query(models.Model):
 class Supplier(models.Model):
     wb_id = models.IntegerField()
     name = models.CharField(max_length=200)
+    inn = models.CharField(max_length=100, blank=True, null=True)
+    ogrn = models.CharField(max_length=100, blank=True, null=True)
+    ogrnip = models.CharField(max_length=100, blank=True, null=True)
+    trademark = models.CharField(max_length=100, blank=True, null=True)
+    
+    class Meta():
+        indexes = [
+            models.Index(fields=['wb_id']),
+        ]
 
 
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING,
                                  blank=True, null=True)
     articul = models.IntegerField()  # , unique=True
+    basket = models.IntegerField(blank=True, null=True)
     # parsing_id = models.IntegerField(blank=True, null=True)
     parsed_at = models.DateTimeField(blank=True, null=True)
     name = models.CharField(max_length=200)

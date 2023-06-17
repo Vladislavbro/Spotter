@@ -13,16 +13,33 @@ from django.views.decorators.csrf import csrf_exempt
 import threading
 import csv
 import re
-# import requests
+import requests
 from api.parse import Parser
 from api.migrate import Migrate
-from api.models import (Category, Product, ProductStat, 
+from api.models import (Category, Product, ProductStat,
                         Config, Query, CategoryStat)
 from api.parse import nlp
+from dotenv import load_dotenv
+import os
+import random
+import string
+
+load_dotenv()
+UNISENDER_KEY = os.getenv('UNISENDER_KEY')
+
+
+def send_mail(subject, content, email, list_id):
+    url = (
+        f'https://api.unisender.com/ru/api/sendEmail?format=json&'
+        f'api_key={UNISENDER_KEY}&email={email}&'
+        'sender_name=SPOTTER.FUN&sender_email=info@spotter.fun&'
+        f'subject={subject}&body={content}&list_id={list_id}&lang=ru'
+    )
+    response = requests.get(url)
+    print(response.data)
 
 
 def me(request):
-    print(' --- me --- ', request.get_host())
     if request.user.is_authenticated:
         user = User.objects.prefetch_related('customer').filter(
             pk=request.user.id).values(
@@ -50,16 +67,50 @@ def me(request):
 
 def log_in(request):
     body = json.loads(request.body)
-    print('log_in', body)
     user = authenticate(username=body['username'].strip(),
                         password=body['password'])
     if user is not None:
-        login(request, user)  # and request.user.__class__ is not AnonymousUser:
-        print('body', body, user, request.user)
-        user = request.user.__class__.objects.filter(pk=request.user.id).values().first()
+        login(request, user)
+        user = User.objects.filter(pk=request.user.id).values().first()
         return JsonResponse(user)
     else:
         return JsonResponse({'status': 'not auth'})
+
+
+def change_password(request):
+    body = json.loads(request.body)
+    user = User.objects.get(pk=request.user.id)
+    if user.check_password(body['password']):
+        user.set_password(body['new_password'])
+        user.save()
+        send_mail(
+            subject='Пароль успешно изменен', 
+            content='Логин: ' + user.username + '<br>Пароль: ' + body['new_password'], 
+            email=user.email, list_id=user.id)
+        return JsonResponse({'status': 'success', 
+                             'message': 'Пароль успешно изменен'})
+    else:
+        return JsonResponse({'status': 'error', 
+                             'message': 'Пароль не подходит'})
+
+
+def change_password_v2(request):
+    email = request.GET.get('email')
+    user = User.objects.filter(email=email).first()
+    if user:
+        password = ''.join(random.choices(
+            string.ascii_lowercase + string.digits, k=6))
+        user.set_password(password)
+        user.save()
+        send_mail(
+            subject='Пароль успешно изменен', 
+            content='Логин: ' + user.username + '<br>Пароль: ' + password,
+            email=user.email, list_id=user.id)
+        return JsonResponse({'status': 'success',
+                             'message': 'Новый пароль отправлен на email'})
+    else:
+        return JsonResponse({'status': 'error',
+                             'message': 'Пользователь не найден'})
 
 
 def log_out(request):
@@ -93,6 +144,10 @@ def signup(request):
     )
     customer.save()
     login(request, user)
+    send_mail(
+        subject='Успешная регистрация на сайте SPOTTER.FUN!', 
+        content='Логин: ' + body['username'] + '<br>Пароль: ' + body['password'], 
+        email=user.email, list_id=user.id)
     return JsonResponse({'status': 'success', 'user': model_to_dict(user)})
 
 

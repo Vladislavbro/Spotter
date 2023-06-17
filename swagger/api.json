@@ -744,6 +744,76 @@
                 }
             }
         },
+        "account/{id}/password": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Изменение пароля",
+                "description": "",
+                "operationId": "changePassword",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "password",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "new_password",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "password": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Изменение пароля по email",
+                "description": "",
+                "operationId": "changePasswordV2",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "required": true,
+                        "in": "query",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
         "account/{id}/delete": {
             "delete": {
                 "tags": [

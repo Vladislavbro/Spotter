@@ -2,7 +2,8 @@ import requests
 # from api.mongo_models import Categories, Products, Config, Queries
 from django.forms.models import model_to_dict
 from django.db.models import Sum, Avg, Q, Count
-from api.models import Category, Product, Config, Query, ProductStat, CategoryStat
+from api.models import (Category, Product, Config, Query, ProductStat, 
+                        CategoryStat, Supplier)
 from time import sleep
 from datetime import datetime, timedelta, timezone
 import time
@@ -21,6 +22,7 @@ from urllib import request
 import asyncio
 import pytz
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 
 
@@ -421,27 +423,6 @@ class Parser(object):
         product.check_articul = True
         product.save()
 
-    def get_old_data(self, product):
-        if product.mongo_transfered is not True:
-            url = f'https://m.spotter.fun/api/products/{product.articul}'
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                if data.get('product'):
-                    for size in data['product'].get('sizes', []):
-                        if size.get('profit') is not None:
-                            date = datetime.fromtimestamp(
-                                size['date']['$date'] / 1000)
-                            date = date.replace(tzinfo=timezone.utc)
-                            product.sale_set.create(
-                                date=date,
-                                quantity=size.get('quantity', 0),
-                                sales=size.get('sales', 0),
-                                profit=size.get('profit', 0),
-                                price=size.get('price', 0),
-                            )
-            product.mongo_transfered = True
-
     def product_calculate(self, product, pstat):
         start = (datetime.now(timezone.utc) - timedelta(days=30)).replace(
             hour=0, minute=0, second=0, microsecond=0)
@@ -565,12 +546,49 @@ class Parser(object):
                     priceU=priceU,
                     date=datetime.now(timezone.utc)
                 )
-            # if product.basket is None:
-            #     self.get_product_basket(product)
+            if product.basket is None:
+                self.get_product_basket(product)
+            if product.basket:
+                supplier = Supplier.objects.filter(wb_id=product.supplier_id)
+                if not supplier.exists():
+                    self.get_seller(product)
+
+    def get_seller(self, product):
+        url = ('https://basket-' + str(product.basket) + '.wb.ru/vol',
+               str(product.articul)[:4] + '/part',
+               str(product.articul)[:6] + '/' + str(product.articul),
+               '/info/sellers.json')
+        response = self.get_url(url)
+        data = response.json()
+        # {
+        #     "nmId": 138098499,
+        #     "supplierId": 975054,
+        #     "supplierName": "ИП Клепиков А. Ю.",
+        #     "inn": "772019882755",
+        #     "ogrn": "322774600471670",
+        #     "ogrnip": "322774600471670",
+        #     "trademark": "Klepiks",
+        #     "rv": 12636635372
+        # }
+        Supplier.objects.create(
+            wb_id=data['supplierId'],
+            name=data['supplierName'],
+            inn=data.get('inn'),
+            ogrn=data.get('ogrn'),
+            ogrnip=data.get('ogrnip'),
+            trademark=data.get('trademark'),
+        )
 
     def get_product_basket(self, product):
         url = f'https://www.wildberries.ru/catalog/{product.articul}/detail.aspx'
         self.driver.get(url)
+        img = self.driver.find_elements(By.CSS_SELECTOR, 
+                                        '.zoom-image-container img')
+        if len(img):
+            src = img[0].get_attribute('src')
+            basket = int(re.search(r'basket-(\d+)', src).group(1))
+            product.basket = basket
+            product.save()
 
     def parse_search(self, data):
         print('parse_search', self.query)
