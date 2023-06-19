@@ -98,6 +98,7 @@ def get_basket(articul):
     while len(img) == 0:
         sleep(0.3)
         img = driver.find_elements(By.CSS_SELECTOR, '.zoom-image-container img')
+        print(len(img))
     # if len(img):
     src = img[0].get_attribute('src')
     basket = int(re.search(r'basket-(\d+)', src).group(1))
