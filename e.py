@@ -69,7 +69,7 @@ options.add_argument('window-size=1200,800')
 options.add_argument('--headless')
 sw_options = {
     'proxy': {
-        'http': proxy, 
+        'http': proxy,
         'https': proxy
     }
 }
