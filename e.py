@@ -59,7 +59,8 @@ proxies = [
 ]
 
 app = Flask(__name__)
-proxy = choice(proxies)
+# proxy = choice(proxies)
+proxy = 'http://CrCWgH3r:bb3KGpCE@45.140.64.241:46385'
 options = Options()
 userAgent = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
              'AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -74,6 +75,17 @@ sw_options = {
     }
 }
 driver = webdriver.Chrome(seleniumwire_options=sw_options, options=options)
+
+
+@app.route('/e/test')
+def test():
+    driver.get('https://ipinfo.io')
+    ip = '45.140.64.241'
+    return {
+        'title': driver.title,
+        'ip': ip in driver.find_element(By.CSS_SELECTOR, 'html').get_attribute('outerHTML')
+    }
+    'http://CrCWgH3r:bb3KGpCE@45.140.64.241:46385'
 
 
 @app.route('/e/basket/<articul>')
