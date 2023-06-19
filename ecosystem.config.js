@@ -2,7 +2,7 @@ module.exports = {
 
   apps : [
     {
-      script: 'selenium.py',
+      script: 'e.py',
       interpreter: '/home/deploy/apps/goods_hunter/venv/bin/python',
     },
     // {
