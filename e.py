@@ -67,12 +67,18 @@ userAgent = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
 options.add_argument(f'user-agent={userAgent}')
 options.add_argument('window-size=1200,800')
 options.add_argument('--headless')
-options.add_argument(f'--proxy-server={proxy}')
-driver = webdriver.Chrome(options=options)
+sw_options = {
+    'proxy': {
+        'http': proxy, 
+        'https': proxy
+    }
+}
+driver = webdriver.Chrome(seleniumwire_options=sw_options, options=options)
 
 
 @app.route('/e/basket/<articul>')
 def get_basket(articul):
+    # 148276125
     url = f'https://www.wildberries.ru/catalog/{articul}/detail.aspx'
     driver.get(url)
     img = driver.find_elements(By.CSS_SELECTOR, '.zoom-image-container img')
