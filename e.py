@@ -59,18 +59,15 @@ proxies = [
 ]
 
 app = Flask(__name__)
+proxy = choice(proxies)
 options = Options()
 userAgent = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
-            'AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/112.0.0.0 Safari/537.36')
+             'AppleWebKit/537.36 (KHTML, like Gecko) '
+             'Chrome/112.0.0.0 Safari/537.36')
 options.add_argument(f'user-agent={userAgent}')
 options.add_argument('window-size=1200,800')
 options.add_argument('--headless')
-proxy = choice(proxies)
-options.proxy = {
-    'http': proxy,
-    'https': proxy,
-}
+options.add_argument(f'--proxy-server={proxy}')
 driver = webdriver.Chrome(options=options)
 
 
