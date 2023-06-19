@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from random import choice
 import re
+from time import sleep 
 
 
 proxies = [
@@ -94,16 +95,19 @@ def get_basket(articul):
     url = f'https://www.wildberries.ru/catalog/{articul}/detail.aspx'
     driver.get(url)
     img = driver.find_elements(By.CSS_SELECTOR, '.zoom-image-container img')
-    if len(img):
-        src = img[0].get_attribute('src')
-        basket = int(re.search(r'basket-(\d+)', src).group(1))
-        return {
-           'basket': basket
-        }
-    else:
-        return {
-           'basket': None
-        }
+    while len(img) == 0:
+        sleep(0.3)
+        img = driver.find_elements(By.CSS_SELECTOR, '.zoom-image-container img')
+    # if len(img):
+    src = img[0].get_attribute('src')
+    basket = int(re.search(r'basket-(\d+)', src).group(1))
+    return {
+        'basket': basket
+    }
+    # else:
+    #     return {
+    #        'basket': None
+    #     }
     
 
 if __name__ == '__main__':
