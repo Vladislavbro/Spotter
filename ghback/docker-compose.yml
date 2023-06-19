@@ -13,7 +13,7 @@ services:
   #   volumes:
   #     - ./data/db:/var/lib/postgres
   db:
-    image: postgres
+    image: postgres:2.31
     shm_size: 1g
     restart: always
     ports:
