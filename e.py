@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, Response
-from selenium import webdriver
+from seleniumwire import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from random import choice
