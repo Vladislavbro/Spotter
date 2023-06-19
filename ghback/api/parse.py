@@ -21,9 +21,6 @@ import os
 from urllib import request
 import asyncio
 import pytz
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 
 
 utc = pytz.UTC
@@ -69,19 +66,6 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.set_period_dates()
-        options = Options()
-        userAgent = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
-                    'AppleWebKit/537.36 (KHTML, like Gecko) '
-                    'Chrome/112.0.0.0 Safari/537.36')
-        options.add_argument(f'user-agent={userAgent}')
-        options.add_argument('window-size=1200,800')
-        options.add_argument('--headless')
-        proxy = choice(proxies)
-        options.proxy = {
-            'http': proxy,
-            'https': proxy,
-        }
-        self.driver = webdriver.Chrome(options=options)
         self.processing()
 
     def get_wirehouses(self):
@@ -546,12 +530,12 @@ class Parser(object):
                     priceU=priceU,
                     date=datetime.now(timezone.utc)
                 )
-            if product.basket is None:
-                self.get_product_basket(product)
-            if product.basket:
-                supplier = Supplier.objects.filter(wb_id=product.supplier_id)
-                if not supplier.exists():
-                    self.get_seller(product)
+            # if product.basket is None:
+            #     self.get_product_basket(product)
+            # if product.basket:
+            #     supplier = Supplier.objects.filter(wb_id=product.supplier_id)
+            #     if not supplier.exists():
+            #         self.get_seller(product)
 
     def get_seller(self, product):
         url = ('https://basket-' + str(product.basket) + '.wb.ru/vol',
@@ -580,15 +564,18 @@ class Parser(object):
         )
 
     def get_product_basket(self, product):
-        url = f'https://www.wildberries.ru/catalog/{product.articul}/detail.aspx'
-        self.driver.get(url)
-        img = self.driver.find_elements(By.CSS_SELECTOR, 
-                                        '.zoom-image-container img')
-        if len(img):
-            src = img[0].get_attribute('src')
-            basket = int(re.search(r'basket-(\d+)', src).group(1))
-            product.basket = basket
-            product.save()
+        url = f'https://spotter.fun/e/basket/{product.articul}'
+        # response = requests.get(url)
+        # if response.status_code == 200:
+        #     response.data()
+        # self.driver.get(url)
+        # img = self.driver.find_elements(By.CSS_SELECTOR, 
+        #                                 '.zoom-image-container img')
+        # if len(img):
+        #     src = img[0].get_attribute('src')
+        #     basket = int(re.search(r'basket-(\d+)', src).group(1))
+        #     product.basket = basket
+        #     product.save()
 
     def parse_search(self, data):
         print('parse_search', self.query)
