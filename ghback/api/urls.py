@@ -18,6 +18,7 @@ urlpatterns = [
     path('password', views.change_password_v2,
          name='change_password_v2'),
     path('parser', views.parser, name='parser'),
+    path('baskets', views.baskets, name='baskets'),
     path('categories', views.categories_list, name='categories_list'),
     path('queries/top', views.queries_top, name='queries_top'),
     path('queries/search', views.queries_search, name='queries_search'),

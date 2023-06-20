@@ -295,6 +295,17 @@ def parser(request):
     })
 
 
+def baskets(request):
+    t = threading.Thread(target=Parser, args=(), kwargs={})
+    t.setDaemon(True)
+    t.start()
+    print('baskets', t.native_id)
+    return JsonResponse({
+        'native_id': t.native_id,
+        'status': 'success'
+    })
+
+
 def get_children(category, categories, stats, period, fb):
     return [{
         **c,

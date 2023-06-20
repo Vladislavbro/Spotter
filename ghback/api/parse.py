@@ -3,7 +3,7 @@ import requests
 from django.forms.models import model_to_dict
 from django.db.models import Sum, Avg, Q, Count
 from api.models import (Category, Product, Config, Query, ProductStat, 
-                        CategoryStat, Supplier)
+                        CategoryStat)
 from time import sleep
 from datetime import datetime, timedelta, timezone
 import time
@@ -530,52 +530,6 @@ class Parser(object):
                     priceU=priceU,
                     date=datetime.now(timezone.utc)
                 )
-            # if product.basket is None:
-            #     self.get_product_basket(product)
-            # if product.basket:
-            #     supplier = Supplier.objects.filter(wb_id=product.supplier_id)
-            #     if not supplier.exists():
-            #         self.get_seller(product)
-
-    def get_seller(self, product):
-        url = ('https://basket-' + str(product.basket) + '.wb.ru/vol',
-               str(product.articul)[:-5] + '/part',
-               str(product.articul)[:-3] + '/' + str(product.articul),
-               '/info/sellers.json')
-        response = self.get_url(url)
-        data = response.json()
-        # {
-        #     "nmId": 138098499,
-        #     "supplierId": 975054,
-        #     "supplierName": "ИП Клепиков А. Ю.",
-        #     "inn": "772019882755",
-        #     "ogrn": "322774600471670",
-        #     "ogrnip": "322774600471670",
-        #     "trademark": "Klepiks",
-        #     "rv": 12636635372
-        # }
-        Supplier.objects.create(
-            wb_id=data['supplierId'],
-            name=data['supplierName'],
-            inn=data.get('inn'),
-            ogrn=data.get('ogrn'),
-            ogrnip=data.get('ogrnip'),
-            trademark=data.get('trademark'),
-        )
-
-    def get_product_basket(self, product):
-        url = f'https://spotter.fun/e/basket/{product.articul}'
-        # response = requests.get(url)
-        # if response.status_code == 200:
-        #     response.data()
-        # self.driver.get(url)
-        # img = self.driver.find_elements(By.CSS_SELECTOR, 
-        #                                 '.zoom-image-container img')
-        # if len(img):
-        #     src = img[0].get_attribute('src')
-        #     basket = int(re.search(r'basket-(\d+)', src).group(1))
-        #     product.basket = basket
-        #     product.save()
 
     def parse_search(self, data):
         print('parse_search', self.query)

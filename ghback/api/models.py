@@ -203,6 +203,7 @@ class Product(models.Model):
             models.Index(fields=['categories']),
             models.Index(fields=['parsed_at']),
             models.Index(fields=['root', 'features']),
+            models.Index(fields=['basket']),
         ]
 
 
