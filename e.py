@@ -114,12 +114,15 @@ def get_basket(articul):
     #     }
 
 
+https://basket-05.wb.ru/vol796/part79616/79616275/info/sellers.json
+https://basket-10.wb.ru/vol1595/part159521/159521068/info/sellers.json
+
 @app.route('/e/bf/<articul>')
 def bf_basket(articul):
-    baskets = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15']
+    baskets = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
     for basket in baskets:
-        url = 'https://basket-' + basket + '.wb.ru/vol' + str(articul)[:4] + '/part'
-        url += str(articul)[:6] + '/' + str(articul) + '/info/sellers.json'
+        url = 'https://basket-' + basket + '.wb.ru/vol' + str(articul)[:-5] + '/part'
+        url += str(articul)[:-3] + '/' + str(articul) + '/info/sellers.json'
         headers = {
             'User-Agent': user_agent_rotator.get_random_user_agent()
         }
