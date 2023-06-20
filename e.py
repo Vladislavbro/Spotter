@@ -5,7 +5,10 @@ from selenium.webdriver.chrome.options import Options
 from random import choice
 import re
 from time import sleep 
+from random_user_agent.user_agent import UserAgent
+import requests
 
+user_agent_rotator = UserAgent()
 
 proxies = [
     'http://CrCWgH3r:bb3KGpCE@91.230.38.109:64220',
@@ -109,7 +112,28 @@ def get_basket(articul):
     #     return {
     #        'basket': None
     #     }
-    
+
+
+@app.route('/e/bf/<articul>')
+def bf_basket(articul):
+    baskets = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15']
+    for basket in baskets:
+        url = 'https://basket-' + basket + '.wb.ru/vol' + str(articul)[:4] + '/part'
+        url += str(articul)[:6] + '/' + str(articul) + '/info/sellers.json'
+        headers = {
+            'User-Agent': user_agent_rotator.get_random_user_agent()
+        }
+        proxy = choice(proxies)
+        response = requests.get(url, headers=headers, proxies={
+            'http': proxy,
+            'https': proxy,
+        })
+        if response.status_code == 200:
+            break
+    return {
+        'basket': int(basket)
+    }
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
