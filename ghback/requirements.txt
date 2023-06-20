@@ -13,3 +13,4 @@ pymystem3
 pytz
 selenium-wire
 python-dotenv
+social-auth-app-django
