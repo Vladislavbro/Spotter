@@ -114,9 +114,6 @@ def get_basket(articul):
     #     }
 
 
-https://basket-05.wb.ru/vol796/part79616/79616275/info/sellers.json
-https://basket-10.wb.ru/vol1595/part159521/159521068/info/sellers.json
-
 @app.route('/e/bf/<articul>')
 def bf_basket(articul):
     baskets = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
