@@ -539,8 +539,8 @@ class Parser(object):
 
     def get_seller(self, product):
         url = ('https://basket-' + str(product.basket) + '.wb.ru/vol',
-               str(product.articul)[:4] + '/part',
-               str(product.articul)[:6] + '/' + str(product.articul),
+               str(product.articul)[:-5] + '/part',
+               str(product.articul)[:-3] + '/' + str(product.articul),
                '/info/sellers.json')
         response = self.get_url(url)
         data = response.json()
