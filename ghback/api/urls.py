@@ -30,5 +30,4 @@ urlpatterns = [
     path('transfer/category', views.transfer_category, name='transfer_category'),
     path('transfer/query', views.transfer_query, name='transfer_query'),
     path('transfer/product', views.transfer_product, name='transfer_product'),
-    path('', include('social_django.urls')),
 ]
