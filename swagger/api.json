@@ -629,6 +629,16 @@
                 }
             }
         },
+        "/login/vk-oauth2": {
+            "get": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Авторизация с помощью ВК",
+                "description": "",
+                "operationId": "vk-oauth2"
+            }
+        },
         "order": {
             "post": {
                 "tags": [

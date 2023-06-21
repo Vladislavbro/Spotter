@@ -24,17 +24,24 @@ sys.setrecursionlimit(10**6)
 class Basket(object):
     """docstring for Basket."""
     product = None
+    baskets = []
 
     def __init__(self):
         super(Basket, self).__init__()
+        self.baskets = list(Product.objects.filter(basket__gt=0).values('basket').annotate(Count('id')).order_by('-id__count').values_list('basket', flat=True))
+        print('baskets', self.baskets)
         self.get_basket()
 
     def get_basket(self):
         self.product = Product.objects.filter(basket=None).first()
         while self.product:
             articul = self.product.articul
-            baskets = ['10', '05', '04', '03', '02', '09', '01', '08', '06', '07', '11', '12']
-            for basket in baskets:
+            # baskets = ['10', '05', '04', '03', '02', '09', '01', '08', '06', '07', '11', '12']
+            for basket in self.baskets:
+                if basket < 10:
+                    basket = f'0{basket}'
+                else:
+                    basket = str(basket)
                 url = 'https://basket-' + basket + '.wb.ru/vol' + str(articul)[:-5] + '/part'
                 url += str(articul)[:-3] + '/' + str(articul) + '/info/sellers.json'
                 headers = {
