@@ -33,7 +33,7 @@ class Basket(object):
         self.product = Product.objects.filter(basket=None).first()
         while self.product:
             articul = self.product.articul
-            baskets = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+            baskets = ['10', '05', '04', '03', '02', '09', '01', '08', '06', '07', '11', '12']
             for basket in baskets:
                 url = 'https://basket-' + basket + '.wb.ru/vol' + str(articul)[:-5] + '/part'
                 url += str(articul)[:-3] + '/' + str(articul) + '/info/sellers.json'
