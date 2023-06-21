@@ -15,6 +15,7 @@ import csv
 import re
 import requests
 from api.parse import Parser
+from api.basket import Basket
 from api.migrate import Migrate
 from api.models import (Category, Product, ProductStat,
                         Config, Query, CategoryStat)
@@ -296,7 +297,7 @@ def parser(request):
 
 
 def baskets(request):
-    t = threading.Thread(target=Parser, args=(), kwargs={})
+    t = threading.Thread(target=Basket, args=(), kwargs={})
     t.setDaemon(True)
     t.start()
     print('baskets', t.native_id)

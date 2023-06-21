@@ -12,11 +12,11 @@ import pytz
 
 utc = pytz.UTC
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-nlp = spacy.load('ru_core_news_md')
+# nlp = spacy.load('ru_core_news_md')
 
 user_agent_rotator = UserAgent()
-TOKEN = '6161677884:AAE8uT0XWRVXr7SbGIjVTP3Ik6BhsDm8Z5I'
-bot = Bot(token=TOKEN)
+# TOKEN = '6161677884:AAE8uT0XWRVXr7SbGIjVTP3Ik6BhsDm8Z5I'
+# bot = Bot(token=TOKEN)
 
 sys.setrecursionlimit(10**6)
 
