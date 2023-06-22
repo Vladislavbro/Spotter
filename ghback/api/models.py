@@ -239,5 +239,6 @@ class ProductStat(models.Model):
         indexes = [
             # models.Index(fields=['-date']),
             models.Index(fields=['-parsing_id']),
+            models.Index(fields=['parsing_id', 'product_id']),
             models.Index(fields=['-profit_30_fbo']),
         ]

@@ -235,6 +235,19 @@ def delete_account(request, id):
     return JsonResponse({})
 
 
+def orders_list(request, id):
+    user = User.objects.get(pk=id)
+    return JsonResponse({
+        'orders': [{
+            'id': order.id,
+            'subscribe_type': order.subscribe_type,
+            'amount': order.amount,
+            'paid': order.paid,
+            'date': order.date.timestamp(),
+        } for order in user.order_set.all()]
+    })
+
+
 @csrf_exempt
 def payment(request):
     body = json.loads(request.body)

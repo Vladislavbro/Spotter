@@ -15,6 +15,8 @@ urlpatterns = [
          name='delete_account'),
     path('account/<int:id>/password', views.change_password,
          name='change_password'),
+    path('account/<int:id>/orders', views.orders_list,
+         name='orders_list'),
     path('password', views.change_password_v2,
          name='change_password_v2'),
     path('parser', views.parser, name='parser'),
