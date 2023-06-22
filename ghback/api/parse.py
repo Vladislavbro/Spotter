@@ -794,7 +794,7 @@ class Parser(object):
         update['products_solded_14_fbs'] = last_agg['sold_14_fbs'] / len(product_ids) * 100
         update['products_solded_30_fbo'] = last_agg['sold_30_fbo'] / len(product_ids) * 100
         update['products_solded_30_fbs'] = last_agg['sold_30_fbs'] / len(product_ids) * 100
-
+        print('update', update)
         productstats_current = ProductStat.objects.filter(
             parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
@@ -820,7 +820,7 @@ class Parser(object):
             update[f'price_avg_{period}'] = agg['price__avg']
             update[f'profit_{period}_fbo'] = agg['profit_fbo__sum']
             update[f'profit_{period}_fbs'] = agg['profit_fbs__sum']
-
+            print(period, update)
             start_prev = (start - timedelta(days=period))
             parsing_ids_prev = Config.objects.filter(
                 current_parsing_id__gte=start_prev.timestamp(),
@@ -839,6 +839,7 @@ class Parser(object):
                 field = f'profit_{period}_{fb}'
                 pstats = productstats_current.order_by(f'-{field}')[:9].values()
                 update[f'product_1_{field}'] = pstats[0][field]
+                print(fb, update)
                 if len(pstats) < 11:
                     continue
                 update[f'product_10_{field}'] = pstats[9][field]
@@ -867,6 +868,7 @@ class Parser(object):
                     continue
                 update[f'top_{period}_{fb}'] = True
                 deleteQuery = False
+        print('end', update)
         if deleteQuery:
             query.delete()
         else:
