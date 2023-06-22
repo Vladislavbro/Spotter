@@ -839,6 +839,8 @@ class Parser(object):
             for fb in ['fbo', 'fbs']:
                 field = f'profit_{period}_{fb}'
                 pstats = productstats_current.order_by(f'-{field}')[:9].values()
+                if pstats.count() < 10:
+                    continue
                 update[f'product_1_{field}'] = pstats[0][field]
                 update[f'product_10_{field}'] = pstats[9][field]
                 # Оборот первого не меньше 300к в месяц
