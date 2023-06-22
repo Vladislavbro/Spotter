@@ -37,7 +37,8 @@ def send_mail(subject, content, email, list_id):
         f'subject={subject}&body={content}&list_id={list_id}&lang=ru'
     )
     response = requests.get(url)
-    print(response.data)
+    data = response.json()
+    print(data)
 
 
 def me(request):
