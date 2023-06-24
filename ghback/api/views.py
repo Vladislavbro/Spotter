@@ -33,7 +33,7 @@ def send_mail(subject, content, email, list_id):
     url = (
         f'https://api.unisender.com/ru/api/sendEmail?format=json&'
         f'api_key={UNISENDER_KEY}&email={email}&'
-        'sender_name=SPOTTER.FUN&sender_email=info@spotter.fun&'
+        'sender_name=SPOTTER.FUN&sender_email=hello@spotter.fun&'
         f'subject={subject}&body={content}&list_id={list_id}&lang=ru'
     )
     response = requests.get(url)
