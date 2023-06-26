@@ -41,6 +41,64 @@ def send_mail(subject, content, email, list_id):
     print(data)
 
 
+def send_mail_v2(subject, content, email, list_id):
+    base_url = 'https://go1.unisender.ru/ru/transactional/api/v1'
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-API-KEY': '66jjjtqjwg7d8eqmiouqcawca6n41qzr33w7hyfo'
+    }
+    request_body = {
+        "message": {
+            "recipients": [
+            {
+                "email": "hello@spotter.fun",
+                "substitutions": {
+                    "CustomerId": 12452,
+                    "to_name": "hello spotter"
+                },
+            }
+            ],
+            "tags": [
+                "string1"
+            ],
+            "skip_unsubscribe": 0,
+            "global_language": "ru",
+            "template_engine": "simple",
+            "global_substitutions": {
+            "property1": "string",
+            "property2": "string"
+            },
+            "global_metadata": {
+            "property1": "string",
+            "property2": "string"
+            },
+            "body": {
+            "html": "<b>Hello, {{to_name}}</b>",
+            "plaintext": "Hello, {{to_name}}",
+            "amp": "<!doctype html><html amp4email><head> <meta charset=\"utf-8\"><script async src=\"https://cdn.ampproject.org/v0.js\"></script> <style amp4email-boilerplate>body{visibility:hidden}</style></head><body> Hello, AMP4EMAIL world.</body></html>"
+            },
+            "subject": "string",
+            "from_email": "hello@spotter.fun",
+            "from_name": "Spotter.fun",
+            # "reply_to": "user@example.com",
+            "track_links": 0,
+            "track_read": 0,
+            "bypass_global": 0,
+            "bypass_unavailable": 0,
+            "bypass_unsubscribed": 0,
+            "bypass_complained": 0,
+            "headers": {
+            "X-MyHeader": "some data",
+            "List-Unsubscribe": "<mailto: unsubscribe@example.com?subject=unsubscribe>, <http://www.example.com/unsubscribe/{{CustomerId}}>"
+            }
+        }
+    }
+    r = requests.post(base_url+'/email/send.json', json=request_body, headers=headers)
+    r.raise_for_status()  # throw an exception in case of error
+    print(r.json())
+
+
 def me(request):
     if request.user.is_authenticated:
         user = User.objects.prefetch_related('customer').filter(
