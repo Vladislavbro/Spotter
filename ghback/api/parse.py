@@ -777,17 +777,25 @@ class Parser(object):
         update['products_count'] = product_ids.count()
         if update['products_count'] == 0:
             return
-        last_agg = ProductStat.objects.filter(
+        
+        last_agg_values = ProductStat.objects.filter(
             parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
-        ).aggregate(
-            sold_7_fbo=Count('sales_7_fbo', filter=Q(sales_7_fbo__gt=0)),
-            sold_14_fbo=Count('sales_14_fbo', filter=Q(sales_14_fbo__gt=0)),
-            sold_30_fbo=Count('sales_30_fbo', filter=Q(sales_30_fbo__gt=0)),
-            sold_7_fbs=Count('sales_7_fbs', filter=Q(sales_7_fbs__gt=0)),
-            sold_14_fbs=Count('sales_14_fbs', filter=Q(sales_14_fbs__gt=0)),
-            sold_30_fbs=Count('sales_30_fbs', filter=Q(sales_30_fbs__gt=0)),
-        )
+        ).values('sales_7_fbo', 'sales_14_fbo', 'sales_30_fbo', 'sales_7_fbs', 'sales_14_fbs', 'sales_30_fbs')
+        last_agg = {
+            'sold_7_fbo': 0,
+            'sold_7_fbs': 0,
+            'sold_14_fbo': 0,
+            'sold_14_fbs': 0,
+            'sold_30_fbo': 0,
+            'sold_30_fbs': 0,
+        }
+        for value in last_agg_values:
+            for fb in ['fbo', 'fbs']:
+                for period in [7, 14, 30]:
+                    if value[f'sales_{period}_{fb}'] > 0:
+                        last_agg[f'sold_{period}_{fb}'] += 1
+                        
         update['products_solded_7_fbo'] = last_agg['sold_7_fbo'] / len(product_ids) * 100
         update['products_solded_7_fbs'] = last_agg['sold_7_fbs'] / len(product_ids) * 100
         update['products_solded_14_fbo'] = last_agg['sold_14_fbo'] / len(product_ids) * 100

@@ -14,7 +14,7 @@ services:
   #     - ./data/db:/var/lib/postgres
   db:
     image: postgres
-    shm_size: 2g
+    shm_size: 1g
     restart: always
     command: postgres -c 'max_connections=20000'
     ports:
