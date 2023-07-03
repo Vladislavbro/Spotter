@@ -235,11 +235,6 @@ class ProductStat(models.Model):
     priceU = models.IntegerField(blank=True, null=True)
 
     class Meta():
-        # ordering = ['-parsing_id']
         indexes = [
-            # models.Index(fields=['-date']),
-            models.Index(fields=['parsing_id']),
             models.Index(fields=['parsing_id', 'product_id']),
-            models.Index(fields=['product_id', 'parsing_id']),
-            models.Index(fields=['profit_30_fbo']),
         ]

@@ -795,7 +795,7 @@ class Parser(object):
                 for period in [7, 14, 30]:
                     if value[f'sales_{period}_{fb}'] > 0:
                         last_agg[f'sold_{period}_{fb}'] += 1
-                        
+
         update['products_solded_7_fbo'] = last_agg['sold_7_fbo'] / len(product_ids) * 100
         update['products_solded_7_fbs'] = last_agg['sold_7_fbs'] / len(product_ids) * 100
         update['products_solded_14_fbo'] = last_agg['sold_14_fbo'] / len(product_ids) * 100
@@ -830,7 +830,7 @@ class Parser(object):
             update[f'price_avg_{period}'] = agg['price__avg']
             update[f'profit_{period}_fbo'] = agg['profit_fbo__sum']
             update[f'profit_{period}_fbs'] = agg['profit_fbs__sum']
-            start_prev = (start - timedelta(days=period))
+            start_prev = start - timedelta(days=period)
             parsing_ids_prev = Config.objects.filter(
                 current_parsing_id__gte=start_prev.timestamp(),
                 current_parsing_id__lt=start.timestamp(),

@@ -41,7 +41,7 @@ def send_mail(subject, content, email, list_id):
     print(data)
 
 
-def send_mail_v2(subject, content, email, list_id):
+def send_mail_v2(subject, content, email, user_id):
     base_url = 'https://go1.unisender.ru/ru/transactional/api/v1'
     headers = {
         'Content-Type': 'application/json',
@@ -52,9 +52,9 @@ def send_mail_v2(subject, content, email, list_id):
         "message": {
             "recipients": [
             {
-                "email": "hello@spotter.fun",
+                "email": email,
                 "substitutions": {
-                    "CustomerId": 12452,
+                    "CustomerId": user_id,
                     "to_name": "hello spotter"
                 },
             }
@@ -70,15 +70,15 @@ def send_mail_v2(subject, content, email, list_id):
             "property2": "string"
             },
             "global_metadata": {
-            "property1": "string",
-            "property2": "string"
+                "property1": "string",
+                "property2": "string"
             },
             "body": {
-            "html": "<b>Hello, {{to_name}}</b>",
-            "plaintext": "Hello, {{to_name}}",
-            "amp": "<!doctype html><html amp4email><head> <meta charset=\"utf-8\"><script async src=\"https://cdn.ampproject.org/v0.js\"></script> <style amp4email-boilerplate>body{visibility:hidden}</style></head><body> Hello, AMP4EMAIL world.</body></html>"
+                "html": f"<p>{content}</p>",
+                "plaintext": content,
+                "amp": f"<!doctype html><html amp4email><head> <meta charset=\"utf-8\"><script async src=\"https://cdn.ampproject.org/v0.js\"></script> <style amp4email-boilerplate>body{visibility:hidden}</style></head><body><p>{content}</p></body></html>"
             },
-            "subject": "string",
+            "subject": subject,
             "from_email": "hello@spotter.fun",
             "from_name": "Spotter.fun",
             # "reply_to": "user@example.com",
@@ -89,8 +89,8 @@ def send_mail_v2(subject, content, email, list_id):
             "bypass_unsubscribed": 0,
             "bypass_complained": 0,
             "headers": {
-            "X-MyHeader": "some data",
-            "List-Unsubscribe": "<mailto: unsubscribe@example.com?subject=unsubscribe>, <http://www.example.com/unsubscribe/{{CustomerId}}>"
+                "X-MyHeader": "some data",
+                "List-Unsubscribe": "<mailto: unsubscribe@example.com?subject=unsubscribe>, <http://www.example.com/unsubscribe/{{CustomerId}}>"
             }
         }
     }
@@ -204,10 +204,10 @@ def signup(request):
     )
     customer.save()
     login(request, user)
-    send_mail(
+    send_mail_v2(
         subject='Успешная регистрация на сайте SPOTTER.FUN!', 
         content='Логин: ' + body['username'] + '<br>Пароль: ' + body['password'], 
-        email=user.email, list_id=user.id)
+        email=user.email, user_id=user.id)
     return JsonResponse({'status': 'success', 'user': model_to_dict(user)})
 
 
