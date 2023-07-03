@@ -76,7 +76,7 @@ def send_mail_v2(subject, content, email, user_id):
             "body": {
                 "html": f"<p>{content}</p>",
                 "plaintext": content,
-                "amp": f"<!doctype html><html amp4email><head> <meta charset=\"utf-8\"><script async src=\"https://cdn.ampproject.org/v0.js\"></script> <style amp4email-boilerplate>body{visibility:hidden}</style></head><body><p>{content}</p></body></html>"
+                "amp": "<!doctype html><html amp4email><head> <meta charset=\"utf-8\"><script async src=\"https://cdn.ampproject.org/v0.js\"></script> <style amp4email-boilerplate>body{visibility:hidden}</style></head><body><p>{content}</p></body></html>"
             },
             "subject": subject,
             "from_email": "hello@spotter.fun",
