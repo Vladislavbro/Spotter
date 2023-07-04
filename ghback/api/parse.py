@@ -659,6 +659,8 @@ class Parser(object):
                 parsing_id__in=parsing_ids,
                 product_id__in=product_ids
             )
+            if productstats.count() == 0:
+                continue
             agg = productstats.aggregate(
                 Avg('price'),
                 Sum('profit_fbo'),
