@@ -659,8 +659,6 @@ class Parser(object):
                 parsing_id__in=parsing_ids,
                 product_id__in=product_ids
             )
-            if productstats.count() == 0:
-                continue
             agg = productstats.aggregate(
                 Avg('price'),
                 Sum('profit_fbo'),
@@ -684,6 +682,8 @@ class Parser(object):
                 pstats = productstats_current.order_by(f'-{field}')[:9].values()
                 # update[field] = sum([pstat[field] for pstat in pstats])
                 # - Оборот первого товара не меньше 500к
+                if pstats.count() == 0:
+                    continue
                 if pstats[0][field] < self.profit_first_top / 30 * period:
                     continue
                 # оборот десятого товара не меньше 100к
