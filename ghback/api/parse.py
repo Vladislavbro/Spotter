@@ -336,6 +336,7 @@ class Parser(object):
             f'sort=popular&spp=25&page={self.page}&{self.category.wb_query}'
         )
         response = self.get_url(url)
+        print('crawl response.status_code', response.status_code)
         if response.status_code == 200:
             if response.text == '':
                 print('change_category')
