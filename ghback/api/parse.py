@@ -33,7 +33,7 @@ bot = Bot(token=TOKEN)
 
 sys.setrecursionlimit(10**6)
 
-TIMEOUT = 0.01
+TIMEOUT = 4
 
 
 class Parser(object):
