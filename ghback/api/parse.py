@@ -328,6 +328,7 @@ class Parser(object):
             return self.change_query()
 
     def crawl(self):
+        sleep(3)
         url = (
             f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog?'
             f'appType=1&couponsGeo={self.couponsGeo}&curr=rub&'
@@ -344,7 +345,6 @@ class Parser(object):
             try:
                 data = json.loads(r"{}".format(response.text))
                 self.parse_catalog(data)
-                sleep(3)
             except JSONDecodeError as e:
                 # self.notify('JSONDecodeError ' + self.category.name + ' ' + str(self.page))
                 print('JSONDecodeError', e, url)
