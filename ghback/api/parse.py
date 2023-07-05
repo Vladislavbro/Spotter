@@ -351,7 +351,7 @@ class Parser(object):
             except Exception as e:
                 print('except', str(e))
         elif response.status_code == 429:
-            sleep(10)
+            sleep(30)
             return self.crawl()
         else:
             # self.notify('404 ' + self.category.name)
