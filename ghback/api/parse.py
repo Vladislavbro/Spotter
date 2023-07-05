@@ -238,6 +238,8 @@ class Parser(object):
             return self.query_crawl()
 
     def get_category(self):
+        count = Category.objects.filter(parsed_at=None, parse=True).count()
+        print('get_category count', count)
         self.category = Category.objects.filter(parsed_at=None,
                                                 parse=True).first()
         if self.category is None:
@@ -359,7 +361,7 @@ class Parser(object):
         self.category.last_parsed_page_at = datetime.now(timezone.utc)
         self.category.parsed_at = datetime.now(timezone.utc)
         self.category.save()
-        self.get_category()
+        return self.get_category()
 
     def get_details(self, ids):
         ids = ';'.join([str(id) for id in ids])
