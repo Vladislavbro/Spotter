@@ -94,6 +94,7 @@ class Parser(object):
                         response.status_code)
 
     def get_url(self, url):
+        sleep(3)
         try:
             headers = {
                 'User-Agent': user_agent_rotator.get_random_user_agent()
@@ -328,7 +329,6 @@ class Parser(object):
             return self.change_query()
 
     def crawl(self):
-        sleep(3)
         url = (
             f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog?'
             f'appType=1&couponsGeo={self.couponsGeo}&curr=rub&'
