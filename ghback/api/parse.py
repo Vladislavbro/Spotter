@@ -349,6 +349,9 @@ class Parser(object):
                 print('JSONDecodeError', e, url)
             except Exception as e:
                 print('except', str(e))
+        elif response.status_code == 429:
+            sleep(5)
+            return self.crawl()
         else:
             # self.notify('404 ' + self.category.name)
             return self.change_category()
