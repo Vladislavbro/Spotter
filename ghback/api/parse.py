@@ -33,6 +33,8 @@ bot = Bot(token=TOKEN)
 
 sys.setrecursionlimit(10**6)
 
+TIMEOUT = 0.01
+
 
 class Parser(object):
     """docstring for Parser."""
@@ -94,7 +96,7 @@ class Parser(object):
                         response.status_code)
 
     def get_url(self, url):
-        sleep(4)
+        sleep(TIMEOUT)
         try:
             headers = {
                 'User-Agent': user_agent_rotator.get_random_user_agent()
