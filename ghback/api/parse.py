@@ -94,7 +94,7 @@ class Parser(object):
                         response.status_code)
 
     def get_url(self, url):
-        sleep(3)
+        sleep(4)
         try:
             headers = {
                 'User-Agent': user_agent_rotator.get_random_user_agent()
@@ -239,8 +239,6 @@ class Parser(object):
             return self.query_crawl()
 
     def get_category(self):
-        count = Category.objects.filter(parsed_at=None, parse=True).count()
-        print('get_category count', count)
         self.category = Category.objects.filter(parsed_at=None,
                                                 parse=True).first()
         if self.category is None:
