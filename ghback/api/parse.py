@@ -344,7 +344,7 @@ class Parser(object):
             try:
                 data = json.loads(r"{}".format(response.text))
                 self.parse_catalog(data)
-                sleep(1)
+                sleep(2)
             except JSONDecodeError as e:
                 # self.notify('JSONDecodeError ' + self.category.name + ' ' + str(self.page))
                 print('JSONDecodeError', e, url)
