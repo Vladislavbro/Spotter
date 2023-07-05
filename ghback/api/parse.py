@@ -344,13 +344,14 @@ class Parser(object):
             try:
                 data = json.loads(r"{}".format(response.text))
                 self.parse_catalog(data)
+                sleep(1)
             except JSONDecodeError as e:
                 # self.notify('JSONDecodeError ' + self.category.name + ' ' + str(self.page))
                 print('JSONDecodeError', e, url)
             except Exception as e:
                 print('except', str(e))
         elif response.status_code == 429:
-            sleep(5)
+            sleep(10)
             return self.crawl()
         else:
             # self.notify('404 ' + self.category.name)
