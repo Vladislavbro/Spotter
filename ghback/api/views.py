@@ -143,10 +143,10 @@ def change_password(request):
     if user.check_password(body['password']):
         user.set_password(body['new_password'])
         user.save()
-        send_mail(
+        send_mail_v2(
             subject='Пароль успешно изменен', 
             content='Логин: ' + user.username + '<br>Пароль: ' + body['new_password'], 
-            email=user.email, list_id=user.id)
+            email=user.email, user_id=user.id)
         return JsonResponse({'status': 'success', 
                              'message': 'Пароль успешно изменен'})
     else:
@@ -162,10 +162,10 @@ def change_password_v2(request):
             string.ascii_lowercase + string.digits, k=6))
         user.set_password(password)
         user.save()
-        send_mail(
+        send_mail_v2(
             subject='Пароль успешно изменен', 
             content='Логин: ' + user.username + '<br>Пароль: ' + password,
-            email=user.email, list_id=user.id)
+            email=user.email, user_id=user.id)
         return JsonResponse({'status': 'success',
                              'message': 'Новый пароль отправлен на email'})
     else:
@@ -200,7 +200,9 @@ def signup(request):
     user.set_password(body['password'])
     user.save()
     customer = Customer(
-        user=user
+        user=user,
+        subscribe_type='demo',
+        subscribe_until=(datetime.now() + timedelta(days=5)).timestamp()
     )
     customer.save()
     login(request, user)
