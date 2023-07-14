@@ -787,10 +787,13 @@ class Parser(object):
         if update['products_count'] == 0:
             return
         
-        last_agg_values = ProductStat.objects.filter(
+        productstats_current = ProductStat.objects.filter(
             parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
-        ).values('sales_7_fbo', 'sales_14_fbo', 'sales_30_fbo', 'sales_7_fbs', 'sales_14_fbs', 'sales_30_fbs')
+        )
+        last_agg_values = productstats_current.values(
+            'sales_7_fbo', 'sales_14_fbo', 'sales_30_fbo', 
+            'sales_7_fbs', 'sales_14_fbs', 'sales_30_fbs')
         last_agg = {
             'sold_7_fbo': 0,
             'sold_7_fbs': 0,
@@ -811,10 +814,7 @@ class Parser(object):
         update['products_solded_14_fbs'] = last_agg['sold_14_fbs'] / len(product_ids) * 100
         update['products_solded_30_fbo'] = last_agg['sold_30_fbo'] / len(product_ids) * 100
         update['products_solded_30_fbs'] = last_agg['sold_30_fbs'] / len(product_ids) * 100
-        productstats_current = ProductStat.objects.filter(
-            parsing_id=self.config.current_parsing_id,
-            product_id__in=product_ids
-        )
+
         if productstats_current.count() < 11 or productstats_current.count() > 2500:
             query.delete()
             return
@@ -855,7 +855,7 @@ class Parser(object):
             )
             for fb in ['fbo', 'fbs']:
                 field = f'profit_{period}_{fb}'
-                pstats = productstats_current.order_by(f'-{field}')[:9].values()
+                pstats = productstats_current.order_by(f'-{field}')[:10].values()
                 if pstats.count() < 10:
                     continue
                 update[f'product_1_{field}'] = pstats[0][field]

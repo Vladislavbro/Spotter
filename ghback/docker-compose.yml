@@ -14,9 +14,21 @@ services:
   #     - ./data/db:/var/lib/postgres
   db:
     image: postgres
-    shm_size: 1g
+    shm_size: 4g
     restart: always
-    command: postgres -c 'max_connections=20000'
+    # command: postgres -c 'max_connections=20000'
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=20000"
+      - "-c"
+      - "shared_buffers=4GB"
+      - "-c"
+      - "effective_cache_size=4GB"
+      - "-c"
+      - "maintenance_work_mem=512MB"
+      - "-c"
+      - "temp_file_limit=10GB"
     ports:
       - '5432:5432'
     volumes:
@@ -26,6 +38,11 @@ services:
       - POSTGRES_DB=gh
       - POSTGRES_USER=ghuser
       - POSTGRES_PASSWORD=ghpassworde23f8852aa92
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
   web:
     restart: always
     build: .
