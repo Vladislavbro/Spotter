@@ -80,9 +80,8 @@ def calculate_query(query):
         )
         for fb in ['fbo', 'fbs']:
             field = f'profit_{period}_{fb}'
-            pstats = productstats_current.order_by(f'-{field}')[:10].values()
-            print(fb, period, pstats.explain())
-            if pstats.count() < 10:
+            pstats = list(productstats_current.order_by(f'-{field}')[:10].values())
+            if len(pstats) < 10:
                 continue
             update[f'product_1_{field}'] = pstats[0][field]
             update[f'product_10_{field}'] = pstats[9][field]
@@ -121,3 +120,6 @@ def calculate_query(query):
 config = Config.objects.first()
 query = Query.objects.filter(parsing_id=config.current_parsing_id,).exclude(calculated=True).first()
 calculate_query(query)
+
+
+# SELECT name, setting FROM pg_settings;
