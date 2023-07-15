@@ -33,7 +33,7 @@ bot = Bot(token=TOKEN)
 
 sys.setrecursionlimit(10**6)
 
-TIMEOUT = 4
+TIMEOUT = 2
 
 
 class Parser(object):
@@ -131,7 +131,9 @@ class Parser(object):
         else:
             self.config.calculated = True
             self.config.save()
+            thread_id = self.config.thread_id
             self.config = Config(
+                thread_id=thread_id,
                 current_parsing_id=int(
                     datetime.now(timezone.utc).timestamp()),
             )
