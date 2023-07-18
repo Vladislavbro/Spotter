@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from django.db.models import Avg, Sum, Count, Q
 from api.models import Customer, Order, Config
@@ -289,8 +289,8 @@ def account(request):
 
 def delete_account(request, id):
     if request.user.is_authenticated:
-        user = User.objects.get(pk=request.user.id)
-        if user.is_superuser:
+        current_user = User.objects.get(pk=request.user.id)
+        if current_user.is_superuser:
             User.objects.get(pk=id).delete()
     return JsonResponse({})
 
@@ -671,7 +671,7 @@ def queries_search(request):
             response['items'] = list(productstats[((page - 1) * per_page):page * per_page].values(
                 'id', 'price', 'priceU', f'profit_{period}_{fb}', 
                 f'sales_{period}_{fb}', 'product__name', 'product__articul', 
-                'product__name', 'product__rating', 'product__feedbacks',
+                'product__rating', 'product__feedbacks',
             ))
     if 'graphs' in view:
         start = (datetime.now() - timedelta(days=30)).replace(

@@ -210,7 +210,7 @@
                     "200": {
                         "description": "successful operation",
                         "schema": {
-                            "$ref": "#/definitions/ApiResponseAny"
+                            "$ref": "#/definitions/ApiResponseQuery"
                         }
                     }
                 }
@@ -742,6 +742,18 @@
                         "name": "password",
                         "in": "body",
                         "type": "string"
+                    },
+                    {
+                        "name": "subscribe_until",
+                        "in": "body",
+                        "type": "number",
+                        "description": "Дата в unix формате"
+                    },
+                    {
+                        "name": "subscribe_type",
+                        "in": "body",
+                        "type": "string",
+                        "enum": ["trial", "premium"]
                     }
                 ],
                 "responses": {
@@ -895,6 +907,79 @@
         "ApiResponseAny": {
             "type": "object",
             "properties": {}
+        },
+        "ApiResponseQuery": {
+            "type": "object",
+            "properties": {
+                "price_avg_diff": {
+                    "type": "number",
+                    "description": "Стабильность среднего чека - изменение среднего чека в течение месяца"
+                },
+                "monopoly": {
+                    "type": "number",
+                    "description": "Монополия - объем продаж у топ 10 продавцов по обороту в данной нише относительного общего оборота по нише"
+                },
+                "sales_org": {
+                    "type": "number",
+                    "description": "Оценка потенциала органических продаж - процент товаров с продажами от общего количества товаров"
+                },
+                "sales_avg": {
+                    "type": "number",
+                    "description": "Среднее количество продаж у товаров"
+                },
+                "products_count": {
+                    "type": "number",
+                    "description": "Конкурентный ассортимент - количество товаров в нише"
+                },
+                "sales_trend": {
+                    "type": "number",
+                    "description": "Оценка тренда продаж - сравнение среднесуточного оборота в начале и конца периода"
+                },
+                "profit": {
+                    "type": "number",
+                    "description": "Объем рынка - оборот в нише в месяц. При изменении периода на 14 или 7 дней показатели делятся на 2 и 4 соответственно"
+                },
+                "suppliers": {
+                    "type": "number",
+                    "description": "Востребованность ниши - изменение количества продавцов с начала периода"
+                },
+                "volume": {
+                    "type": "number",
+                    "description": "Объем рынка (динамика)"
+                },
+                "profit_lost": {
+                    "type": "number",
+                    "description": "LP - Упущенная выручка в нише - для каждого товара считается как:  количество дней без продаж * среднее количество продаж товара в день. По нише считается как сумма упущенной выручки всех товаров в нише"
+                },
+                "profit_top_sup": {
+                    "type": "number",
+                    "description": "Объем рынка у топ 10"
+                },
+                "profit_top_sup_diff": {
+                    "type": "number",
+                    "description": "Объем рынка у топ 10 (динамика)"
+                },
+                "product_solded_diff": {
+                    "type": "number",
+                    "description": "SPP - Процент товаров с продажами (динамика)"
+                },
+                "sales_speed_avg": {
+                    "type": "number",
+                    "description": "Средняя скорость продаж - среднее количество продаж в день по всем товарам, считается как: общее количество продаж ÷ общее количество товаров ÷ 30 (дней)"
+                },
+                "supplier_profit_avg": {
+                    "type": "number",
+                    "description": "Средний оборот на продавца"
+                },
+                "supplier_sold_count": {
+                    "type": "number",
+                    "description": "SPS - процент продавцов с продажами"
+                },
+                "supplier_sold_diff": {
+                    "type": "number",
+                    "description": "SPS - процент продавцов с продажами (динамика)"
+                }
+            }
         },
         "ApiResponse": {
             "type": "object",
