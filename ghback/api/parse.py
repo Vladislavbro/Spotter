@@ -874,9 +874,9 @@ class Parser(object):
                     continue
                 # Средний чек в категории месяц назад и сейчас
                 # отличается не более чем на +/- 40%
-                if update[f'price_avg_{period}'] < agg_prev['price__avg'] * 0.6:
+                if update[f'price_avg_{period}'] < (agg_prev['price__avg'] or 0) * 0.6:
                     continue
-                if update[f'price_avg_{period}'] > agg_prev['price__avg'] * 1.4:
+                if update[f'price_avg_{period}'] > (agg_prev['price__avg'] or 0) * 1.4:
                     continue
                 # Оборот в категории месяц назад и сейчас отличается
                 # не более чем на +/- 10%
