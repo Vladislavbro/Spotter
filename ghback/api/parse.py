@@ -964,8 +964,9 @@ class Parser(object):
                 current_parsing_id__lt=start.timestamp(),
             ).values_list('current_parsing_id', flat=True)
             productstats_prev = [ps for ps in productstats if ps['parsing_id'] in parsing_ids_prev]
+            if len(productstats_prev) == 0:
+                continue
             productstats_prev_price_avg = int(sum([ps['price'] for ps in productstats_prev]) / len(productstats_prev))
-            
             for fb in ['fbo', 'fbs']:
                 field = f'profit_{period}_{fb}'
                 pstats = sorted(productstats_current, key=lambda x: x[field], reverse=True)[:10]
