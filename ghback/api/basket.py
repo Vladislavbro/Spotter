@@ -65,7 +65,9 @@ class Basket(object):
                 if response.status_code == 200:
                     data = response.json()
                     self.product.basket = int(basket)
-                    if not Supplier.objects.filter(wb_id=data['supplierId']).exists():
+                    if (data.get('supplierId') and 
+                            not Supplier.objects.filter(
+                                wb_id=data.get('supplierId')).exists()):
                         Supplier.objects.create(
                             wb_id=data['supplierId'],
                             name=data['supplierName'],
