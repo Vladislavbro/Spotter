@@ -48,35 +48,38 @@ class Basket(object):
                     'User-Agent': user_agent_rotator.get_random_user_agent()
                 }
                 proxy = choice(proxies)
-                response = requests.get(url, headers=headers, proxies={
-                    'http': proxy,
-                    'https': proxy,
-                })
-                # {
-                #     "nmId": 138098499,
-                #     "supplierId": 975054,
-                #     "supplierName": "ИП Клепиков А. Ю.",
-                #     "inn": "772019882755",
-                #     "ogrn": "322774600471670",
-                #     "ogrnip": "322774600471670",
-                #     "trademark": "Klepiks",
-                #     "rv": 12636635372
-                # }
-                if response.status_code == 200:
-                    data = response.json()
-                    self.product.basket = int(basket)
-                    if (data.get('supplierId') and 
-                            not Supplier.objects.filter(
-                                wb_id=data.get('supplierId')).exists()):
-                        Supplier.objects.create(
-                            wb_id=data['supplierId'],
-                            name=data['supplierName'],
-                            inn=data.get('inn'),
-                            ogrn=data.get('ogrn'),
-                            ogrnip=data.get('ogrnip'),
-                            trademark=data.get('trademark'),
-                        )
-                    break
+                try:
+                    response = requests.get(url, headers=headers, proxies={
+                        'http': proxy,
+                        'https': proxy,
+                    })
+                    # {
+                    #     "nmId": 138098499,
+                    #     "supplierId": 975054,
+                    #     "supplierName": "ИП Клепиков А. Ю.",
+                    #     "inn": "772019882755",
+                    #     "ogrn": "322774600471670",
+                    #     "ogrnip": "322774600471670",
+                    #     "trademark": "Klepiks",
+                    #     "rv": 12636635372
+                    # }
+                    if response.status_code == 200:
+                        data = response.json()
+                        self.product.basket = int(basket)
+                        if (data.get('supplierId') and 
+                                not Supplier.objects.filter(
+                                    wb_id=data.get('supplierId')).exists()):
+                            Supplier.objects.create(
+                                wb_id=data['supplierId'],
+                                name=data['supplierName'],
+                                inn=data.get('inn'),
+                                ogrn=data.get('ogrn'),
+                                ogrnip=data.get('ogrnip'),
+                                trademark=data.get('trademark'),
+                            )
+                        break
+                except:
+                    print('except', basket)
             if not self.product.basket:
                 self.product.basket = 0
             print('product.basket', self.product.basket)
