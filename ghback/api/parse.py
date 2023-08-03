@@ -620,6 +620,10 @@ class Parser(object):
             parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
         )
+        if productstats_current.count() < 10:
+            category.calculated = True
+            category.save()
+            return
         last_agg = productstats_current.aggregate(
             sold_7_fbo=Count('sales_7_fbo', filter=Q(sales_7_fbo__gt=0)),
             sold_14_fbo=Count('sales_14_fbo', filter=Q(sales_14_fbo__gt=0)),
