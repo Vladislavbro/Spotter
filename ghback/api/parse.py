@@ -620,6 +620,7 @@ class Parser(object):
             parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
         )
+        print('productstats_current.count()', productstats_current.count())
         if productstats_current.count() < 10:
             category.calculated = True
             category.save()
