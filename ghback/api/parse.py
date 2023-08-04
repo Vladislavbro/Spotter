@@ -620,7 +620,6 @@ class Parser(object):
             parsing_id=self.config.current_parsing_id,
             product_id__in=product_ids
         )
-        print('productstats_current.count()', productstats_current.count())
         if productstats_current.count() < 10:
             category.calculated = True
             category.save()
@@ -693,7 +692,7 @@ class Parser(object):
                 parsing_id=prev_parsing.current_parsing_id).first()
             for fb in ['fbo', 'fbs']:
                 field = f'profit_{period}_{fb}'
-                pstats = productstats_current.order_by(f'-{field}')[:9].values()
+                pstats = productstats_current.order_by(f'-{field}')[:10].values()
                 # update[field] = sum([pstat[field] for pstat in pstats])
                 # - Оборот первого товара не меньше 500к
                 if pstats.count() == 0:
