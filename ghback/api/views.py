@@ -633,6 +633,11 @@ def queries_search(request):
         parsing_id=config.current_parsing_id,
         product_id__in=product_ids
     )
+    if productstats.count() == 0:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Нет данных по товарам'
+        })
     response = {}
     if 'products' in view:
         output = request.GET.get('output', 'json')
