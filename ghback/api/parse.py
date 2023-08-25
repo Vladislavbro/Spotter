@@ -69,8 +69,8 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.set_period_dates()
-        # self.processing()
-        self.get_categories()
+        self.processing()
+        # self.get_categories()
 
     def get_wirehouses(self):
         url = "https://seller.wildberries.ru/ns/distribution-offices/distribution-offices/api/v1/office/getAllMarketplace"
@@ -336,8 +336,8 @@ class Parser(object):
     def crawl(self):
         url = (
             f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog'
-            f'?appType=1&cat=8194&curr=rub&dest=-1257786&page={self.page}&'
-            f'regions={self.regions}&sort=popular&spp=0'
+            f'?appType=1&curr=rub&dest=-1257786&page={self.page}&'
+            f'regions={self.regions}&sort=popular&spp=0&{self.category.wb_query}'
         )
         # url = (
         #     f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog?'
