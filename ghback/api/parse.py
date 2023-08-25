@@ -69,7 +69,8 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.set_period_dates()
-        self.processing()
+        # self.processing()
+        self.get_categories()
 
     def get_wirehouses(self):
         url = "https://seller.wildberries.ru/ns/distribution-offices/distribution-offices/api/v1/office/getAllMarketplace"
