@@ -107,6 +107,14 @@ DATABASES = {
         # "HOST": "localhost",  # set in docker-compose.yml
         "HOST": "db",  # set in docker-compose.yml
         "PORT": 5432,  # default postgres port
+    },
+    'replica': {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "gh",
+        "USER": "ghuser",
+        "PASSWORD": "orde23f8852aa92ghpassw",
+        "HOST": "db_repl",
+        "PORT": 5432,
     }
 }
 

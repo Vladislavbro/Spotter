@@ -38,7 +38,8 @@ TIMEOUT = 2
 
 class Parser(object):
     """docstring for Parser."""
-    regions = '68,64,83,4,38,80,33,70,82,86,75,30,69,1,48,22,66,31,40,71'
+    # regions = '68,64,83,4,38,80,33,70,82,86,75,30,69,1,48,22,66,31,40,71'
+    regions = '80,38,83,4,64,33,68,70,30,40,86,75,69,1,31,66,22,110,48,71,114'
     dest = '-1029256,-102269,-2162196,-1257786'
     couponsGeo = '12,3,18,15,21'
     page = 1
@@ -188,11 +189,12 @@ class Parser(object):
 
     def get_categories(self):
         self.upgrade_parsing()
-        f = open('data/catalog.txt', 'r')
+        f = open('catalog.txt', 'r')
         content = f.read()
         categoryUrlList = [line for line in content.strip().split('\n')]
         # if '/catalog/' in line]
-        url = 'https://www.wildberries.ru/webapi/menu/main-menu-ru-ru.json'
+        # url = 'https://www.wildberries.ru/webapi/menu/main-menu-ru-ru.json'
+        url = 'https://static-basket-01.wb.ru/vol0/data/main-menu-ru-ru-v2.json'
         response = self.get_url(url)
         data = response.json()
         for item in [item for item in data if item['name'] in categoryUrlList]:
@@ -332,12 +334,17 @@ class Parser(object):
 
     def crawl(self):
         url = (
-            f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog?'
-            f'appType=1&couponsGeo={self.couponsGeo}&curr=rub&'
-            f'dest={self.dest}&emp=0&lang=ru&locale=ru&'
-            f'pricemarginCoeff=1.0&reg=1&regions={self.regions}&'
-            f'sort=popular&spp=25&page={self.page}&{self.category.wb_query}'
+            f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog'
+            f'?appType=1&cat=8194&curr=rub&dest=-1257786&page={self.page}&'
+            f'regions={self.regions}&sort=popular&spp=0'
         )
+        # url = (
+        #     f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog?'
+        #     f'appType=1&couponsGeo={self.couponsGeo}&curr=rub&'
+        #     f'dest={self.dest}&emp=0&lang=ru&locale=ru&'
+        #     f'pricemarginCoeff=1.0&reg=1&regions={self.regions}&'
+        #     f'sort=popular&spp=25&page={self.page}&{self.category.wb_query}'
+        # )
         response = self.get_url(url)
         print('crawl response.status_code', response.status_code)
         if response.status_code == 200:
