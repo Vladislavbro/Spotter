@@ -612,6 +612,7 @@ def queries_search(request):
             calculated=True,
             current_parsing_id__gte=date.timestamp(),
         ).first()
+        print('config', config.id, date)
         if config is None:
             return JsonResponse({
                 'status': 'error',
@@ -619,6 +620,7 @@ def queries_search(request):
             })
     else:
         config = Config.objects.filter(calculated=True).first()
+        print('config', config.id, date)
     product_ids = Product.objects.filter(
         root=query_root,
         features__contains=query_features
@@ -633,7 +635,9 @@ def queries_search(request):
         parsing_id=config.current_parsing_id,
         product_id__in=product_ids
     )
-    if productstats.count() == 0:
+    ps_count = productstats.count()
+    print(total, ps_count)
+    if ps_count == 0:
         return JsonResponse({
             'status': 'error',
             'message': f'Нет данных по товарам'
@@ -703,6 +707,7 @@ def queries_search(request):
             calculated=True,
             current_parsing_id__gte=f_p_date,
         ).exclude(pk=config.id).first()
+        print('summary', f_p_date, f_p_config.id)
         if f_p_config is None:
             return JsonResponse({
                 'status': 'error',
