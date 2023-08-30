@@ -707,7 +707,7 @@ def queries_search(request):
             calculated=True,
             current_parsing_id__gte=f_p_date,
         ).exclude(pk=config.id).first()
-        print('summary', f_p_date, f_p_config.id)
+        print('summary', f_p_date, f_p_config)
         if f_p_config is None:
             return JsonResponse({
                 'status': 'error',
