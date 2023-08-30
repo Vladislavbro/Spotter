@@ -611,7 +611,6 @@ def queries_search(request):
         config = Config.objects.filter(
             calculated=True,
             current_parsing_id__gte=date.timestamp(),
-            current_parsing_id__lt=date.timestamp() + 86400,
         ).first()
         if config is None:
             return JsonResponse({
@@ -703,7 +702,7 @@ def queries_search(request):
         f_p_config = Config.objects.filter(
             calculated=True,
             current_parsing_id__gte=f_p_date,
-        ).first()
+        ).exclude(pk=config.id).first()
         if f_p_config is None:
             return JsonResponse({
                 'status': 'error',
@@ -737,7 +736,8 @@ def queries_search(request):
         start = (date - timedelta(days=30)).replace(
                 hour=0, minute=0, second=0, microsecond=0)
         prev_parsing = Config.objects.filter(
-            current_parsing_id__lt=start.timestamp()).first()
+            current_parsing_id__lt=start.timestamp()
+        ).exclude(pk__in=[config.id, f_p_config.id]).first()
         prev_stat = ProductStat.objects.filter(
             product_id__in=product_ids,
             parsing_id=prev_parsing.current_parsing_id
