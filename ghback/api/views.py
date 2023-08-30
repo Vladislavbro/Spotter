@@ -696,6 +696,18 @@ def queries_search(request):
             brands=Count('product__brand_id', distinct=True)
         ))
     if 'summary' in view:
+        # f_p - first period
+        f_p_date = (datetime.now() - timedelta(days=14)).replace(
+            hour=0, minute=0, second=0, microsecond=0).timestamp()
+        f_p_config = Config.objects.filter(
+            calculated=True,
+            current_parsing_id__gte=f_p_date,
+        ).first()
+        if f_p_config is None:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Нет данных по товарам'
+            })
         sales_field = f'sales_30_{fb}__gt'
         sales_field_week = f'sales_14_{fb}__gt'
         curr_stat = productstats.aggregate(
@@ -729,13 +741,7 @@ def queries_search(request):
             product_id__in=product_ids,
             parsing_id=prev_parsing.current_parsing_id
         ).aggregate(Avg('price'))
-        # f_p - first period
-        f_p_date = (datetime.now() - timedelta(days=14)).replace(
-            hour=0, minute=0, second=0, microsecond=0).timestamp()
-        f_p_config = Config.objects.filter(
-            calculated=True,
-            current_parsing_id__gte=f_p_date,
-        ).first()
+        
         sales_field = f'sales_14_{fb}__gt'
         f_p_stat = ProductStat.objects.prefetch_related('product').filter(
             product_id__in=product_ids,
