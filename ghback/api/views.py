@@ -605,12 +605,13 @@ def queries_search(request):
     period = int(request.GET.get('period', '30'))
     fb = request.GET.get('fb', 'fbo')
     dateTo = request.GET.get('date')
+    date = datetime.now()
     if dateTo:
-        date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
+        date = datetime.strptime(dateTo, '%Y-%m-%d')
         config = Config.objects.filter(
             calculated=True,
-            current_parsing_id__gte=date,
-            current_parsing_id__lt=date + 86400,
+            current_parsing_id__gte=date.timestamp(),
+            current_parsing_id__lt=date.timestamp() + 86400,
         ).first()
         if config is None:
             return JsonResponse({
@@ -697,7 +698,7 @@ def queries_search(request):
         ))
     if 'summary' in view:
         # f_p - first period
-        f_p_date = (datetime.now() - timedelta(days=14)).replace(
+        f_p_date = (date - timedelta(days=14)).replace(
             hour=0, minute=0, second=0, microsecond=0).timestamp()
         f_p_config = Config.objects.filter(
             calculated=True,
@@ -733,7 +734,7 @@ def queries_search(request):
             product__supplier_id__in=top_supplier_ids
         ).aggregate(Sum(f'profit_30_{fb}'))
         #
-        start = (datetime.now() - timedelta(days=30)).replace(
+        start = (date - timedelta(days=30)).replace(
                 hour=0, minute=0, second=0, microsecond=0)
         prev_parsing = Config.objects.filter(
             current_parsing_id__lt=start.timestamp()).first()
