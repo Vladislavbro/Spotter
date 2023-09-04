@@ -719,15 +719,15 @@ class Parser(object):
                 if prev_stat is None:
                     continue
                 _prev_stat = model_to_dict(prev_stat)
-                if update[field] < _prev_stat[field] * 0.9:
+                if _prev_stat[field] is None or update[field] < _prev_stat[field] * 0.9:
                     continue
-                if update[field] > _prev_stat[field] * 1.1:
+                if _prev_stat[field] is None or update[field] > _prev_stat[field] * 1.1:
                     continue
                 # - Средний чек в категории месяц назад и сейчас отличается не более
                 # чем на +-10%
-                if update[f'price_avg_{period}'] < _prev_stat[f'price_avg_{period}'] * 0.9:
+                if _prev_stat[f'price_avg_{period}'] is None or update[f'price_avg_{period}'] < _prev_stat[f'price_avg_{period}'] * 0.9:
                     continue
-                if update[f'price_avg_{period}'] > _prev_stat[f'price_avg_{period}'] * 1.1:
+                if _prev_stat[f'price_avg_{period}'] is None or update[f'price_avg_{period}'] > _prev_stat[f'price_avg_{period}'] * 1.1:
                     continue
                 update[f'top_{period}_{fb}'] = True
         stat = category.categorystat_set.filter(
