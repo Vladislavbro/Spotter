@@ -28,6 +28,7 @@ class Order(models.Model):
 
 class Config(models.Model):
     thread_id = models.IntegerField(blank=True, null=True)
+    baskets_thread_id = models.IntegerField(blank=True, null=True)
     parsing_date = models.BigIntegerField(blank=True, null=True)
     current_parsing_id = models.IntegerField(blank=True, null=True)
     parsed_at = models.DateTimeField(blank=True, null=True)

@@ -371,12 +371,19 @@ def parser(request):
 
 
 def baskets(request):
-    t = threading.Thread(target=Basket, args=(), kwargs={})
-    t.setDaemon(True)
-    t.start()
-    print('baskets', t.native_id)
+    native_ids = [t.native_id for t in threading.enumerate()]
+    config = Config.objects.first()
+    native_id = None
+    if config.baskets_thread_id not in native_ids:
+        t = threading.Thread(target=Basket, args=(), kwargs={})
+        t.setDaemon(True)
+        t.start()
+        native_id = t.native_id
+        config.baskets_thread_id = t.native_id
+        config.save()
+        print('baskets', t.native_id)
     return JsonResponse({
-        'native_id': t.native_id,
+        'native_id': native_id,
         'status': 'success'
     })
 
