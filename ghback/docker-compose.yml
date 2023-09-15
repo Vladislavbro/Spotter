@@ -12,36 +12,36 @@ services:
   #   restart: always
   #   volumes:
   #     - ./data/db:/var/lib/postgres
-  db:
-    image: postgres
-    shm_size: 4g
-    restart: always
-    command:
-      - "postgres"
-      - "-c"
-      - "max_connections=50"
-      - "-c"
-      - "shared_buffers=4GB"
-      - "-c"
-      - "effective_cache_size=4GB"
-      - "-c"
-      - "maintenance_work_mem=512MB"
-      - "-c"
-      - "temp_file_limit=10GB"
-    ports:
-      - '5432:5432'
-    volumes:
-      - ./data/db:/var/lib/postgresql/data
-    environment:
-      # - "POSTGRES_HOST_AUTH_METHOD=trust"
-      - POSTGRES_DB=gh
-      - POSTGRES_USER=ghuser
-      - POSTGRES_PASSWORD=ghpassworde23f8852aa92
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 4G
+  # db:
+  #   image: postgres
+  #   shm_size: 4g
+  #   restart: always
+  #   command:
+  #     - "postgres"
+  #     - "-c"
+  #     - "max_connections=50"
+  #     - "-c"
+  #     - "shared_buffers=4GB"
+  #     - "-c"
+  #     - "effective_cache_size=4GB"
+  #     - "-c"
+  #     - "maintenance_work_mem=512MB"
+  #     - "-c"
+  #     - "temp_file_limit=10GB"
+  #   ports:
+  #     - '5432:5432'
+  #   volumes:
+  #     - ./data/db:/var/lib/postgresql/data
+  #   environment:
+  #     # - "POSTGRES_HOST_AUTH_METHOD=trust"
+  #     - POSTGRES_DB=gh
+  #     - POSTGRES_USER=ghuser
+  #     - POSTGRES_PASSWORD=ghpassworde23f8852aa92
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '2'
+  #         memory: 4G
   web:
     restart: always
     build: .
@@ -50,5 +50,5 @@ services:
       - .:/code
     ports:
       - '8000:8000'
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
