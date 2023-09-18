@@ -1,0 +1,1152 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description0": "You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.",
+        "description": "Это описание апи веб-сервера приложения Goods Hunter написанного на django.",
+        "version": "0.1.0",
+        "title": "Spotter",
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "host": "https://spotter.fun",
+    "basePath": "/api",
+    "tags": [],
+    "schemes": [
+        "https"
+    ],
+    "paths": {
+        "/categories": {
+            "get": {
+                "tags": [
+                    "Категории"
+                ],
+                "summary": "Категории",
+                "description": "",
+                "operationId": "categories",
+                "produces": [
+                    "application/json",
+                    "text/csv"
+                ],
+                "parameters": [
+                    {
+                        "name": "output",
+                        "in": "query",
+                        "description": "Формат вывода",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "json",
+                            "csv"
+                        ]
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Сортировка",
+                        "type": "string",
+                        "enum": [
+                            "products_count",
+                            "sellers_count",
+                            "products_solded",
+                            "sellers_solded",
+                            "price_avg",
+                            "profit"
+                        ]
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Направление сортировки",
+                        "type": "string",
+                        "enum": [
+                            "desc",
+                            "asc"
+                        ]
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "fb",
+                        "in": "query",
+                        "description": "FBO / FBS",
+                        "type": "string",
+                        "enum": [
+                            "fbo", 
+                            "fbs"
+                        ]
+                    },
+                    {
+                        "name": "dateTo",
+                        "required": true,
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/queries/search": {
+            "get": {
+                "tags": [
+                    "Поиск"
+                ],
+                "summary": "Перспективность ниши, товары",
+                "description": "",
+                "operationId": "queriesSearch",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "Искомый запрос",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "view",
+                        "in": "query",
+                        "description": "Запрос статистики, списка товаров, графиков. Вместе или раздельно",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "summary",
+                            "products",
+                            "graphs",
+                            "'summary,products'",
+                            "'summary,products,graphs'",
+                            "..."
+                        ]
+                    },
+                    {
+                        "name": "format",
+                        "in": "query",
+                        "description": "Формат вывода, работает с view == 'products'",
+                        "type": "string",
+                        "enum": [
+                            "json",
+                            "csv"
+                        ]
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Номер страницы, работает с view == 'products'",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Количество товаров в ответе, работает с view == 'products'",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Сортировка, работает с view == 'products'",
+                        "type": "string",
+                        "enum": [
+                            "sales",
+                            "price",
+                            "pricU",
+                            "profit",
+                            "product__feedbacks",
+                            "product__rating",
+                        ]
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Направление сортировки, работает с view == 'products'",
+                        "type": "string",
+                        "enum": [
+                            "desc",
+                            "asc"
+                        ]
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "fb",
+                        "in": "query",
+                        "description": "FBO / FBS",
+                        "type": "string",
+                        "enum": [
+                            "fbo", 
+                            "fbs"
+                        ]
+                    },
+                    {
+                        "name": "dateTo",
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseQuery"
+                        }
+                    }
+                }
+            }
+        },
+        "/queries/top": {
+            "get": {
+                "tags": [
+                    "Топ ниши"
+                ],
+                "summary": "Топ ниши",
+                "description": "",
+                "operationId": "topQueries",
+                "produces": [
+                    "application/json",
+                    "text/csv",
+                ],
+                "parameters": [
+                    {
+                        "name": "output",
+                        "in": "query",
+                        "description": "Формат вывода",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "json",
+                            "csv"
+                        ]
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Номер страницы для формата json",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Сортировка",
+                        "type": "string",
+                        "enum": [
+                            "products_count",
+                            "products_solded",
+                            "product_1_profit",
+                            "product_10_profit",
+                            "price_avg",
+                            "profit"
+                        ]
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Направление сортировки",
+                        "type": "string",
+                        "enum": [
+                            "desc",
+                            "asc"
+                        ]
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "fb",
+                        "in": "query",
+                        "description": "FBO / FBS",
+                        "type": "string",
+                        "enum": [
+                            "fbo", 
+                            "fbs"
+                        ]
+                    },
+                    {
+                        "name": "dateTo",
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    },
+                    {
+                        "name": "products_count",
+                        "in": "query",
+                        "description": "Фильтр количества товаров в формате 'от;до', например '100;200', ';100', '300;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "price_avg",
+                        "in": "query",
+                        "description": "Фильтр средней цены товаров в формате 'от;до', например '1000;2000', ';1000', '3000;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "profit",
+                        "in": "query",
+                        "description": "Фильтр оборота товаров в формате 'от;до', например '10000;20000', ';10000', '30000;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "product_1_profit",
+                        "in": "query",
+                        "description": "Фильтр оборота первого товара в формате 'от;до', например '10000;20000', ';10000', '30000;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "product_10_profit",
+                        "in": "query",
+                        "description": "Фильтр оборота десятого товара в формате 'от;до', например '10000;20000', ';10000', '30000;'",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{articul}": {
+            "get": {
+                "tags": [
+                    "Товар"
+                ],
+                "summary": "Данные по товару",
+                "description": "",
+                "operationId": "getProduct",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "articul",
+                        "required": true,
+                        "in": "path",
+                        "description": "Артикул товара",
+                        "type": "number"
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "dateTo",
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/brands/{id}": {
+            "get": {
+                "tags": [
+                    "Бренд"
+                ],
+                "summary": "Данные по бренду",
+                "description": "",
+                "operationId": "getBrand",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "description": "Id бренда",
+                        "type": "number"
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "dateTo",
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/suppliers/{id}": {
+            "get": {
+                "tags": [
+                    "Продавец"
+                ],
+                "summary": "Данные по продавцу",
+                "description": "",
+                "operationId": "getSupplier",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "description": "Id продавца",
+                        "type": "number"
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "dateTo",
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/search": {
+            "get": {
+                "tags": [
+                    "Поиск"
+                ],
+                "summary": "Подсказки для поиска",
+                "description": "",
+                "operationId": "getVariants",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "query",
+                        "required": true,
+                        "in": "query",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Информация о текущем пользователе",
+                "description": "",
+                "operationId": "getUser",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/log_in": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Авторизация",
+                "description": "",
+                "operationId": "logIn",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "username",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/log_out": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Удаление сессии",
+                "description": "",
+                "operationId": "logOut",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signup": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Регистрация пользователя",
+                "description": "",
+                "operationId": "signup",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "username",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "first_name",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "last_name",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "password_confirm",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/login/vk-oauth2": {
+            "get": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Авторизация с помощью ВК",
+                "description": "",
+                "operationId": "vk-oauth2"
+            }
+        },
+        "order": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Оформление подписки",
+                "description": "",
+                "operationId": "order",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "amount",
+                        "description": "Сумма за подписку",
+                        "required": true,
+                        "in": "body",
+                        "type": "number"
+                    },
+                    {
+                        "name": "subscribe_type",
+                        "description": "Тип подписки trial или premium",
+                        "required": true,
+                        "in": "body",
+                        "type": "string",
+                        "enum": [
+                            "trial", "premium"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "accounts": {
+            "get": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Список аккаунтов",
+                "description": "",
+                "operationId": "accounts",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            }
+        },
+        "account": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Добавление или обновление пользователя",
+                "description": "",
+                "operationId": "account",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "description": "Если есть параметр id то обновление, если нет - то добавление",
+                        "in": "body",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "email",
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "username",
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "first_name",
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "last_name",
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "subscribe_until",
+                        "in": "body",
+                        "type": "number",
+                        "description": "Дата в unix формате"
+                    },
+                    {
+                        "name": "subscribe_type",
+                        "in": "body",
+                        "type": "string",
+                        "enum": ["trial", "premium"]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            }
+        },
+        "account/{id}/password": {
+            "post": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Изменение пароля",
+                "description": "",
+                "operationId": "changePassword",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "password",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "new_password",
+                        "required": true,
+                        "in": "body",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "account/{id}/orders": {
+            "get": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Список заказов",
+                "description": "",
+                "operationId": "ordersList",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "password": {
+            "get": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Изменение пароля по email",
+                "description": "",
+                "operationId": "changePasswordV2",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "required": true,
+                        "in": "query",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "account/{id}/delete": {
+            "delete": {
+                "tags": [
+                    "ЛК"
+                ],
+                "summary": "Удаление пользователя",
+                "description": "",
+                "operationId": "deleteAccount",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "api_key": {
+            "type": "apiKey",
+            "name": "api_key",
+            "in": "header"
+        },
+        "petstore_auth": {
+            "type": "oauth2",
+            "authorizationUrl": "https://petstore.swagger.io/oauth/authorize",
+            "flow": "implicit",
+            "scopes": {
+                "read:pets": "read your pets",
+                "write:pets": "modify pets in your account"
+            }
+        }
+    },
+    "definitions": {
+        "ApiResponseAny": {
+            "type": "object",
+            "properties": {}
+        },
+        "ApiResponseQuery": {
+            "type": "object",
+            "properties": {
+                "price_avg_diff": {
+                    "type": "number",
+                    "description": "Стабильность среднего чека - изменение среднего чека в течение месяца"
+                },
+                "monopoly": {
+                    "type": "number",
+                    "description": "Монополия - объем продаж у топ 10 продавцов по обороту в данной нише относительного общего оборота по нише"
+                },
+                "sales_org": {
+                    "type": "number",
+                    "description": "Оценка потенциала органических продаж - процент товаров с продажами от общего количества товаров"
+                },
+                "sales_avg": {
+                    "type": "number",
+                    "description": "Среднее количество продаж у товаров"
+                },
+                "products_count": {
+                    "type": "number",
+                    "description": "Конкурентный ассортимент - количество товаров в нише"
+                },
+                "sales_trend": {
+                    "type": "number",
+                    "description": "Оценка тренда продаж - сравнение среднесуточного оборота в начале и конца периода"
+                },
+                "profit": {
+                    "type": "number",
+                    "description": "Объем рынка - оборот в нише в месяц. При изменении периода на 14 или 7 дней показатели делятся на 2 и 4 соответственно"
+                },
+                "suppliers": {
+                    "type": "number",
+                    "description": "Востребованность ниши - изменение количества продавцов с начала периода"
+                },
+                "volume": {
+                    "type": "number",
+                    "description": "Объем рынка (динамика)"
+                },
+                "profit_lost": {
+                    "type": "number",
+                    "description": "LP - Упущенная выручка в нише - для каждого товара считается как:  количество дней без продаж * среднее количество продаж товара в день. По нише считается как сумма упущенной выручки всех товаров в нише"
+                },
+                "profit_top_sup": {
+                    "type": "number",
+                    "description": "Объем рынка у топ 10"
+                },
+                "profit_top_sup_diff": {
+                    "type": "number",
+                    "description": "Объем рынка у топ 10 (динамика)"
+                },
+                "product_solded_diff": {
+                    "type": "number",
+                    "description": "SPP - Процент товаров с продажами (динамика)"
+                },
+                "sales_speed_avg": {
+                    "type": "number",
+                    "description": "Средняя скорость продаж - среднее количество продаж в день по всем товарам, считается как: общее количество продаж ÷ общее количество товаров ÷ 30 (дней)"
+                },
+                "supplier_profit_avg": {
+                    "type": "number",
+                    "description": "Средний оборот на продавца"
+                },
+                "supplier_sold_count": {
+                    "type": "number",
+                    "description": "SPS - процент продавцов с продажами"
+                },
+                "supplier_sold_diff": {
+                    "type": "number",
+                    "description": "SPS - процент продавцов с продажами (динамика)"
+                }
+            }
+        },
+        "ApiResponse": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "number",
+                    "description": "Количество записей в БД по фильтрам"
+                },
+                "items": {
+                    "type": "object",
+                    "default": []
+                }
+            }
+        },
+        "Query": {
+            "type": "object",
+            "properties": {
+                "root": {
+                    "type": "string"
+                },
+                "features": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "products_count": {
+                    "type": "integer"
+                },
+                "products_solded_7_fbo": {
+                    "type": "integer"
+                },
+                "products_solded_7_fbs": {
+                    "type": "integer"
+                },
+                "products_solded_14_fbo": {
+                    "type": "integer"
+                },
+                "products_solded_14_fbs": {
+                    "type": "integer"
+                },
+                "products_solded_30_fbo": {
+                    "type": "integer"
+                },
+                "products_solded_30_fbs": {
+                    "type": "integer"
+                },
+                "product_1_profit_7_fbo": {
+                    "type": "integer"
+                },
+                "product_1_profit_7_fbs": {
+                    "type": "integer"
+                },
+                "product_1_profit_14_fbo": {
+                    "type": "integer"
+                },
+                "product_1_profit_14_fbs": {
+                    "type": "integer"
+                },
+                "product_1_profit_30_fbo": {
+                    "type": "integer"
+                },
+                "product_1_profit_30_fbs": {
+                    "type": "integer"
+                },
+                "product_10_profit_7_fbo": {
+                    "type": "integer"
+                },
+                "product_10_profit_7_fbs": {
+                    "type": "integer"
+                },
+                "product_10_profit_14_fbo": {
+                    "type": "integer"
+                },
+                "product_10_profit_14_fbs": {
+                    "type": "integer"
+                },
+                "product_10_profit_30_fbo": {
+                    "type": "integer"
+                },
+                "product_10_profit_30_fbs": {
+                    "type": "integer"
+                },
+                "price_avg_7": {
+                    "type": "integer"
+                },
+                "price_avg_14": {
+                    "type": "integer"
+                },
+                "price_avg_30": {
+                    "type": "integer"
+                },
+                "profit_7_fbo": {
+                    "type": "integer"
+                },
+                "profit_7_fbs": {
+                    "type": "integer"
+                },
+                "profit_14_fbo": {
+                    "type": "integer"
+                },
+                "profit_14_fbs": {
+                    "type": "integer"
+                },
+                "profit_30_fbo": {
+                    "type": "integer"
+                },
+                "profit_30_fbs": {
+                    "type": "integer"
+                },
+                "top_7_fbo": {
+                    "type": "boolean"
+                },
+                "top_7_fbs": {
+                    "type": "boolean"
+                },
+                "top_14_fbo": {
+                    "type": "boolean"
+                },
+                "top_14_fbs": {
+                    "type": "boolean"
+                },
+                "top_30_fbo": {
+                    "type": "boolean"
+                },
+                "top_30_fbs": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "customer__subscribe_type": {
+                    "description": "trial или premium",
+                    "type": "string"
+                },
+                "customer__subscribe_until": {
+                    "description": "В формате unix timestamp",
+                    "type": "integer"
+                },
+                "is_staff": {
+                    "type": "boolean"
+                },
+                "is_superuser": {
+                    "type": "boolean"
+                }
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "Find out more about Swagger",
+        "url": "http://swagger.io"
+    }
+}

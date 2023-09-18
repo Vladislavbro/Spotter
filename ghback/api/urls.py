@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 
 from . import views
 
@@ -13,4 +13,23 @@ urlpatterns = [
     path('account', views.account, name='account'),
     path('account/<int:id>/delete', views.delete_account,
          name='delete_account'),
+    path('account/<int:id>/password', views.change_password,
+         name='change_password'),
+    path('account/<int:id>/orders', views.orders_list,
+         name='orders_list'),
+    path('password', views.change_password_v2,
+         name='change_password_v2'),
+    path('parser', views.parser, name='parser'),
+    path('baskets', views.baskets, name='baskets'),
+    path('categories', views.categories_list, name='categories_list'),
+    path('queries/top', views.queries_top, name='queries_top'),
+    path('queries/search', views.queries_search, name='queries_search'),
+    path('products/<int:articul>', views.product, name='product'),
+    path('brands/<int:brandId>', views.brand, name='brand'),
+    path('suppliers/<int:supplierId>', views.supplier, name='supplier'),
+    path('search', views.search, name='search'),
+    path('transfer/config', views.transfer_config, name='transfer_config'),
+    path('transfer/category', views.transfer_category, name='transfer_category'),
+    path('transfer/query', views.transfer_query, name='transfer_query'),
+    path('transfer/product', views.transfer_product, name='transfer_product'),
 ]

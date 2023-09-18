@@ -1,0 +1,16 @@
+Django
+django-cors-headers
+psycopg2-binary
+requests
+django-environ
+python-dateutil
+mongoengine
+python-telegram-bot
+random_user_agent
+spacy
+nltk
+pymystem3
+pytz
+selenium-wire
+python-dotenv
+social-auth-app-django

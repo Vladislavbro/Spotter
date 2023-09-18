@@ -1,0 +1,38 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev --port 3020",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview --port 3099",
+    "postinstall": "nuxt prepare",
+    "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore . --fix",
+    "lint:style": "stylelint \"**/*.{vue,css}\" --ignore-path .gitignore --fix",
+    "lint": "yarn lint:js && yarn lint:style"
+  },
+  "devDependencies": {
+    "@nuxtjs/eslint-config-typescript": "^11.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.0",
+    "eslint": "^8.26.0",
+    "nuxt": "^3.7.1",
+    "postcss-html": "^1.5.0",
+    "sass": "^1.55.0",
+    "stylelint": "^14.14.0",
+    "stylelint-config-recess-order": "^3.0.0",
+    "stylelint-config-recommended-scss": "^8.0.0",
+    "stylelint-config-recommended-vue": "^1.4.0",
+    "typescript": "4.5.5"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.4.6",
+    "chart.js": "^4.3.0",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "click-outside-vue3": "^4.0.1",
+    "date-fns": "^2.30.0",
+    "maska": "^2.1.8",
+    "nuxt-swiper": "^1.2.2",
+    "vue-chartjs": "^5.2.0",
+    "vue3-toastify": "^0.1.12"
+  }
+}

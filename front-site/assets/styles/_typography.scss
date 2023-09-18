@@ -1,0 +1,47 @@
+@mixin overflow-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin h1 {
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 28px;
+
+  @include mq($bp-small) {
+    font-size: 36px;
+    line-height: 44px;  
+  }
+}
+
+@mixin h2 {
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 28px;
+
+  @include mq($bp-small) {
+    font-size: 40px;
+    line-height: 48px;
+  }
+}
+
+@mixin h4 {
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 24px;
+
+  @include mq($bp-small) {
+    font-size: 28px;
+    line-height: 34px;
+  }
+}
+
+@mixin text_normal {
+  font-size: 13px;
+  line-height: 18px;
+
+  @include mq($bp-small) {
+    font-size: 16px;
+    line-height: 24px;
+  }
+}

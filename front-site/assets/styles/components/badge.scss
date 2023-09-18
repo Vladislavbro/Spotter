@@ -1,0 +1,40 @@
+.badge {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  font-size: 14px;
+  line-height: 18px;
+  background: var(--white);
+  border: 1px solid #E2E2E7;
+  border-radius: 60px;
+
+  &--blue {
+    background: #E7EFFF;
+    border: 1px solid #B7CFFF;
+  }
+
+  &--purple {
+    background: #F4EDFD;
+    border: 1px solid #DFC6FF;
+  }
+
+  &--orange {
+    background: #FFF1EF;
+    border: 1px solid #FFD1CC;
+  }
+
+  &--green {
+    background: #DCF9E4;
+    border: 1px solid #82D2B2;
+  }
+
+  &--yellow {
+    background: #EDFECD;
+    border: 1px solid #C7EE7F;
+  }
+
+  &__value {
+    margin-left: 4px;
+    font-weight: 600;
+  }
+}

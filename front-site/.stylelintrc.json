@@ -1,0 +1,11 @@
+{
+  "extends": [
+    "stylelint-config-recommended-scss",
+    "stylelint-config-recommended-vue/scss",
+    "stylelint-config-recess-order"
+  ],
+  "rules": {
+    "no-descending-specificity": null,
+    "no-invalid-position-at-import-rule": null
+  }
+}
