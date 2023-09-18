@@ -50,5 +50,5 @@ services:
       - .:/code
     ports:
       - '8000:8000'
-    # depends_on:
-    #   - db
+    extra_hosts:
+      - 'db:172.17.0.1'
