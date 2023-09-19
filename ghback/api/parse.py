@@ -404,15 +404,25 @@ class Parser(object):
                 # self.notify('Exception ' + str(e))
         return []
 
+    def update_products(self):
+        product = Product.objects.filter(root='').first()
+        while product:
+            self.text_process(product)
+            product.save()
+            product = Product.objects.filter(root='').first()
+
     def text_process(self, product):
-        doc = nlp(product.name)
-        root = [w for w in doc if w.dep_ == 'ROOT'][0]
-        if root.tag_ != 'NOUN':
+        name = re.sub(r'[^a-zA-Zа-яА-Я\s]', '', product.name)
+        doc = nlp(name.strip())
+        features = list(set([w for w in doc if w.tag_ == 'ADJ']))
+        doc = [t for t in doc if t not in features]
+        root = [w for w in doc if w.dep_ == 'ROOT']
+        if len(root) == 0 or root[0].tag_ != 'NOUN':
             nsubj = [w for w in doc if w.dep_ == 'nsubj']
             if len(nsubj):
                 root = nsubj[0]
         product.root = root.lemma_
-        features = list(set([w.lemma_ for w in doc if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
+        features = [f.lemma_ for f in features if len(f.lemma_) > 1]
         features.sort()
         product.features = features
         if len(doc.ents):
