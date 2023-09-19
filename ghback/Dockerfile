@@ -5,6 +5,7 @@ WORKDIR /code
 COPY requirements.txt /code/
 RUN pip install --upgrade pip && pip install -r requirements.txt
 RUN python -m spacy download ru_core_news_md
+RUN python -m spacy download ru_core_news_lg
 RUN apt-get -y update
 RUN apt-get -y upgrade
 COPY . /code/

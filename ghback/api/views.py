@@ -103,7 +103,7 @@ def me(request):
     if request.user.is_authenticated:
         user = User.objects.prefetch_related('customer').filter(
             pk=request.user.id).values(
-                'id', 'username', 'email', 'first_name', 'last_name',
+                'id', 'email', 'first_name', 'last_name',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser').first()
         return JsonResponse(user)
@@ -114,7 +114,7 @@ def me(request):
             User.objects.prefetch_related('customer').filter(
                 email='test@test.ru'
             ).values(
-                'id', 'username', 'email', 'first_name', 'last_name',
+                'id', 'email', 'first_name', 'last_name',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser'
             ).first()
@@ -127,7 +127,7 @@ def me(request):
 
 def log_in(request):
     body = json.loads(request.body)
-    user = authenticate(username=body['username'].strip(),
+    user = authenticate(username=body['email'].strip(),
                         password=body['password'])
     if user is not None:
         login(request, user)
@@ -145,7 +145,7 @@ def change_password(request):
         user.save()
         send_mail_v2(
             subject='Пароль успешно изменен', 
-            content='Логин: ' + user.username + '<br>Пароль: ' + body['new_password'], 
+            content='Email: ' + user.email + '<br>Пароль: ' + body['new_password'], 
             email=user.email, user_id=user.id)
         return JsonResponse({'status': 'success', 
                              'message': 'Пароль успешно изменен'})
@@ -164,7 +164,7 @@ def change_password_v2(request):
         user.save()
         send_mail_v2(
             subject='Пароль успешно изменен', 
-            content='Логин: ' + user.username + '<br>Пароль: ' + password,
+            content='Email: ' + user.email + '<br>Пароль: ' + password,
             email=user.email, user_id=user.id)
         return JsonResponse({'status': 'success',
                              'message': 'Новый пароль отправлен на email'})
@@ -192,7 +192,7 @@ def signup(request):
                 'выберите другой или восстановите пароль.'
             )})
     user = User(
-        username=body['username'].strip(),
+        username=body['email'].strip(),
         email=body['email'].strip(),
         last_name=body['last_name'].strip(),
         first_name=body['first_name'].strip(),
@@ -208,7 +208,7 @@ def signup(request):
     login(request, user)
     send_mail_v2(
         subject='Успешная регистрация на сайте SPOTTER.FUN!', 
-        content='Логин: ' + body['username'] + '<br>Пароль: ' + body['password'], 
+        content='Email: ' + body['email'] + '<br>Пароль: ' + body['password'], 
         email=user.email, user_id=user.id)
     return JsonResponse({'status': 'success', 'user': model_to_dict(user)})
 
@@ -218,7 +218,7 @@ def accounts(request):
         user = User.objects.get(pk=request.user.id)
         if user.is_superuser:
             accounts = User.objects.prefetch_related('customer').all().values(
-                'id', 'username', 'email', 'first_name', 'last_name',
+                'id', 'email', 'first_name', 'last_name',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser')
             return JsonResponse({'accounts': list(accounts)})
@@ -242,7 +242,7 @@ def account(request):
                     customer.save()
                 user = User.objects.prefetch_related('customer').filter(
                     pk=body.get('id')).values(
-                        'id', 'username', 'email', 'first_name', 'last_name',
+                        'id', 'email', 'first_name', 'last_name',
                         'customer__subscribe_type',
                         'customer__subscribe_until', 'is_staff',
                         'is_superuser').first()
@@ -255,15 +255,8 @@ def account(request):
                             'Пользователь с таким email уже существует, '
                             'выберите другой или восстановите пароль.'
                         )})
-                if User.objects.filter(username=body['username'].strip()).first():
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': (
-                            'Пользователь с таким логином уже существует, '
-                            'выберите другой или восстановите пароль.'
-                        )})
                 user = User(
-                    username=body['username'].strip(),
+                    username=body['email'].strip(),
                     email=body['email'].strip(),
                     last_name=body['last_name'].strip(),
                     first_name=body['first_name'].strip(),
@@ -280,7 +273,7 @@ def account(request):
                     customer.save()
                 return JsonResponse(User.objects.prefetch_related(
                     'customer').filter(pk=user.id).values(
-                        'id', 'username', 'email', 'first_name', 'last_name',
+                        'id', 'email', 'first_name', 'last_name',
                         'customer__subscribe_type',
                         'customer__subscribe_until', 'is_staff',
                         'is_superuser').first())

@@ -25,7 +25,7 @@ import pytz
 
 utc = pytz.UTC
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-nlp = spacy.load('ru_core_news_md')
+nlp = spacy.load('ru_core_news_lg')
 
 user_agent_rotator = UserAgent()
 TOKEN = '6161677884:AAE8uT0XWRVXr7SbGIjVTP3Ik6BhsDm8Z5I'
@@ -908,6 +908,112 @@ class Parser(object):
             print('query calculated TOP', update)
             Query.objects.filter(pk=query.id).update(**update)
 
+    def calculate_query_scoring(self, query):
+        scoring = 0
+        # 1 Стабильность среднего чека - изменение среднего чека 
+        # в течение месяца
+        if prev_stat['price__avg']:
+            response['price_avg_diff'] = (curr_stat['price__avg'] / prev_stat['price__avg'])
+            if response['price_avg_diff'] <= 0.9:
+                scoring -= 1
+            elif response['price_avg_diff'] <= 1.1:
+                scoring += 1
+        # 2 Монополия - объем продаж у топ 10 продавцов по обороту в 
+        # данной нише относительного общего оборота по нише
+        response['monopoly'] = (top_supplier_agg[f'profit_30_{fb}__sum'] / curr_stat[f'profit_30_{fb}__sum'])
+        if response['monopoly'] <= 0.25:
+            scoring += 1
+        elif response['monopoly'] > 0.5:
+            scoring -= 1
+        # 3 Оценка потенциала органических продаж - процент товаров 
+        # с продажами от общего количества товаров
+        response['sales_org'] = curr_stat['sales_org'] / total
+        if response['sales_org'] > 0.5:
+            scoring += 1
+        elif response['sales_org'] < 0.3:
+            scoring -= 1
+        # 4 Среднее количество продаж у товаров
+        response['sales_avg'] = curr_stat[f'sales_30_{fb}__avg']
+        if response['sales_avg'] >= 12:
+            scoring += 1
+        # 5 Конкурентный ассортимент - количество товаров в нише
+        response['products_count'] = total
+        if response['products_count'] < 1000:
+            scoring += 1
+        elif response['products_count'] > 2000:
+            scoring -= 1
+        # 6 Оценка тренда продаж - сравнение среднесуточного оборота
+        # в начале и конца периода
+        response['sales_trend'] = (curr_stat[f'profit_14_{fb}__sum'] / f_p_stat_agg[f'profit_14_{fb}__sum'])
+        if response['sales_trend'] <= 0.9:
+            scoring -= 1
+        elif response['sales_trend'] > 1.1:
+            scoring += 1
+        # 7 Объем рынка - оборот в нише в месяц. При изменении периода 
+        # на 14 или 7 дней показатели делятся на 2 и 4 соответственно
+        response['profit'] = curr_stat[f'profit_30_{fb}__sum']
+        if response['profit'] < 1000000:
+            scoring -= 1
+        elif response['profit'] >= 5000000 and response['profit'] <= 100000000:
+            scoring += 1
+        elif response['profit'] > 100000000:
+            scoring -= 5
+        # 8 Востребованность ниши - изменение количества продавцов 
+        # с начала периода
+        response['suppliers'] = curr_stat['product__supplier_id__count']
+        response['suppliers_diff'] = curr_stat['product__supplier_id__count'] / f_p_stat_agg['product__supplier_id__count']
+        if response['suppliers_diff'] < 0.9:
+            scoring -= 1
+        if response['suppliers_diff'] <= 1.1:
+            scoring += 1
+        # 9 Объем рынка (динамика)
+        response['volume'] = (curr_stat[f'profit_14_{fb}__sum'] / f_p_stat_agg[f'profit_14_{fb}__sum'])
+        if response['volume'] >= 1.1:
+            scoring += 1
+        if response['volume'] <= 0.9:
+            scoring -= 1
+        # 10 LP - Упущенная выручка в нише - для каждого товара считается 
+        # как:  количество дней без продаж * среднее количество продаж 
+        # товара в день. По нише считается как сумма упущенной выручки 
+        # всех товаров в нише
+        response['profit_lost'] = curr_stat[f'profit_lost_{fb}__sum'] / curr_stat[f'profit_{fb}__sum']
+        if response['profit_lost'] > 0.2:
+            scoring += 1
+        elif response['profit_lost'] <= 0.1:
+            scoring -= 1
+        # 11 Объем рынка у топ 10 (динамика)
+        response['profit_top_sup'] = top_supplier_agg[f'profit_30_{fb}__sum']
+        response['profit_top_sup_diff'] = top_supplier_agg[f'profit_30_{fb}__sum'] / f_p_top_supplier_agg[f'profit_30_{fb}__sum']
+        if response['profit_top_sup_diff'] >= 1.1:
+            scoring -= 1
+        # 12 SPP - Процент товаров с продажами (динамика)
+        response['product_solded_diff'] = (curr_stat['product_solded'] / f_p_stat_agg['product_solded'])
+        if response['product_solded_diff'] >= 1.1:
+            scoring += 1
+        elif response['product_solded_diff'] <= 0.9:
+            scoring -= 1
+        # 13 Средняя скорость продаж - среднее количество продаж в день по 
+        # всем товарам, считается как: общее количество продаж ÷ общее 
+        # количество товаров ÷ 30 (дней)
+        response['sales_speed_avg'] = curr_stat[f'sales_30_{fb}__sum'] / total / 30
+        if response['sales_speed_avg'] >= 1:
+            scoring += 1
+        elif response['sales_speed_avg'] >= 0 and response['sales_speed_avg'] <= 0.3:
+            scoring -= 1
+        # 14 Средний оборот на продавца
+        response['supplier_profit_avg'] = (curr_stat[f'profit_30_{fb}__sum'] / curr_stat['product__supplier_id__count'])
+        if response['supplier_profit_avg'] >= 100000:
+            scoring += 1
+        elif response['supplier_profit_avg'] <= 20000:
+            scoring -= 1
+        # 15 SPS - процент продавцов с продажами
+        response['supplier_sold_count'] = curr_stat['sup_sold_count']
+        response['supplier_sold_diff'] = curr_stat['sup_sold_count'] / curr_stat['product__supplier_id__count']
+        if response['supplier_sold_diff'] >= 0.5:
+            scoring += 1
+        elif response['supplier_sold_diff'] <= 0.2:
+            scoring -= 1
+
     def calculate_query_v2(self, query):
         update = {}
         product_ids = list(Product.objects.filter(
@@ -917,7 +1023,6 @@ class Parser(object):
         if update['products_count'] == 0:
             query.delete()
             return
-        
         period = 30
         start_30 = (datetime.now() - timedelta(days=period)).replace(
                 hour=0, minute=0, second=0, microsecond=0)

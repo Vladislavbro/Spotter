@@ -115,9 +115,9 @@ export default {
   methods: {
 
     signup () {
-      if (!this.$store.state.user.username) {
-        return this.$toast.error('username')
-      }
+      // if (!this.$store.state.user.username) {
+      //   return this.$toast.error('username')
+      // }
       if (!this.$store.state.user.email) {
         return this.$toast.error('email')
       }
