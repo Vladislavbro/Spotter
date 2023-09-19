@@ -430,8 +430,8 @@ class Parser(object):
         features = [f.lemma_ for f in features if len(f.lemma_) > 1]
         features.sort()
         product.features = features
-        if len(doc.ents):
-            product.entity = doc.ents[0].lemma_
+        # if len(doc.ents):
+        #     product.entity = doc.ents[0].lemma_
 
     def check_unique(self, product):
         print(product.articul)
