@@ -1,0 +1,88 @@
+html {
+  font-family: 'Hauora';
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  color: var(--white);
+}
+
+button {
+  touch-action: manipulation;
+}
+
+// * {
+//   scrollbar-width: thin;
+//   scrollbar-color: #6D6A77 #E4E6E8;
+
+//   &::-webkit-scrollbar-thumb {
+//     width: 3px;
+//     height: 3px;
+//     background-color: #6D6A77;
+//   }
+
+//   &::-webkit-scrollbar-track {
+//     width: 3px;
+//     height: 3px;
+//     background-color: #E4E6E8;
+//   }
+
+//   &::-webkit-scrollbar {
+//     width: 3px;
+//     height: 3px;
+//   }
+// }
+
+
+// убираем стрелки у инпутов при type="number"
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='numbr'] {
+  -moz-appearance: textfield;
+}
+
+.exact-active-link {
+  cursor: default;
+  pointer-events: none;
+}
+
+img[src=""] {
+  display: none;
+}
+
+[v-cloak] {
+  display: none;
+}
+
+.container {
+  width: 100%;
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 0 20px;
+
+  @include mq($bp-small) {
+    padding: 0 30px;
+  }
+}
+
+.container-lk {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 32px 0 60px;
+
+  @include mq($bp-bigger) {
+    padding: 0 54px 0 60px;
+  }
+
+  &--profile {
+    padding: 0 70px;
+  }
+}

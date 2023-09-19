@@ -1,0 +1,20 @@
+:root {
+  --white: #ffffff;
+
+  --black: #000000;
+  --blackMain: #18181C;
+  --blackLight: #303038;
+
+  --gray: #8B8B91;
+  --grayLight: #9D9DA5;
+  --grayBlack: #7D7D91;
+  --grayDark: #232328;
+
+  --lime: #98E012;
+  --limeLight: #A4F017;
+  --limeLighter: #B9EB5B;
+
+  --purple: #6A3BAC;
+
+  --red: #CC2A2A;
+}

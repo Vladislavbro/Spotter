@@ -1,0 +1,33 @@
+@mixin font-face($name, $path, $weight: null, $style: null, $exts: eot woff2 woff ttf svg) {
+  $src: null;
+
+  $extmods: (eot: "?", svg: "#" + str-replace($name, " ", "_"));
+
+  $formats: (otf: "opentype", ttf: "truetype");
+
+  @each $ext in $exts {
+    $extmod: if(map-has-key($extmods, $ext), $ext + map-get($extmods, $ext), $ext);
+    $format: if(map-has-key($formats, $ext), map-get($formats, $ext), $ext);
+    $src: append($src, url(quote($path + "." + $extmod)) format(quote($format)), comma);
+  }
+
+  @font-face {
+    font-family: quote($name);
+    font-style: $style;
+    font-weight: $weight;
+    src: $src;
+    font-display: swap;
+  }
+}
+
+@include font-face(Hauora, "~/assets/fonts/Hauora/Hauora-Light", 300, normal, woff2);
+@include font-face(Hauora, "~/assets/fonts/Hauora/Hauora-Regular", 400, normal, woff2);
+@include font-face(Hauora, "~/assets/fonts/Hauora/Hauora-Medium", 500, normal, woff2);
+@include font-face(Hauora, "~/assets/fonts/Hauora/Hauora-SemiBold", 600, normal, woff2);
+@include font-face(Hauora, "~/assets/fonts/Hauora/Hauora-Bold", 700, normal, woff2);
+
+@include font-face(RobotoFlex, "~/assets/fonts/RobotoFlex/RobotoFlex", 700, normal, ttf);
+
+@include font-face(Inter, "~/assets/fonts/Inter/Inter-Regular", 400, normal, ttf);
+@include font-face(Inter, "~/assets/fonts/Inter/Inter-Medium", 500, normal, ttf);
+@include font-face(Inter, "~/assets/fonts/Inter/Inter-SemiBold", 600, normal, ttf);
