@@ -114,6 +114,7 @@ class Parser(object):
             return self.get_url(url)
 
     def processing(self):
+        return self.update_products()
         if self.config.parsing_done is not True:
             self.notify('Парсинг категорий начался')
             self.get_wirehouses()
