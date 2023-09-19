@@ -418,11 +418,15 @@ class Parser(object):
         features = list(set([w for w in doc if w.tag_ == 'ADJ']))
         doc = [t for t in doc if t not in features]
         root = [w for w in doc if w.dep_ == 'ROOT']
+        if len(root):
+            product.root = root[0].lemma_
         if len(root) == 0 or root[0].tag_ != 'NOUN':
             nsubj = [w for w in doc if w.dep_ == 'nsubj']
             if len(nsubj):
                 root = nsubj[0]
-        product.root = root.lemma_
+                product.root = root.lemma_
+            else:
+                product.root = '-'
         features = [f.lemma_ for f in features if len(f.lemma_) > 1]
         features.sort()
         product.features = features
