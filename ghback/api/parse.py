@@ -429,13 +429,14 @@ class Parser(object):
         #         product.root = root.lemma_
         #     else:
         #         product.root = '-'
-        features = list(set([w for w in doc if morph.parse(w.lemma_)[0].tag.POS == 'ADJF']))
+        features = list(set([w for w in doc if morph.parse(w.lemma_)[0].tag.POS == 'ADJF' or w.tag_ == 'ADJ']))
         doc = [t for t in doc if t not in features]
         root = [
             w for w in doc if (
                 (
                     morph.parse(w.lemma_)[0].tag.POS == 'NOUN' or 
-                    w.dep_ == 'ROOT'
+                    w.dep_ == 'ROOT' or 
+                    w.tag_ == 'NOUN'
                 ) and len(w.lemma_) > 2
             )
         ]
