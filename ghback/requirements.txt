@@ -14,3 +14,4 @@ pytz
 selenium-wire
 python-dotenv
 social-auth-app-django
+pymorphy2
