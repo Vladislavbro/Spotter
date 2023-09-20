@@ -27,7 +27,7 @@ module.exports = {
       repo : 'git@github.com:Vladislavbro/goods_hunter.git',
       path : '/home/deploy/apps/goods_hunter',
       // 'pre-deploy-local': '',
-      'post-deploy' : 'cd front-site && yarn install && yarn build && cd .. && pm2 reload ecosystem.config.js --env production',
+      'post-deploy' : 'cd front-site && /home/deploy/.nvm/versions/node/v18.18.0/bin/yarn install && /home/deploy/.nvm/versions/node/v18.18.0/bin/yarn build && cd .. && pm2 reload ecosystem.config.js --env production',
       // 'pre-setup': ''
     }
   }
