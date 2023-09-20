@@ -21,8 +21,10 @@ import os
 from urllib import request
 import asyncio
 import pytz
+import pymorphy2
 
 
+morph = pymorphy2.MorphAnalyzer()
 utc = pytz.UTC
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 nlp = spacy.load('ru_core_news_lg')
@@ -416,18 +418,31 @@ class Parser(object):
         name = re.sub(r'[\W\d]', ' ', product.name)
         name = re.sub(r'\s+', ' ', name)
         doc = nlp(name.strip())
-        features = list(set([w for w in doc if w.tag_ == 'ADJ']))
+        # features = list(set([w for w in doc if w.tag_ == 'ADJ']))
+        # root = [w for w in doc if w.dep_ == 'ROOT']
+        # if len(root):
+        #     product.root = root[0].lemma_
+        # if len(root) == 0 or root[0].tag_ != 'NOUN':
+        #     nsubj = [w for w in doc if w.dep_ == 'nsubj']
+        #     if len(nsubj):
+        #         root = nsubj[0]
+        #         product.root = root.lemma_
+        #     else:
+        #         product.root = '-'
+        features = list(set([w for w in doc if morph.parse(w.lemma_)[0].tag.POS == 'ADJF']))
         doc = [t for t in doc if t not in features]
-        root = [w for w in doc if w.dep_ == 'ROOT']
+        root = [
+            w for w in doc if (
+                (
+                    morph.parse(w.lemma_)[0].tag.POS == 'NOUN' or 
+                    w.dep_ == 'ROOT'
+                ) and len(w.lemma_) > 2
+            )
+        ]
         if len(root):
             product.root = root[0].lemma_
-        if len(root) == 0 or root[0].tag_ != 'NOUN':
-            nsubj = [w for w in doc if w.dep_ == 'nsubj']
-            if len(nsubj):
-                root = nsubj[0]
-                product.root = root.lemma_
-            else:
-                product.root = '-'
+        else:
+            product.root = '-'
         features = [f.lemma_ for f in features if len(f.lemma_) > 1]
         features.sort()
         product.features = features
