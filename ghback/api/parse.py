@@ -114,7 +114,7 @@ class Parser(object):
             return self.get_url(url)
 
     def processing(self):
-        return self.update_products()
+        # return self.update_products()
         if self.config.parsing_done is not True:
             self.notify('Парсинг категорий начался')
             self.get_wirehouses()
@@ -413,7 +413,8 @@ class Parser(object):
             product = Product.objects.filter(root='').first()
 
     def text_process(self, product):
-        name = re.sub(r'[^a-zA-Zа-яА-Я\s]', '', product.name)
+        name = re.sub(r'[\W\d]', ' ', product.name)
+        name = re.sub(r'\s+', ' ', name)
         doc = nlp(name.strip())
         features = list(set([w for w in doc if w.tag_ == 'ADJ']))
         doc = [t for t in doc if t not in features]
@@ -495,7 +496,7 @@ class Parser(object):
             if product:
                 if product.name != name:
                     product.name = name
-                    self.text_process(product)
+                self.text_process(product)
                 product.name = name
                 product.supplier_id = item['supplierId']
                 product.brand = item['brand']
