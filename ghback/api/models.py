@@ -114,6 +114,8 @@ class Query(models.Model):
                                  blank=True, null=True)
     parsing_id = models.IntegerField(blank=True, null=True)
     root = models.CharField(max_length=200)
+    product_name = models.CharField(max_length=300, blank=True, null=True)
+    scoring = models.JSONField(blank=True, null=True)
     features = ArrayField(ArrayField(models.CharField(max_length=100,
                                                       blank=True)), default=[])
     products_count = models.IntegerField(blank=True, null=True)
@@ -232,10 +234,12 @@ class ProductStat(models.Model):
     profit_14_fbs = models.BigIntegerField(blank=True, null=True, default=0)
     profit_30_fbo = models.BigIntegerField(blank=True, null=True, default=0)
     profit_30_fbs = models.BigIntegerField(blank=True, null=True, default=0)
+    profit_30_fbo_grow = models.IntegerField(blank=True, null=True, default=0)
     price = models.IntegerField(blank=True, null=True)
     priceU = models.IntegerField(blank=True, null=True)
 
     class Meta():
+        ordering = ['-date']
         indexes = [
             models.Index(fields=['parsing_id', 'product_id']),
         ]

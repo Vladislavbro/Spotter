@@ -24,7 +24,10 @@ from dotenv import load_dotenv
 import os
 import random
 import string
+import pymorphy2
 
+
+morph = pymorphy2.MorphAnalyzer()
 load_dotenv()
 UNISENDER_KEY = os.getenv('UNISENDER_KEY')
 
@@ -569,6 +572,8 @@ def queries_top(request):
             'total': total,
             'items': [{
                 'id': i['id'],
+                'product_name': i['product_name'],
+                'scoring': i['scoring'],
                 'root': i['root'],
                 'features': ' '.join(i['features']),
                 'products_count': i['products_count'],
@@ -588,19 +593,28 @@ def queries_top(request):
         })
 
 
+def get_keys(query):
+    query = re.sub(r'[\W\d]', ' ', query)
+    query = re.sub(r'\s+', ' ', query)
+    doc = nlp(query.strip())
+    features = list(set([w for w in doc if morph.parse(w.lemma_)[0].tag.POS == 'ADJF' or w.tag_ == 'ADJ']))
+    doc = [t for t in doc if t not in features]
+    root = [
+        w for w in doc if (
+            (
+                morph.parse(w.lemma_)[0].tag.POS == 'NOUN' or 
+                w.dep_ == 'ROOT' or 
+                w.tag_ == 'NOUN'
+            ) and len(w.lemma_) > 2
+        )
+    ]
+    return root[0].lemma_ if len(root) else None, features
+
+
 def queries_search(request):
     view = request.GET.get('view')
     query = request.GET.get('query')
-    doc = nlp(query)
-    root = [w for w in doc if w.dep_ == 'ROOT'][0]
-    if root.tag_ != 'NOUN':
-        nsubj = [w for w in doc if w.dep_ == 'nsubj']
-        if len(nsubj):
-            root = nsubj[0]
-    query_root = root.lemma_
-    features = list(set([w.lemma_ for w in doc if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
-    features.sort()
-    query_features = features
+    query_root, query_features = get_keys(query)
     # query_root, query_features = 'рубашка', ['белый', 'офисный']
     period = int(request.GET.get('period', '30'))
     fb = request.GET.get('fb', 'fbo')
@@ -1015,16 +1029,7 @@ def supplier(request, supplierId):
 
 def search(request):
     query = request.GET.get('query')
-    doc = nlp(query)
-    root = [w for w in doc if w.dep_ == 'ROOT'][0]
-    if root.tag_ != 'NOUN':
-        nsubj = [w for w in doc if w.dep_ == 'nsubj']
-        if len(nsubj):
-            root = nsubj[0]
-    root = root.lemma_
-    features = list(set([w.lemma_ for w in doc 
-                         if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
-    features.sort()
+    root, features = get_keys(query)
     names = list(Product.objects.filter(
         root=root, features__contains=features
     ).values('name').distinct()[:100])
