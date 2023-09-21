@@ -435,7 +435,7 @@ class Parser(object):
                 ) and len(w.lemma_) > 2
             )
         ]
-        return root[0].lemma_ if len(root) else None, features
+        return root[0].lemma_ if len(root) else None, [f.lemma_ for f in features]
 
     def text_process(self, product):
         root, features = self.get_keys(product.name)
