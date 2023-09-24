@@ -23,7 +23,7 @@
   height: 198px;
   padding: 24px 20px 12px;
   background-color: var(--blackMain);
-  background-image: url('@/assets/icons/landing/find-item/video-preview.svg');
+  background-image: url('@/assets/images/landing/find-item/video-preview.png');
   background-repeat: no-repeat;
   background-position: 100% calc(100% - 12px);
   background-size: 190px;

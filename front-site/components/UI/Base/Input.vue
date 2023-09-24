@@ -17,6 +17,7 @@
       :placeholder="placeholder"
       :disabled="disabled"
       :required="required"
+      autocomplete="off"
       class="input__area"
       @input="$emit('update:modelValue', $event.target.value)"
     >
@@ -29,6 +30,7 @@
       :type="currentType"
       :disabled="disabled"
       :required="required"
+      autocomplete="off"
       class="input__area"
       @input="$emit('update:modelValue', $event.target.value)"
     >

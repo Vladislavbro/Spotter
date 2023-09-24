@@ -59,14 +59,14 @@
               />
             </div>
 
-            <div class="auth__row">
+            <!-- <div class="auth__row">
               <UIBaseInput
                 v-model="form.username"
                 label="Username"
                 placeholder="Укажите username"
                 required
               />
-            </div>
+            </div> -->
 
             <!-- <div class="auth__row">
               <UIBaseInput
@@ -156,7 +156,7 @@ const isLoading = ref(false)
 const isShowSuccessSignUp = ref(false)
 const form = reactive({
   email: '',
-  username: '',
+  // username: '',
   // phone: '',
   // name: '',
   first_name: '',

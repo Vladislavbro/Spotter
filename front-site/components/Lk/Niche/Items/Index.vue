@@ -51,12 +51,13 @@
             >
               <td v-if="headColumns[0].show">
                 <div class="niche-items-table-item">
-                  <!-- <div class="niche-items-table-item__image">
+                  <div class="niche-items-table-item__image">
                     <img
-                      src="@/assets/images/lk/item-niche-items-test.jpg"
+                      v-lazy-load
+                      :data-src="getProductUrl(item.product__articul)"
                       alt=""
                     >
-                  </div> -->
+                  </div>
                   <div class="niche-items-table-item__info">
                     <NuxtLink
                       :to="`/lk/item/${item.product__articul}`"
@@ -157,7 +158,8 @@
 </template>
 
 <script setup>
-import copyTextToClipboard from '@/utils/copyTextToClipboard'
+import copyTextToClipboard from '@/utils/copyTextToClipboard.js'
+import GenerateImgUrl from '@/utils/generateImgUrl.js'
 
 const props = defineProps({
   slug: {
@@ -201,7 +203,13 @@ const headColumns = ref([
 ])
 
 const copyText = async (text) => {
-  const msg = await copyTextToClipboard(text)
+  try {
+    await copyTextToClipboard(text)
+  } catch (e) {}
+}
+
+const getProductUrl = (id) => {
+  return new GenerateImgUrl(id).url()
 }
 
 const getData = async () => {

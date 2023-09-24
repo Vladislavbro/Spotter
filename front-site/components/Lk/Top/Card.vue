@@ -56,14 +56,14 @@
           {{ item?.profit?.toLocaleString() || 0 }} ₽
         </p>
       </div>
-      <div class="top-card__line">
+      <!-- <div class="top-card__line">
         <p class="top-card__label">
           Ценовой сегмент:
         </p>
         <p class="top-card__value">
           0
         </p>
-      </div>
+      </div> -->
       <div class="top-card__line">
         <p class="top-card__label">
           Средний чек:
@@ -77,7 +77,7 @@
           Товаров с продажами:
         </p>
         <p class="top-card__value">
-          {{ item.products_solded || 0 }}%
+          {{ item.products_solded || 0 }}
         </p>
       </div>
     </div>

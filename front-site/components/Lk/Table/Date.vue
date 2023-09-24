@@ -1,11 +1,17 @@
 <template>
   <div :class="['lk-date', { 'lk-date--calendar': calendarOnly }]">
-    <div class="lk-date__calendar">
-      <UIBaseIcon
-        name="lk/icon-calendar"
-      />
-      14.02.2022 - 21.02.2022
-    </div>
+    <VueDatePicker
+      v-model="date"
+      range
+      multi-calendars="3"
+      :month-change-on-scroll="false"
+      :clearable="false"
+      format="dd.MM.yyyy"
+      :enable-time-picker="false"
+      locale="ru"
+      input-class-name="lk-date-calendar__input"
+      class="lk-date-calendar"
+    />
 
     <div
       v-if="!calendarOnly"
@@ -24,6 +30,9 @@
 </template>
 
 <script setup>
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
+
 defineProps({
   calendarOnly: {
     type: Boolean,
@@ -37,6 +46,7 @@ const days = [
   { label: 'месяц', value: 30 },
 ]
 
+const date = ref(null)
 const day = ref(30)
 </script>
 
@@ -54,23 +64,6 @@ const day = ref(30)
     grid-gap: 0;
   }
 
-  &__calendar {
-    display: grid;
-    align-items: center;
-    grid-gap: 8px;
-    grid-template-columns: repeat(2, auto);
-    height: 46px;
-    padding: 0 20px;
-    background: var(--white);
-    border: 1px solid #E2E2E7;
-    border-radius: 8px;
-    cursor: pointer;
-
-    &:hover {
-      background: #F3F4F5;
-    }
-  }
-
   &__days {
     display: flex;
     align-items: center;
@@ -86,15 +79,40 @@ const day = ref(30)
     height: 38px;
     padding: 0 20px;
     border-radius: 4px;
+    transition: background-color 0.3s;
 
     &:hover:not(.lk-date__day--active) {
-      background: #F3F4F5;
+      background-color: #F3F4F5;
     }
 
     &--active {
       color: var(--white);
-      background: #8557E5;
+      background-color: #8557E5;
       box-shadow: 0px 2px 6px rgba(42, 46, 59, 0.24);
+    }
+  }
+}
+
+.lk-date-calendar {
+  --dp-border-radius: 8px;
+  --dp-border-color: #E2E2E7;
+  --dp-border-color-hover: #E2E2E7;
+  --dp-input-padding: 14px 20px;
+  --dp-font-size: 15px;
+  --dp-font-family: 'Inter';
+  // --dp-input-icon-padding: 44px;
+
+  width: 240px;
+
+  ::v-deep .lk-date-calendar {
+    &__input {
+      height: 46px;
+      font-weight: 500;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: #F3F4F5;
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="niche-resume">
-    <template v-if="!isLoading">
+    <template v-if="!isLoading && item">
       <div class="niche-resume__info">
         <LkTableTypes />
 
@@ -40,14 +40,13 @@ const props = defineProps({
   },
 })
 
-const isLoading = ref(false)
+const isLoading = ref(true)
 const item = ref(null)
 
 const getData = async () => {
   isLoading.value = true
-  const { data } = await useFetch(`/api/queries/search?query=${props.slug}&view=summary`, {
-    server: false,
-  })
+  const { data } = await useFetch(`/api/queries/search?query=${props.slug}&view=summary`)
+
   isLoading.value = false
 
   item.value = data?.value

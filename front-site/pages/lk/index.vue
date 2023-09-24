@@ -39,8 +39,10 @@
             @submit="setFilters()"
           >
             <UILkFilter
+              v-model:from="initialFilters.scoring.from"
+              v-model:to="initialFilters.scoring.to"
               label="Оценка"
-              :max-value="10"
+              :max-value="initialFilters.scoring.maxValue"
             />
             <UILkFilter
               v-model:from="initialFilters.profit.from"
@@ -48,20 +50,22 @@
               label="Объём рынка, ₽"
               :max-value="initialFilters.profit.maxValue"
             />
-            <UILkFilter
+            <!-- <UILkFilter
               label="Ценовой сегмент, ₽"
               :max-value="999999"
-            />
+            /> -->
             <UILkFilter
               v-model:from="initialFilters.price_avg.from"
               v-model:to="initialFilters.price_avg.to"
               label="Средний чек, ₽"
               :max-value="initialFilters.price_avg.maxValue"
             />
-            <UILkFilter
+            <!-- <UILkFilter
+              v-model:from="initialFilters.products_solded.from"
+              v-model:to="initialFilters.products_solded.to"
               label="Товары с продажами"
-              :max-value="999999"
-            />
+              :max-value="initialFilters.products_solded.maxValue"
+            /> -->
           </LkTableFilter>
 
           <div
@@ -100,20 +104,29 @@ definePageMeta({
 })
 
 const headColumns = ref([
-  { label: 'Название, характеристики', sort: false, show: true },
+  // { label: 'Название, характеристики', sort: false, show: true },
   { label: 'Товары, шт.', slug: 'products_count', sort: true, show: true },
-  { label: 'Товары с продажами', slug: 'products_solded', sort: true, show: true },
-  { label: 'Средняя цена', slug: 'price_avg', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
-  { label: 'Оборот 1-го', slug: 'product_1_profit', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
-  { label: 'Оборот 10-го', slug: 'product_10_profit', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
-  { label: 'Оборот', slug: 'profit', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
+  { label: 'Товары с продажами', slug: 'products_solded_30_fbo', sort: true, show: true },
+  { label: 'Средний чек', slug: 'price_avg', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
+  // { label: 'Оборот 1-го', slug: 'product_1_profit', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
+  // { label: 'Оборот 10-го', slug: 'product_10_profit', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
+  { label: 'Объём рынка', slug: 'profit', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
 ])
+
 const items = ref([])
 const page = ref(1)
+
 const fb = ref('fbo')
 const sortSlug = ref('products_count')
 const sortDirection = ref('asc')
+
 const initialFilters = reactive({
+  scoring: {
+    from: 0,
+    to: 10,
+    minValue: 0,
+    maxValue: 10,
+  },
   price_avg: {
     from: 0,
     to: 999999,
@@ -126,8 +139,15 @@ const initialFilters = reactive({
     minValue: 0,
     maxValue: 99999999,
   },
+  products_solded: {
+    from: 0,
+    to: 999999,
+    minValue: 0,
+    maxValue: 999999,
+  },
 })
 const filters = ref({})
+
 const isShowBtn = ref(true)
 const isLoadingPage = ref(true)
 const isLoading = ref(false)
@@ -136,6 +156,16 @@ const changeType = (value) => {
   items.value = []
   page.value = 1
   fb.value = value
+
+  const newSortSlug = `products_solded_30_${value}`
+  sortSlug.value = newSortSlug
+  headColumns.value.find((item) => {
+    if (item.slug.startsWith('products_solded')) {
+      item.slug = newSortSlug
+      return true
+    }
+    return false
+  })
 
   getData()
 }
@@ -293,6 +323,8 @@ await getData()
 
   &__show-more {
     height: 48px;
+    margin-top: 40px;
+
     font-weight: 500;
     font-size: 14px;
     line-height: 16px;

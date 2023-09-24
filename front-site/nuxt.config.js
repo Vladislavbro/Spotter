@@ -17,7 +17,19 @@ export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
     'nuxt-swiper',
+    'nuxt-lazy-load',
   ],
+
+  lazyLoad: {
+    images: false,
+    videos: false,
+    audios: false,
+    iframes: false,
+    native: false,
+    directiveOnly: true,
+    // defaultImage: '/images/default-image.jpg',
+  },
+
   runtimeConfig: {
     public: {
       baseURL: process.env.BASE_URL,

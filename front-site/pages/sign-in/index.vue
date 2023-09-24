@@ -23,16 +23,9 @@
           </div>
 
           <div class="auth__rows">
-            <!-- <div class="auth__row">
-              <UIBaseInput
-                v-model="form.email"
-                label="E-mail"
-              />
-            </div> -->
-
             <div class="auth__row">
               <UIBaseInput
-                v-model="form.username"
+                v-model="form.email"
                 label="Username"
               />
             </div>
@@ -102,8 +95,7 @@ const socials = [
 const isLoading = ref(false)
 const isShowRestorePassword = ref(false)
 const form = reactive({
-  // email: '',
-  username: '',
+  email: '',
   password: '',
 })
 

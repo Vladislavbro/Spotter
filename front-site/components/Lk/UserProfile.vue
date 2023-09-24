@@ -37,10 +37,10 @@
         </div>
       </div> -->
 
-      <div class="user-profile__line">
+      <!-- <div class="user-profile__line">
         <div class="user-profile__box">
           <div class="user-profile__icon">
-            <!-- <UIBaseIcon name="lk/icon-mail" /> -->
+            <UIBaseIcon name="lk/icon-mail" />
           </div>
           <div class="user-profile__content">
             <p class="user-profile__label">
@@ -51,7 +51,7 @@
             </p>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <div class="user-profile__line">
         <div class="user-profile__box">
