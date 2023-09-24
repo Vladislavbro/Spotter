@@ -24,7 +24,10 @@ from dotenv import load_dotenv
 import os
 import random
 import string
+import pymorphy2
 
+
+morph = pymorphy2.MorphAnalyzer()
 load_dotenv()
 UNISENDER_KEY = os.getenv('UNISENDER_KEY')
 
@@ -103,7 +106,7 @@ def me(request):
     if request.user.is_authenticated:
         user = User.objects.prefetch_related('customer').filter(
             pk=request.user.id).values(
-                'id', 'username', 'email', 'first_name', 'last_name',
+                'id', 'email', 'first_name', 'last_name',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser').first()
         return JsonResponse(user)
@@ -114,7 +117,7 @@ def me(request):
             User.objects.prefetch_related('customer').filter(
                 email='test@test.ru'
             ).values(
-                'id', 'username', 'email', 'first_name', 'last_name',
+                'id', 'email', 'first_name', 'last_name',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser'
             ).first()
@@ -127,7 +130,7 @@ def me(request):
 
 def log_in(request):
     body = json.loads(request.body)
-    user = authenticate(username=body['username'].strip(),
+    user = authenticate(username=body['email'].strip(),
                         password=body['password'])
     if user is not None:
         login(request, user)
@@ -145,7 +148,7 @@ def change_password(request):
         user.save()
         send_mail_v2(
             subject='Пароль успешно изменен', 
-            content='Логин: ' + user.username + '<br>Пароль: ' + body['new_password'], 
+            content='Email: ' + user.email + '<br>Пароль: ' + body['new_password'], 
             email=user.email, user_id=user.id)
         return JsonResponse({'status': 'success', 
                              'message': 'Пароль успешно изменен'})
@@ -164,7 +167,7 @@ def change_password_v2(request):
         user.save()
         send_mail_v2(
             subject='Пароль успешно изменен', 
-            content='Логин: ' + user.username + '<br>Пароль: ' + password,
+            content='Email: ' + user.email + '<br>Пароль: ' + password,
             email=user.email, user_id=user.id)
         return JsonResponse({'status': 'success',
                              'message': 'Новый пароль отправлен на email'})
@@ -192,7 +195,7 @@ def signup(request):
                 'выберите другой или восстановите пароль.'
             )})
     user = User(
-        username=body['username'].strip(),
+        username=body['email'].strip(),
         email=body['email'].strip(),
         last_name=body['last_name'].strip(),
         first_name=body['first_name'].strip(),
@@ -208,7 +211,7 @@ def signup(request):
     login(request, user)
     send_mail_v2(
         subject='Успешная регистрация на сайте SPOTTER.FUN!', 
-        content='Логин: ' + body['username'] + '<br>Пароль: ' + body['password'], 
+        content='Email: ' + body['email'] + '<br>Пароль: ' + body['password'], 
         email=user.email, user_id=user.id)
     return JsonResponse({'status': 'success', 'user': model_to_dict(user)})
 
@@ -218,7 +221,7 @@ def accounts(request):
         user = User.objects.get(pk=request.user.id)
         if user.is_superuser:
             accounts = User.objects.prefetch_related('customer').all().values(
-                'id', 'username', 'email', 'first_name', 'last_name',
+                'id', 'email', 'first_name', 'last_name',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser')
             return JsonResponse({'accounts': list(accounts)})
@@ -242,7 +245,7 @@ def account(request):
                     customer.save()
                 user = User.objects.prefetch_related('customer').filter(
                     pk=body.get('id')).values(
-                        'id', 'username', 'email', 'first_name', 'last_name',
+                        'id', 'email', 'first_name', 'last_name',
                         'customer__subscribe_type',
                         'customer__subscribe_until', 'is_staff',
                         'is_superuser').first()
@@ -255,15 +258,8 @@ def account(request):
                             'Пользователь с таким email уже существует, '
                             'выберите другой или восстановите пароль.'
                         )})
-                if User.objects.filter(username=body['username'].strip()).first():
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': (
-                            'Пользователь с таким логином уже существует, '
-                            'выберите другой или восстановите пароль.'
-                        )})
                 user = User(
-                    username=body['username'].strip(),
+                    username=body['email'].strip(),
                     email=body['email'].strip(),
                     last_name=body['last_name'].strip(),
                     first_name=body['first_name'].strip(),
@@ -280,7 +276,7 @@ def account(request):
                     customer.save()
                 return JsonResponse(User.objects.prefetch_related(
                     'customer').filter(pk=user.id).values(
-                        'id', 'username', 'email', 'first_name', 'last_name',
+                        'id', 'email', 'first_name', 'last_name',
                         'customer__subscribe_type',
                         'customer__subscribe_until', 'is_staff',
                         'is_superuser').first())
@@ -576,6 +572,8 @@ def queries_top(request):
             'total': total,
             'items': [{
                 'id': i['id'],
+                'product_name': i['product_name'],
+                'scoring': i['scoring'],
                 'root': i['root'],
                 'features': ' '.join(i['features']),
                 'products_count': i['products_count'],
@@ -595,19 +593,28 @@ def queries_top(request):
         })
 
 
+def get_keys(query):
+    query = re.sub(r'[\W\d]', ' ', query)
+    query = re.sub(r'\s+', ' ', query)
+    doc = nlp(query.strip())
+    features = list(set([w for w in doc if morph.parse(w.lemma_)[0].tag.POS == 'ADJF' or w.tag_ == 'ADJ']))
+    doc = [t for t in doc if t not in features]
+    root = [
+        w for w in doc if (
+            (
+                morph.parse(w.lemma_)[0].tag.POS == 'NOUN' or 
+                w.dep_ == 'ROOT' or 
+                w.tag_ == 'NOUN'
+            ) and len(w.lemma_) > 2
+        )
+    ]
+    return root[0].lemma_ if len(root) else None, features
+
+
 def queries_search(request):
     view = request.GET.get('view')
     query = request.GET.get('query')
-    doc = nlp(query)
-    root = [w for w in doc if w.dep_ == 'ROOT'][0]
-    if root.tag_ != 'NOUN':
-        nsubj = [w for w in doc if w.dep_ == 'nsubj']
-        if len(nsubj):
-            root = nsubj[0]
-    query_root = root.lemma_
-    features = list(set([w.lemma_ for w in doc if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
-    features.sort()
-    query_features = features
+    query_root, query_features = get_keys(query)
     # query_root, query_features = 'рубашка', ['белый', 'офисный']
     period = int(request.GET.get('period', '30'))
     fb = request.GET.get('fb', 'fbo')
@@ -1022,16 +1029,7 @@ def supplier(request, supplierId):
 
 def search(request):
     query = request.GET.get('query')
-    doc = nlp(query)
-    root = [w for w in doc if w.dep_ == 'ROOT'][0]
-    if root.tag_ != 'NOUN':
-        nsubj = [w for w in doc if w.dep_ == 'nsubj']
-        if len(nsubj):
-            root = nsubj[0]
-    root = root.lemma_
-    features = list(set([w.lemma_ for w in doc 
-                         if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
-    features.sort()
+    root, features = get_keys(query)
     names = list(Product.objects.filter(
         root=root, features__contains=features
     ).values('name').distinct()[:100])

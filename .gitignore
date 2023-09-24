@@ -8,3 +8,5 @@ node_modules
 bot.pkl
 ghback/db.sqlite3
 ghback/data
+.env
+roots.txt
