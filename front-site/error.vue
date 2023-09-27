@@ -1,7 +1,7 @@
 <template>
   <div class="error-page">
     <h1 v-if="error.statusCode === 404">
-      Page not found
+      Page not found 
     </h1>
     <h1 v-else-if="error.statusCode === 500">
       Internal Server error
