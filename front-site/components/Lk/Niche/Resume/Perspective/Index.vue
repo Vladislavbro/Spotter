@@ -42,12 +42,12 @@
                     Продажи
                   </p>
                   <span class="perspective-stats-item__value">
-                    4/4
+                    {{ stats.sales > 0 ? stats.sales : 0 }}/4
                   </span>
                 </div>
                 <div class="perspective-stats-item__progress">
                   <div
-                    style="width: 100%"
+                    :style="`width: ${100 / 4 * (stats.sales > 0 ? stats.sales : 0)}%`"
                     class="perspective-stats-item__progress-line"
                   />
                 </div>
@@ -58,12 +58,12 @@
                     Рынок
                   </p>
                   <span class="perspective-stats-item__value">
-                    3/3
+                    {{ stats.shop > 0 ? stats.shop : 0 }}/3
                   </span>
                 </div>
                 <div class="perspective-stats-item__progress">
                   <div
-                    style="width: 20%"
+                    :style="`width: ${100 / 3 * (stats.shop > 0 ? stats.shop : 0)}%`"
                     class="perspective-stats-item__progress-line"
                   />
                 </div>
@@ -74,12 +74,12 @@
                     Конкуренция
                   </p>
                   <span class="perspective-stats-item__value">
-                    5/5
+                    {{ stats.conc > 0 ? stats.conc : 0 }}/5
                   </span>
                 </div>
                 <div class="perspective-stats-item__progress">
                   <div
-                    style="width: 100%"
+                    :style="`width: ${100 / 5 * (stats.conc > 0 ? stats.conc : 0)}%`"
                     class="perspective-stats-item__progress-line"
                   />
                 </div>
@@ -102,6 +102,10 @@
 
 <script setup>
 const props = defineProps({
+  stats: {
+    type: Object,
+    default: () => ({}),
+  },
   item: {
     type: Object,
     default: () => ({}),

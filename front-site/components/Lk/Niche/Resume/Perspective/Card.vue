@@ -12,7 +12,7 @@
             {
               'perspective-card__icon--1': item.score === 1,
               'perspective-card__icon--2': item.score === 0,
-              'perspective-card__icon--3': item.score === -1
+              'perspective-card__icon--3': item.score < 0
             }
           ]"
         >
@@ -26,7 +26,7 @@
     </div>
 
     <p class="perspective-card__type">
-      {{ item.type }}
+      {{ item.type_text }}
     </p>
   </div>
 </template>
@@ -54,6 +54,7 @@ defineProps({
   border-radius: 8px;
 
   &__content {
+    width: 100%;
     display: flex;
     flex-direction: column;
   }
