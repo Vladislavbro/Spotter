@@ -12,7 +12,9 @@
             @change="changeType"
           />
 
-          <LkTableDate />
+          <LkTableDate
+            @change="changeDate"
+          />
         </div>
 
         <!-- <LkTableFilter class="category__filter">
@@ -101,8 +103,10 @@ const headColumns = ref([
 ])
 const items = ref([])
 const page = ref(1)
-const fb = ref('fbo')
 
+const fb = ref('fbo')
+const day = ref(null)
+const date = ref(null)
 const sortSlug = ref('products_count')
 const sortDirection = ref('asc')
 
@@ -114,6 +118,15 @@ const changeType = (value) => {
   items.value = []
   page.value = 1
   fb.value = value
+
+  getData()
+}
+
+const changeDate = (data) => {
+  items.value = []
+  page.value = 1
+  day.value = data.day
+  date.value = data.date
 
   getData()
 }
@@ -134,10 +147,18 @@ const getData = async (isPreloading = true) => {
 
   const params = {
     output: 'json',
-    // page: page.value,
+    page: page.value,
     // sort: sortSlug.value,
     direction: sortDirection.value,
     fb: fb.value,
+  }
+
+  if (day.value) {
+    params.period = day.value
+  }
+
+  if (date.value) {
+    params.dateTo = date.value
   }
 
   const { data } = await useFetch('/api/categories', {

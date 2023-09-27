@@ -26,18 +26,19 @@ const cards = ref([
   { title: 'Объём рынка', type: 'up', price: '0', diff: '0', percent: '0' },
   { title: 'LP', type: 'up', price: '0', diff: '0', percent: '0' },
   { title: 'Общий потенциал рынка', type: 'up', price: '0', diff: '0', percent: '0' },
-  { title: 'Объём рынка у ТОП-10', type: 'up', price: '0', diff: '0', percent: '0' },
+  { title: 'Объём рынка у ТОП-10', type: 'up', price: '0', price_percent: '0', diff: '0', percent: '0' },
   { title: 'SPP', type: 'up', price: '0', diff: '', percent: '0' },
 ])
 
 const setDefault = () => {
   cards.value[0].price = `${props.item?.profit?.toLocaleString()} ₽`
-  cards.value[0].percent = parseInt((props.item?.volume || 0) * 100) / 100
 
   cards.value[1].price = `${props.item?.profit_lost?.toLocaleString()} ₽`
 
+  cards.value[2].price = `${(props.item?.profit + props.item?.profit_lost).toLocaleString()} ₽`
+
   cards.value[3].price = `${props.item?.profit_top_sup?.toLocaleString()} ₽`
-  cards.value[3].percent = parseInt((props.item?.profit_top_sup_diff || 0) * 100) / 100
+  cards.value[3].price_percent = `${parseInt((props.item?.profit_top_sup_diff || 0) * 100) / 100}`
 
   cards.value[4].price = `${parseInt((props.item?.product_solded_diff || 0) * 100) / 100} %`
 }
