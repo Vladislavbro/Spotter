@@ -28,8 +28,7 @@ module.exports = {
       repo : 'git@github.com:Vladislavbro/goods_hunter.git',
       path : '/home/deploy/apps/goods_hunter',
       // 'pre-deploy-local': '',
-      'post-deploy' : 'source ~/.bashrc && \
-                      cd front-site && \
+      'post-deploy' : 'cd front-site && \
                       yarn install && \
                       yarn build && \
                       cd .. && \
