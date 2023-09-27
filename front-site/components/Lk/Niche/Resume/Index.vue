@@ -1,27 +1,39 @@
 <template>
   <div class="niche-resume">
-    <template v-if="!isLoading && item">
+    <template v-if="!isLoadingPage">
       <div class="niche-resume__info">
-        <LkTableTypes />
+        <LkTableTypes
+          :value="fb"
+          @change="changeType"
+        />
 
-        <LkTableDate />
+        <LkTableDate
+          @change="changeDate"
+        />
       </div>
 
-      <LkNicheResumePerspective
-        :stats="stats"
-        :item="item"
-        :perspectives="perspectives"
-        class="niche-resume__perspective"
-      />
+      <template v-if="!isLoading">
+        <LkNicheResumePerspective
+          :stats="stats"
+          :item="item"
+          :perspectives="perspectives"
+          class="niche-resume__perspective"
+        />
 
-      <LkNicheResumeTopItems
-        class="niche-resume__top-items"
-      />
+        <LkNicheResumeTopItems
+          :items="topItems"
+          :type="fb"
+          :day="day"
+          class="niche-resume__top-items"
+        />
 
-      <LkNicheResumeStats
-        :item="item"
-        class="niche-resume__stats"
-      />
+        <LkNicheResumeStats
+          :item="item"
+          class="niche-resume__stats"
+        />
+
+        <LkNicheResumeGraphic />
+      </template>
     </template>
     <div
       v-else
@@ -29,8 +41,6 @@
     >
       <UILoader />
     </div>
-
-    <LkNicheResumeGraphic />
   </div>
 </template>
 
@@ -42,8 +52,14 @@ const props = defineProps({
   },
 })
 
-const isLoading = ref(true)
+const isLoadingPage = ref(true)
+const isLoading = ref(false)
+
 const item = ref(null)
+const topItems = ref([])
+const fb = ref('fbo')
+const day = ref(30)
+const date = ref(null)
 
 const perspectives = ref([])
 
@@ -280,13 +296,59 @@ const setPerspective = () => {
   perspectives.value.push(item12)
 }
 
+const changeType = (value) => {
+  item.value = null
+  topItems.value = []
+  perspectives.value = []
+  fb.value = value
+
+  getData()
+}
+
+const changeDate = (data) => {
+  item.value = null
+  topItems.value = []
+  perspectives.value = []
+  day.value = data.day
+  date.value = data.date
+
+  getData()
+}
+
 const getData = async () => {
   isLoading.value = true
-  const { data } = await useFetch(`/api/queries/search?query=${props.slug}&view=summary`)
+
+  const params = {
+    output: 'json',
+    fb: fb.value,
+  }
+
+  if (day.value) {
+    params.period = day.value
+  }
+
+  if (date.value) {
+    params.dateTo = date.value
+  }
+
+  const { data } = await useFetch(`/api/queries/search?query=${props.slug}&view=summary`, {
+    watch: false,
+    params,
+  })
+
+  const productsQuery = await useFetch(`/api/queries/search?query=${props.slug}&view=products`, {
+    watch: false,
+    params: {
+      ...params,
+      per_page: 5,
+    },
+  })
 
   isLoading.value = false
+  isLoadingPage.value = false
 
   item.value = data?.value
+  topItems.value = productsQuery?.data?.value?.items || []
 
   setPerspective()
 }

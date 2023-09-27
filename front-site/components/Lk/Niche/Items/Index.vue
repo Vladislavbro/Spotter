@@ -7,7 +7,9 @@
           @change="changeType"
         />
 
-        <LkTableDate />
+        <LkTableDate
+          @change="changeDate"
+        />
       </div>
 
       <!-- <LkTableFilter class="niche-items__filter">
@@ -84,7 +86,7 @@
                       <UIBaseIcon name="lk/icon-star" />
                       {{ item.product__rating }}
                       <span class="niche-items-table-item__reviews">
-                        ({{ item.product__feedbacks }} отзывов)
+                        ({{ item.product__feedbacks }} {{ declOfNum(item.product__feedbacks, ['отзыв', 'отзыва', 'отзывов']) }})
                       </span>
                     </p>
                   </div>
@@ -121,7 +123,7 @@
               </td> -->
               <td v-if="headColumns[2].show">
                 <p class="niche-items-table__stats">
-                  {{ item?.profit_30_fbo.toLocaleString() || 0 }} ₽
+                  {{ item[`profit_${day}_${fb}`].toLocaleString() || 0 }} ₽
                   <!-- <span class="niche-items-table__stats-percent niche-items-table__stats-percent--good">
                     {{ item.turnover_percent }}
                   </span> -->
@@ -129,7 +131,7 @@
               </td>
               <td v-if="headColumns[3].show">
                 <p class="niche-items-table__stats">
-                  {{ item?.sales_30_fbo.toLocaleString() || 0 }}
+                  {{ item[`sales_${day}_${fb}`].toLocaleString() || 0 }}
                   <!-- <span class="niche-items-table__stats-percent niche-items-table__stats-percent--good">
                     {{ item.sales_percent }}
                   </span> -->
@@ -160,6 +162,7 @@
 <script setup>
 import copyTextToClipboard from '@/utils/copyTextToClipboard.js'
 import GenerateImgUrl from '@/utils/generateImgUrl.js'
+import declOfNum from '@/utils/declOfNum.js'
 
 const props = defineProps({
   slug: {
@@ -168,20 +171,65 @@ const props = defineProps({
   },
 })
 
-const isLoading = ref(false)
-const isLoadingPage = ref(true)
+const headColumns = ref([
+  { label: 'Название товара', show: true },
+  { label: 'Цена', slug: 'price', sort: true, show: true },
+  // { label: 'Продавец', show: true },
+  // { label: 'Бренд', show: true },
+  { label: 'Оборот', slug: 'profit_30_fbo', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
+  { label: 'Продажи, шт.', slug: 'sales_30_fbo', sort: true, show: true },
+])
+
 const items = ref([])
 const page = ref(1)
+
 const fb = ref('fbo')
+const day = ref(30)
+const date = ref(null)
 const sortSlug = ref('price')
 const sortDirection = ref('asc')
+
+const isShowBtn = ref(true)
+const isLoadingPage = ref(true)
+const isLoading = ref(false)
 
 const changeType = (value) => {
   items.value = []
   page.value = 1
   fb.value = value
 
+  updateSort()
+
   getData()
+}
+
+const changeDate = (data) => {
+  items.value = []
+  page.value = 1
+  day.value = data.day
+  date.value = data.date
+
+  updateSort()
+
+  getData()
+}
+
+const updateSort = () => {
+  headColumns.value.forEach((item) => {
+    if (item.slug) {
+      if (item.slug.startsWith('profit')) {
+        item.slug = `profit_${day.value}_${fb.value}`
+      } else if (item?.slug?.startsWith('sales')) {
+        item.slug = `sales_${day.value}_${fb.value}`
+      }
+    }
+  })
+
+  if (sortSlug.value.startsWith('profit')) {
+    sortSlug.value = `profit_${day.value}_${fb.value}`
+  } else if (sortSlug.value.startsWith('sales')) {
+    sortSlug.value = `sales_${day.value}_${fb.value}`
+  }
 }
 
 const changeSort = (obj) => {
@@ -192,15 +240,6 @@ const changeSort = (obj) => {
 
   getData()
 }
-
-const headColumns = ref([
-  { label: 'Название товара', show: true },
-  { label: 'Цена', slug: 'price', sort: true, show: true },
-  // { label: 'Продавец', show: true },
-  // { label: 'Бренд', show: true },
-  { label: 'Оборот', slug: 'profit', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
-  { label: 'Продажи, шт.', slug: 'sales', sort: true, show: true },
-])
 
 const copyText = async (text) => {
   try {
@@ -214,16 +253,26 @@ const getProductUrl = (id) => {
 
 const getData = async () => {
   isLoading.value = true
+
+  const params = {
+    output: 'json',
+    page: page.value,
+    sort: sortSlug.value,
+    direction: sortDirection.value,
+    fb: fb.value,
+  }
+
+  if (day.value) {
+    params.period = day.value
+  }
+
+  if (date.value) {
+    params.dateTo = date.value
+  }
+
   const { data } = await useFetch(`/api/queries/search?query=${props.slug}&view=products`, {
-    // lazy: true,
-    // server: false,
     watch: false,
-    params: {
-      page: page.value,
-      sort: sortSlug.value,
-      direction: sortDirection.value,
-      fb: fb.value,
-    },
+    params,
   })
 
   const total = data?.value?.total || 0
