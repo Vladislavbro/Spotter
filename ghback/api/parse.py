@@ -774,7 +774,6 @@ class Parser(object):
         ).exclude(calculated=True).first()
         while query:
             self.calculate_query_v2(query)
-            self.get_query_scoring(query)
             query = Query.objects.filter(
                 parsing_id=self.config.current_parsing_id,
             ).exclude(calculated=True).first()
@@ -939,7 +938,6 @@ class Parser(object):
             Query.objects.filter(pk=query.id).update(**update)
 
     def calculate_query_v2(self, query):
-        print('calculate_query_v2', model_to_dict(query))
         update = {}
         product_ids = list(Product.objects.filter(
             root=query.root, features__contains=query.features
@@ -1048,6 +1046,7 @@ class Parser(object):
             update['calculated'] = True
             print('query calculated TOP', query.id, update)
             Query.objects.filter(pk=query.id).update(**update)
+            self.get_query_scoring(query)
 
     def get_query_scoring(self, query):
         print('get_query_scoring', model_to_dict(query))
