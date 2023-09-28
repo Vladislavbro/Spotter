@@ -1046,10 +1046,11 @@ class Parser(object):
             update['calculated'] = True
             print('query calculated TOP', query.id, update)
             Query.objects.filter(pk=query.id).update(**update)
-            self.get_query_scoring(query)
+            self.get_query_scoring(query.id)
 
-    def get_query_scoring(self, query):
-        print('get_query_scoring', model_to_dict(query))
+    def get_query_scoring(self, query_id):
+        # print('get_query_scoring', model_to_dict(query))
+        query = Query.objects.get(pk=query_id)
         date = datetime.now()
         fb = 'fbo'
         config = Config.objects.filter(calculated=True).first()
