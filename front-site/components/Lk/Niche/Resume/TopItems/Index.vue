@@ -6,8 +6,11 @@
 
     <div class="top-items__cards">
       <LkNicheResumeTopItemsCard
-        v-for="i in 5"
+        v-for="(item, i) in items"
         :key="i"
+        :item="item"
+        :type="type"
+        :day="day"
       />
     </div>
 
@@ -18,7 +21,22 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+defineProps({
+  items: {
+    type: Array,
+    default: () => ([]),
+  },
+  type: {
+    type: String,
+    default: 'fbo',
+  },
+  day: {
+    type: Number,
+    default: 30,
+  },
+})
+</script>
 
 <style lang="scss" scoped>
 .top-items {

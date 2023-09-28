@@ -21,7 +21,9 @@
                 @change="changeType"
               />
 
-              <LkTableDate />
+              <LkTableDate
+                @change="changeDate"
+              />
             </div>
 
             <LkTableSort
@@ -117,6 +119,8 @@ const items = ref([])
 const page = ref(1)
 
 const fb = ref('fbo')
+const day = ref(null)
+const date = ref(null)
 const sortSlug = ref('products_count')
 const sortDirection = ref('asc')
 
@@ -135,9 +139,9 @@ const initialFilters = reactive({
   },
   profit: {
     from: 0,
-    to: 99999999,
+    to: 9999999999,
     minValue: 0,
-    maxValue: 99999999,
+    maxValue: 9999999999,
   },
   products_solded: {
     from: 0,
@@ -157,8 +161,29 @@ const changeType = (value) => {
   page.value = 1
   fb.value = value
 
-  const newSortSlug = `products_solded_30_${value}`
-  sortSlug.value = newSortSlug
+  updateSort()
+
+  getData()
+}
+
+const changeDate = (data) => {
+  items.value = []
+  page.value = 1
+  day.value = data.day
+  date.value = data.date
+
+  updateSort()
+
+  getData()
+}
+
+const updateSort = () => {
+  const newSortSlug = `products_solded_${day.value}_${fb.value}`
+
+  if (sortSlug.value.startsWith('products_solded')) {
+    sortSlug.value = newSortSlug
+  }
+
   headColumns.value.find((item) => {
     if (item.slug.startsWith('products_solded')) {
       item.slug = newSortSlug
@@ -166,8 +191,6 @@ const changeType = (value) => {
     }
     return false
   })
-
-  getData()
 }
 
 const changeSort = (obj) => {
@@ -217,6 +240,14 @@ const getData = async (isPreloading = true) => {
     sort: sortSlug.value,
     direction: sortDirection.value,
     fb: fb.value,
+  }
+
+  if (day.value) {
+    params.period = day.value
+  }
+
+  if (date.value) {
+    params.dateTo = date.value
   }
 
   if (Object.keys(filters.value).length) {

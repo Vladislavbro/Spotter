@@ -4,33 +4,59 @@
     class="top-items-card"
   >
     <div class="top-items-card__image">
-      <img src="@/assets/images/lk/item-top-items-test.jpg" alt="">
+      <img
+        v-lazy-load
+        :data-src="getProductUrl(item.product__articul)"
+        alt=""
+      >
     </div>
     <p class="top-items-card__reviews">
       <span class="top-items-card__icon">
         <UIBaseIcon name="lk/icon-star" />
       </span>
-      4.9
+      {{ item.product__rating }}
       <span>
-        (2384 отзывов)
+        ({{ item.product__feedbacks }} {{ declOfNum(item.product__feedbacks, ['отзыв', 'отзыва', 'отзывов']) }})
       </span>
     </p>
     <p class="top-items-card__title">
-      Топлёное масло ГХИ, 440 мл / без лактозы / без сахара
+      {{ item.product__name }}
     </p>
     <p class="top-items-card__label">
       Оборот товара
     </p>
     <p class="top-items-card__value">
-      710 478 ₽
-      <span class="top-items-card__percent">
+      {{ item?.[`profit_${day}_${type}`]?.toLocaleString() || 0 }} ₽
+      <!-- <span class="top-items-card__percent">
         +2.2%
-      </span>
+      </span> -->
     </p>
   </NuxtLink>
 </template>
 
-<script setup></script>
+<script setup>
+import GenerateImgUrl from '@/utils/generateImgUrl.js'
+import declOfNum from '@/utils/declOfNum.js'
+
+defineProps({
+  item: {
+    type: Object,
+    default: () => ({}),
+  },
+  type: {
+    type: String,
+    default: 'fbo',
+  },
+  day: {
+    type: Number,
+    default: 30,
+  },
+})
+
+const getProductUrl = (id) => {
+  return new GenerateImgUrl(id).url()
+}
+</script>
 
 <style lang="scss" scoped>
 .top-items-card {

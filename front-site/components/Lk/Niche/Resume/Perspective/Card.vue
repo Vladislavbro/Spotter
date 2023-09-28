@@ -6,7 +6,16 @@
           {{ item.title }}
         </p>
 
-        <div class="perspective-card__icon">
+        <div
+          :class="[
+            'perspective-card__icon',
+            {
+              'perspective-card__icon--1': item.score === 1,
+              'perspective-card__icon--2': item.score === 0,
+              'perspective-card__icon--3': item.score < 0
+            }
+          ]"
+        >
           <UIBaseIcon name="lk/icon-flag" />
         </div>
       </div>
@@ -17,7 +26,7 @@
     </div>
 
     <p class="perspective-card__type">
-      {{ item.type }}
+      {{ item.type_text }}
     </p>
   </div>
 </template>
@@ -45,6 +54,7 @@ defineProps({
   border-radius: 8px;
 
   &__content {
+    width: 100%;
     display: flex;
     flex-direction: column;
   }
@@ -70,8 +80,34 @@ defineProps({
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: #E1F2EC;
     border-radius: 50%;
+
+    &--1 {
+      background: #E1F2EC;
+      ::v-deep(.ui-icon) svg {
+        & > * {
+          fill: #119E6E;
+        }
+      }
+    }
+
+    &--2 {
+      background: #FFF3DB;
+      ::v-deep(.ui-icon) svg {
+        & > * {
+          fill: #FEC350;
+        }
+      }
+    }
+
+    &--3 {
+      background: #FBEBEF;
+      ::v-deep(.ui-icon) svg {
+        & > * {
+          fill: #BA3A58;
+        }
+      }
+    }
   }
 
   &__text {

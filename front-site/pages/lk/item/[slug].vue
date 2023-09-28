@@ -65,7 +65,11 @@
             </div>
             <div class="item-lk-card__body">
               <div class="item-lk-card__image">
-                <img src="@/assets/images/lk/item-page-test.jpg" alt="">
+                <img
+                  v-lazy-load
+                  :data-src="getProductUrl(info.articul)"
+                  alt=""
+                >
               </div>
               <div class="item-lk-card__list">
                 <div class="item-lk-card__row">
@@ -231,8 +235,9 @@
 <script setup>
 import { format } from 'date-fns'
 
-import copyTextToClipboard from '@/utils/copyTextToClipboard'
-import declOfNum from '@/utils/declOfNum'
+import copyTextToClipboard from '@/utils/copyTextToClipboard.js'
+import GenerateImgUrl from '@/utils/generateImgUrl.js'
+import declOfNum from '@/utils/declOfNum.js'
 
 definePageMeta({
   layout: 'lk',
@@ -250,6 +255,10 @@ const copyText = async (text) => {
 
 const dateFormat = (date) => {
   return format(new Date(date * 1000), 'dd.MM.yyyy')
+}
+
+const getProductUrl = (id) => {
+  return new GenerateImgUrl(id, 'big').url()
 }
 
 const data1 = {
