@@ -1234,6 +1234,7 @@ class Parser(object):
         elif response['supplier_sold_diff'] <= 0.2:
             response['scoring'] -= 1
         query.scoring = response
+        print('model_to_dict(query)', model_to_dict(query))
         if response['scoring'] < 9:
             query.delete()
         else:
