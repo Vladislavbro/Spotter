@@ -115,6 +115,7 @@ class Query(models.Model):
     parsing_id = models.IntegerField(blank=True, null=True)
     root = models.CharField(max_length=200)
     product_name = models.CharField(max_length=300, blank=True, null=True)
+    product_basket = models.IntegerField(blank=True, null=True)
     scoring = models.JSONField(blank=True, null=True)
     features = ArrayField(ArrayField(models.CharField(max_length=100,
                                                       blank=True)), default=[])

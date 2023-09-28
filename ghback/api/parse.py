@@ -168,6 +168,7 @@ class Parser(object):
                     if q is None:
                         q = Query(
                             product_name=pstat.product.name,
+                            product_basket=pstat.product.basket,
                             root=pstat.product.root,
                             features=features,
                             category_id=category.id,

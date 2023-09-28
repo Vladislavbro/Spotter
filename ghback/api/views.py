@@ -573,6 +573,7 @@ def queries_top(request):
             'items': [{
                 'id': i['id'],
                 'product_name': i['product_name'],
+                'product_basket': i['product_basket'],
                 'scoring': i['scoring'],
                 'root': i['root'],
                 'features': ' '.join(i['features']),
