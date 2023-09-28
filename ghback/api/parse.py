@@ -939,6 +939,7 @@ class Parser(object):
             Query.objects.filter(pk=query.id).update(**update)
 
     def calculate_query_v2(self, query):
+        print('calculate_query_v2', model_to_dict(query))
         update = {}
         product_ids = list(Product.objects.filter(
             root=query.root, features__contains=query.features
@@ -1049,6 +1050,7 @@ class Parser(object):
             Query.objects.filter(pk=query.id).update(**update)
 
     def get_query_scoring(self, query):
+        print('get_query_scoring', model_to_dict(query))
         date = datetime.now()
         fb = 'fbo'
         config = Config.objects.filter(calculated=True).first()
@@ -1234,7 +1236,6 @@ class Parser(object):
         elif response['supplier_sold_diff'] <= 0.2:
             response['scoring'] -= 1
         query.scoring = response
-        print('model_to_dict(query)', model_to_dict(query))
         if response['scoring'] < 9:
             query.delete()
         else:
