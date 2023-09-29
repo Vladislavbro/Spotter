@@ -26,7 +26,7 @@
             <div class="auth__row">
               <UIBaseInput
                 v-model="form.email"
-                label="Username"
+                label="E-mail"
               />
             </div>
 

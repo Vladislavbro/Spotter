@@ -7,7 +7,7 @@
 
       <div class="top-card__content">
         <NuxtLink
-          :to="`/lk/niche/${item.root}`"
+          :to="`/lk/niche/${item.root + ' ' + item.features}`"
           class="top-card__name"
         >
           {{ item.root }}

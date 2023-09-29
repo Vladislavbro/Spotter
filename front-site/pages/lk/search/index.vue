@@ -58,12 +58,14 @@
             </a>
           </div>
 
-          <!-- <div
-            v-if="isLoading"
-            class="search-lk__loader"
+          <p
+            v-if="!isLoadHints && search && hints.length === 0 && results.length === 0"
+            class="search-lk__empty"
           >
-            <UILoader />
-          </div> -->
+            По запросу: {{ search }} ничего не найдено.<br>
+            Введите запрос заново или воспользуйтесь подсказками
+          </p>
+
           <div class="search-lk__results search-lk-results">
             <div class="search-lk-results__list">
               <div
@@ -77,23 +79,12 @@
                   v-for="(item, i) in hints"
                   :key="i"
                   class="search-lk-results__item search-lk-results-item"
+                  @click="searchResults(item)"
                 >
                   <UIBaseIcon name="lk/icon-loop" />
                   {{ item }}
                 </div>
               </template>
-              <!-- <div class="search-lk-results__item search-lk-results-item">
-                <UIBaseIcon name="lk/icon-loop" />
-                Масло для губ
-              </div>
-              <div class="search-lk-results__item search-lk-results-item">
-                <UIBaseIcon name="lk/icon-loop" />
-                Масло для кутикулы
-              </div>
-              <div class="search-lk-results__item search-lk-results-item">
-                <UIBaseIcon name="lk/icon-loop" />
-                Масло для волос
-              </div> -->
             </div>
 
             <div class="search-lk-results__list">
@@ -104,44 +95,29 @@
                 <UILoader />
               </div>
               <template v-else-if="results.length">
-                <div
+                <NuxtLink
                   v-for="(item, i) in results"
                   :key="i"
+                  :to="`/lk/item/${item.product__articul}`"
                   class="search-lk-results__category search-lk-results-category"
                 >
-                  {{ item }}
                   <div class="search-lk-results-category__name">
-                    Уход за ногятми
-                    <span class="search-lk-results-category__category">
+                    {{ item.product__name }}
+                    <!-- <span class="search-lk-results-category__category">
                       Красота / ногти
-                    </span>
+                    </span> -->
                   </div>
                   <div class="search-lk-results-category__image">
-                    <img src="@/assets/images/lk/search-dropdown-test.jpg" alt="">
+                    <img
+                      v-lazy-load
+                      :data-src="getProductUrl(item.product__articul)"
+                      alt=""
+                    >
                   </div>
-                </div>
+                </NuxtLink>
               </template>
-              <!-- <div class="search-lk-results__category search-lk-results-category">
-                <div class="search-lk-results-category__name">
-                  Уход за ногятми
-                  <span class="search-lk-results-category__category">
-                    Красота / ногти
-                  </span>
-                </div>
-                <div class="search-lk-results-category__image">
-                  <img src="@/assets/images/lk/search-dropdown-test.jpg" alt="">
-                </div>
-              </div> -->
             </div>
           </div>
-
-          <!-- <p
-            v-else-if="!isLoading && search && items.length === 0"
-            class="search-lk__empty"
-          >
-            По запросу: {{ search }} ничего не найдено.<br>
-            Введите запрос заново или воспользуйтесь подсказками
-          </p> -->
 
           <!-- <div
             v-if="!search"
@@ -173,6 +149,7 @@
 
 <script setup>
 import debounce from 'lodash/debounce'
+import GenerateImgUrl from '@/utils/generateImgUrl.js'
 
 definePageMeta({
   layout: 'lk',
@@ -197,9 +174,6 @@ const how = ref('name')
 
 const search = ref('')
 
-// const isLoading = ref(false)
-// const items = ref([])
-
 const isLoadHints = ref(false)
 const isLoadResults = ref(false)
 const hints = ref([])
@@ -207,14 +181,29 @@ const results = ref([])
 
 const clear = () => {
   search.value = ''
+  hints.value = []
+  results.value = []
 }
 
 watch(() => search.value, (value) => {
-  if (value) {
+  results.value = []
+
+  if (value && !isLoadResults.value) {
     isLoadHints.value = true
     debounced(search.value)
   }
 })
+
+const getProductUrl = (id) => {
+  return new GenerateImgUrl(id).url()
+}
+
+const searchResults = (query) => {
+  search.value = query
+  results.value = []
+
+  getResults(query)
+}
 
 const getHints = async () => {
   const { data } = await useFetch('/api/search', {
@@ -227,8 +216,21 @@ const getHints = async () => {
   hints.value = data?.value?.variants || []
 }
 
-const getResults = async () => {
+const getResults = async (query) => {
+  isLoadResults.value = true
 
+  const { data } = await useFetch('/api/queries/search', {
+    params: {
+      query,
+      view: 'products',
+    },
+  })
+
+  const array = data?.value?.items || []
+
+  results.value.push(...array)
+
+  isLoadResults.value = false
 }
 
 const debounced = debounce(getHints, 500)
@@ -388,10 +390,10 @@ const debounced = debounce(getHints, 500)
     padding: 10px 0;
     font-size: 15px;
     line-height: 18px;
-    border-top: 1px solid #E9E9EA;
+    border-bottom: 1px solid #E9E9EA;
 
-    &:first-child {
-      border-top: 0;
+    &:last-child {
+      border-bottom: 0;
     }
   }
 
@@ -410,6 +412,7 @@ const debounced = debounce(getHints, 500)
   grid-gap: 12px;
   align-items: center;
   justify-content: flex-start;
+  cursor: pointer;
 }
 
 .search-lk-results-category {
@@ -429,6 +432,17 @@ const debounced = debounce(getHints, 500)
     font-size: 13px;
     line-height: 16px;
     color: #8B8B91;
+  }
+
+  &__image {
+    width: 48px;
+    height: 48px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   }
 }
 </style>

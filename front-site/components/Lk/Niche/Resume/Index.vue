@@ -340,6 +340,8 @@ const getData = async () => {
     watch: false,
     params: {
       ...params,
+      sort: `profit_${day.value}_${fb.value}`,
+      direction: 'desc',
       per_page: 5,
     },
   })
