@@ -511,7 +511,7 @@ def queries_top(request):
             })
     else:
         config = Config.objects.filter(calculated=True).first()
-    items = Query.objects.filter(
+    items = Query.objects.prefetch_related('first_product__articul').filter(
         parsing_id=config.current_parsing_id,
         # products_count__lte=2500,
         # products_count__gte=10,
@@ -572,7 +572,8 @@ def queries_top(request):
             'total': total,
             'items': [{
                 'id': i['id'],
-                'product_name': i['product_name'],
+                'product_name': i.get('product_name'),
+                'product_image': get_product_image(i),
                 'scoring': i['scoring'],
                 'root': i['root'],
                 'features': ' '.join(i['features']),
@@ -591,6 +592,10 @@ def queries_top(request):
             'status': 'error',
             'message': 'Не задан формат вывода'
         })
+
+
+def get_product_image(product):
+    return product['product_basket']
 
 
 def get_keys(query):

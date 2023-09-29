@@ -168,6 +168,7 @@ class Parser(object):
                     if q is None:
                         q = Query(
                             product_name=pstat.product.name,
+                            first_product=pstat.product,
                             root=pstat.product.root,
                             features=features,
                             category_id=category.id,
@@ -774,7 +775,6 @@ class Parser(object):
         ).exclude(calculated=True).first()
         while query:
             self.calculate_query_v2(query)
-            self.get_query_scoring(query)
             query = Query.objects.filter(
                 parsing_id=self.config.current_parsing_id,
             ).exclude(calculated=True).first()
@@ -1045,10 +1045,13 @@ class Parser(object):
             query.delete()
         else:
             update['calculated'] = True
-            print('query calculated TOP', update)
+            print('query calculated TOP', query.id, update)
             Query.objects.filter(pk=query.id).update(**update)
+            self.get_query_scoring(query.id)
 
-    def get_query_scoring(self, query):
+    def get_query_scoring(self, query_id):
+        # print('get_query_scoring', model_to_dict(query))
+        query = Query.objects.get(pk=query_id)
         date = datetime.now()
         fb = 'fbo'
         config = Config.objects.filter(calculated=True).first()
@@ -1137,7 +1140,10 @@ class Parser(object):
                 response['scoring'] += 1
         # 2 Монополия - объем продаж у топ 10 продавцов по обороту в 
         # данной нише относительного общего оборота по нише
-        response['monopoly'] = (top_supplier_agg[f'profit_30_{fb}__sum'] / curr_stat[f'profit_30_{fb}__sum'])
+        if curr_stat[f'profit_30_{fb}__sum'] == 0:
+            response['monopoly'] = 0
+        else:
+            response['monopoly'] = (top_supplier_agg[f'profit_30_{fb}__sum'] / curr_stat[f'profit_30_{fb}__sum'])
         if response['monopoly'] <= 0.25:
             response['scoring'] += 1
         elif response['monopoly'] > 0.5:
@@ -1231,7 +1237,10 @@ class Parser(object):
         elif response['supplier_sold_diff'] <= 0.2:
             response['scoring'] -= 1
         query.scoring = response
-        query.save()
+        if response['scoring'] < 9:
+            query.delete()
+        else:
+            query.save()
 
     def calculate_products(self):
         # "Товары в этот раздел отбираются по следующему принципу:
