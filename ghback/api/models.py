@@ -109,13 +109,49 @@ class CategoryStat(models.Model):
         ordering = ['-parsing_id']
 
 
+class Product(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.DO_NOTHING,
+                                 blank=True, null=True)
+    articul = models.IntegerField()  # , unique=True
+    basket = models.IntegerField(blank=True, null=True)
+    # parsing_id = models.IntegerField(blank=True, null=True)
+    parsed_at = models.DateTimeField(blank=True, null=True)
+    name = models.CharField(max_length=200)
+    # desc = models.TextField()
+    root = models.CharField(max_length=200)
+    entity = models.CharField(max_length=200, blank=True, null=True)
+    features = ArrayField(ArrayField(models.CharField(max_length=100,
+                                                      blank=True)), default=[])
+    brand = models.CharField(max_length=200, blank=True, null=True)
+    brand_id = models.IntegerField(blank=True, null=True)
+    supplier_id = models.IntegerField(blank=True, null=True)
+    categories = ArrayField(ArrayField(models.IntegerField(blank=True)),
+                            default=[])
+    rating = models.FloatField(blank=True, null=True)
+    feedbacks = models.IntegerField(blank=True, null=True)
+    # is_new = models.BooleanField(blank=True, null=True)
+    price = models.IntegerField(blank=True, null=True)
+    priceU = models.IntegerField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta():
+        indexes = [
+            models.Index(fields=['articul']),
+            models.Index(fields=['categories']),
+            models.Index(fields=['parsed_at']),
+            models.Index(fields=['root', 'features']),
+            models.Index(fields=['basket']),
+        ]
+
+
 class Query(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  blank=True, null=True)
+    first_product = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                      blank=True, null=True)
     parsing_id = models.IntegerField(blank=True, null=True)
     root = models.CharField(max_length=200)
-    product_name = models.CharField(max_length=300, blank=True, null=True)
-    product_basket = models.IntegerField(blank=True, null=True)
     scoring = models.JSONField(blank=True, null=True)
     features = ArrayField(ArrayField(models.CharField(max_length=100,
                                                       blank=True)), default=[])
@@ -172,42 +208,6 @@ class Supplier(models.Model):
     class Meta():
         indexes = [
             models.Index(fields=['wb_id']),
-        ]
-
-
-class Product(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.DO_NOTHING,
-                                 blank=True, null=True)
-    articul = models.IntegerField()  # , unique=True
-    basket = models.IntegerField(blank=True, null=True)
-    # parsing_id = models.IntegerField(blank=True, null=True)
-    parsed_at = models.DateTimeField(blank=True, null=True)
-    name = models.CharField(max_length=200)
-    # desc = models.TextField()
-    root = models.CharField(max_length=200)
-    entity = models.CharField(max_length=200, blank=True, null=True)
-    features = ArrayField(ArrayField(models.CharField(max_length=100,
-                                                      blank=True)), default=[])
-    brand = models.CharField(max_length=200, blank=True, null=True)
-    brand_id = models.IntegerField(blank=True, null=True)
-    supplier_id = models.IntegerField(blank=True, null=True)
-    categories = ArrayField(ArrayField(models.IntegerField(blank=True)),
-                            default=[])
-    rating = models.FloatField(blank=True, null=True)
-    feedbacks = models.IntegerField(blank=True, null=True)
-    # is_new = models.BooleanField(blank=True, null=True)
-    price = models.IntegerField(blank=True, null=True)
-    priceU = models.IntegerField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta():
-        indexes = [
-            models.Index(fields=['articul']),
-            models.Index(fields=['categories']),
-            models.Index(fields=['parsed_at']),
-            models.Index(fields=['root', 'features']),
-            models.Index(fields=['basket']),
         ]
 
 
