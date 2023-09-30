@@ -586,7 +586,7 @@ def queries_top(request):
             } for i in items.values(
                 'first_product__name', 'first_product__articul', 
                 'first_product__basket',
-                'scoring', 'root', 'features', 
+                'id', 'scoring', 'root', 'features', 
                 'products_count', f'products_solded_{period}_{fb}', 
                 f'product_1_profit_{period}_{fb}', f'product_10_profit_{period}_{fb}',
                 f'price_avg_{period}', f'profit_{period}_{fb}'
