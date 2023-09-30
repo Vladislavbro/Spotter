@@ -574,6 +574,7 @@ def queries_top(request):
                 'id': i['id'],
                 'product_name': get_product_name(i),
                 'product_image': get_product_image(i),
+                'product_articul': i['first_product__articul'],
                 'scoring': i['scoring'],
                 'root': i['root'],
                 'features': ' '.join(i['features']),
