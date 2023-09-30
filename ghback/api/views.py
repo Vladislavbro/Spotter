@@ -672,7 +672,7 @@ def queries_search(request):
     #         'status': 'error',
     #         'message': f'Найдено товаров {total}. Уточните запрос'
     #     })
-    productstats = ProductStat.objects.prefetch_related('product').filter(
+    productstats = ProductStat.objects.prefetch_related('product', 'product__supplier').filter(
         parsing_id=config.current_parsing_id,
         product_id__in=product_ids
     )
@@ -721,8 +721,15 @@ def queries_search(request):
             response['items'] = list(productstats[((page - 1) * per_page):page * per_page].values(
                 'id', 'price', 'priceU', f'profit_{period}_{fb}', 
                 f'sales_{period}_{fb}', 'product__name', 'product__articul', 
-                'product__rating', 'product__feedbacks',
+                'product__rating', 'product__feedbacks', 'product__supplier_id',
+                'product__brand', 'product__brand_id'
             ))
+            supplier_ids = [p['product__supplier_id'] for p in response['items']]
+            suppliers = Supplier.objects.filter(wb_id__in=supplier_ids).values()
+            for item in response['items']:
+                supplier = [s for s in suppliers if s['wb_id'] == item['supplier_id']]
+                if len(supplier):
+                    item['supplier'] = supplier[0]
     if 'graphs' in view:
         start = (datetime.now() - timedelta(days=30)).replace(
                 hour=0, minute=0, second=0, microsecond=0).timestamp()
