@@ -727,7 +727,7 @@ def queries_search(request):
             supplier_ids = [p['product__supplier_id'] for p in response['items']]
             suppliers = Supplier.objects.filter(wb_id__in=supplier_ids).values()
             for item in response['items']:
-                supplier = [s for s in suppliers if s['wb_id'] == item['supplier_id']]
+                supplier = [s for s in suppliers if s['wb_id'] == item['product__supplier_id']]
                 if len(supplier):
                     item['supplier'] = supplier[0]
     if 'graphs' in view:
