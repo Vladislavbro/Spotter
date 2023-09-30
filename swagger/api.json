@@ -409,6 +409,21 @@
                         "in": "query",
                         "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
                         "type": "string"
+                    },
+                    {
+                        "name": "view",
+                        "in": "query",
+                        "description": "Запрос графиков, списка товаров, поставщиков. Вместе или раздельно",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "products",
+                            "graphs",
+                            "suppliers",
+                            "'suppliers,products'",
+                            "'suppliers,products,graphs'",
+                            "..."
+                        ]
                     }
                 ],
                 "responses": {
@@ -439,6 +454,21 @@
                         "in": "path",
                         "description": "Id продавца",
                         "type": "number"
+                    },
+                    {
+                        "name": "view",
+                        "in": "query",
+                        "description": "Запрос графиков, списка товаров, брендов. Вместе или раздельно",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "products",
+                            "graphs",
+                            "brands",
+                            "'brands,products'",
+                            "'brands,products,graphs'",
+                            "..."
+                        ]
                     },
                     {
                         "name": "period",

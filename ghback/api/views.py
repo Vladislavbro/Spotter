@@ -1002,7 +1002,7 @@ def product(request, articul):
 
 
 def brand(request, brandId):
-    view = request.GET.get('view')
+    view = request.GET.get('view', '')
     period = int(request.GET.get('period', '30'))
     dateTo = request.GET.get('date')
     if dateTo:
