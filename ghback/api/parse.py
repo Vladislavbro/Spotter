@@ -167,12 +167,11 @@ class Parser(object):
                     ).first()
                     if q is None:
                         q = Query(
-                            product_name=pstat.product.name,
-                            first_product=pstat.product,
                             root=pstat.product.root,
                             features=features,
+                            parsing_id=self.config.current_parsing_id,
                             category_id=category.id,
-                            parsing_id=self.config.current_parsing_id
+                            first_product=pstat.product,
                         )
                         q.save()
                         print(q.root, q.features)
@@ -1055,7 +1054,12 @@ class Parser(object):
         date = datetime.now()
         fb = 'fbo'
         config = Config.objects.filter(calculated=True).first()
-        query_root, query_features = self.get_keys(query.product_name)
+        if query.first_product_id:
+            product = Product.objects.get(pk=query.first_product_id)
+            query_root, query_features = self.get_keys(product.name)
+        else:
+            query_root = query.root
+            query_features = query.features
         product_ids = Product.objects.filter(
             root=query_root,
             features__contains=query_features
