@@ -2,43 +2,47 @@
   <div class="top-card">
     <div class="top-card__box">
       <div class="top-card__image">
-        <img src="" alt="">
+        <img
+          v-if="item.product_articul"
+          v-lazy-load
+          :data-src="getProductUrl(item.product_articul)"
+          alt=""
+        >
       </div>
 
       <div class="top-card__content">
         <NuxtLink
-          :to="`/lk/niche/${item.root + ' ' + item.features}`"
+          :to="`/lk/niche/${item.product_name}`"
           class="top-card__name"
         >
-          {{ item.root }}
-          {{ item.features }}
+          {{ item.product_name }}
         </NuxtLink>
 
         <div class="top-card__bottom">
           <div
             :class="[
               'perspective perspective--bad',
-              { 'perspective--bad' : item.scoring <= 3 },
-              { 'perspective--normal' : item.scoring > 3 && item.scoring <= 6 },
-              { 'perspective--good' : item.scoring > 6 },
+              { 'perspective--bad' : scoring <= 5 },
+              { 'perspective--normal' : scoring > 5 && scoring <= 10 },
+              { 'perspective--good' : scoring > 10 },
             ]"
           >
             <p class="perspective__label">
               Перспективность ниши
               <span class="perspective__point">
-                1/10
+                {{ scoring }}/15
               </span>
             </p>
             <div class="perspective__bar">
               <div
-                :style="`width: ${100 / 10 * (item.scoring || 1)}%`"
+                :style="`width: ${100 / 15 * scoring}%`"
                 class="perspective__progress"
               />
             </div>
           </div>
 
           <NuxtLink
-            :to="`/lk/niche/${item.root}`"
+            :to="`/lk/niche/${item.product_name}`"
             class="top-card__link"
           >
             Товары и аналитика
@@ -85,12 +89,22 @@
 </template>
 
 <script setup>
-defineProps({
+import GenerateImgUrl from '@/utils/generateImgUrl.js'
+
+const props = defineProps({
   item: {
     type: Object,
     default: () => ({}),
   },
 })
+
+const scoring = computed(() => {
+  return props.item?.scoring?.scoring || 0
+})
+
+const getProductUrl = (id) => {
+  return new GenerateImgUrl(id).url()
+}
 </script>
 
 <style lang="scss" scoped>

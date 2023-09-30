@@ -1,22 +1,20 @@
 <template>
   <div class="item-lk">
-    <template v-if="!isLoading">
+    <template v-if="!isLoading && info">
       <div class="container-lk">
         <div class="item-lk__box">
           <LkGoBack
-            link="/lk"
+            :link="`/lk/niche/${info?.name ? info.name.toLowerCase() : ''}`"
             text="Вернуться к товарам"
             class="item-lk__back"
           />
 
-          <div
-            v-if="info"
-            class="item-lk__card item-lk-card"
-          >
+          <div class="item-lk__card item-lk-card">
             <div class="item-lk-card__header">
               <a
-                href="/"
+                :href="`https://www.wildberries.ru/catalog/${info.articul}/detail.aspx`"
                 target="_blank"
+                rel="nofollow"
                 class="item-lk-card__link"
               >
                 {{ info.name }}
@@ -108,8 +106,8 @@
                     :to="`/lk/seller/${info.supplier_id}`"
                     class="item-lk-card__value item-lk-card__value--link"
                   >
-                    <!-- ИП Сельская Дарья (320774600299021) -->
-                    --
+                    {{ info?.supplier?.name || '--' }}
+                    {{ info?.supplier?.inn ? `(${info?.supplier?.inn})` : '' }}
                   </NuxtLink>
                 </div>
                 <div class="item-lk-card__row">
@@ -149,9 +147,14 @@
           </div>
 
           <div class="item-lk__info">
-            <LkTableTypes />
+            <!-- <LkTableTypes
+              :value="fb"
+              @change="changeType"
+            /> -->
 
-            <LkTableDate />
+            <LkTableDate
+              @change="changeDate"
+            />
           </div>
 
           <div class="item-lk__graphics">
@@ -163,37 +166,37 @@
                 <span class="badge badge--orange">
                   Цена:
                   <span class="badge__value">
-                    866 ₽
+                    0 ₽
                   </span>
                 </span>
                 <span class="badge badge--purple">
-                  Оборот по продажам:
+                  Оборот по продажам FBO:
                   <span class="badge__value">
-                    10 425 866 ₽
+                    0 ₽
                   </span>
                 </span>
                 <span class="badge badge--blue">
-                  Оборот по заказам::
+                  Оборот по продажам FBS:
                   <span class="badge__value">
-                    10 425 866 ₽
+                    0 ₽
                   </span>
                 </span>
-                <span class="badge">
+                <!-- <span class="badge">
                   Оборот по счетчику WB:
                   <span class="badge__value">
                     8 425 866 ₽
                   </span>
-                </span>
+                </span> -->
               </div>
               <div class="item-lk-graphic__chart">
                 <LkChart
-                  :data="data1"
+                  :data="data"
                   :options="options"
                 />
               </div>
             </div>
 
-            <div class="item-lk-graphic">
+            <!-- <div class="item-lk-graphic">
               <p class="item-lk-graphic__title">
                 Скидки
               </p>
@@ -217,7 +220,7 @@
                   :options="options"
                 />
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -243,14 +246,24 @@ definePageMeta({
   layout: 'lk',
 })
 
+const { $toast } = useNuxtApp()
 const route = useRoute()
 
 const { slug } = route.params
+
 const isLoading = ref(false)
 const info = ref(null)
+// const fb = ref('fbo')
+const day = ref(30)
 
 const copyText = async (text) => {
-  await copyTextToClipboard(text)
+  try {
+    await copyTextToClipboard(text)
+
+    $toast.success('Артикул товара скопирован')
+  } catch (e) {
+    $toast.success('Не удалось скопировать артикул товара')
+  }
 }
 
 const dateFormat = (date) => {
@@ -261,48 +274,34 @@ const getProductUrl = (id) => {
   return new GenerateImgUrl(id, 'big').url()
 }
 
-const data1 = {
+// #5480F2 - blue
+// #AE80EA - purple
+// #FF8F6D - orange
+const data = {
   labels: [],
   datasets: [
     {
-      label: 'Оборот по заказам',
-      valueSuffix: '₽',
-      borderColor: '#5480F2',
-      pointBorderColor: '#5480F2',
-      data: [],
-    },
-    {
-      label: 'Оборот по продажам',
-      valueSuffix: '₽',
-      borderColor: '#AE80EA',
-      pointBorderColor: '#AE80EA',
-      data: [],
-    },
-    {
-      label: 'Средний чек',
+      label: 'Цена',
       valueSuffix: '₽',
       borderColor: '#FF8F6D',
       pointBorderColor: '#FF8F6D',
-      data: [],
-    },
-  ],
-}
-
-const data2 = {
-  labels: [],
-  datasets: [
-    {
-      label: 'Остатки',
-      valueSuffix: 'шт.',
-      borderColor: '#22A873',
-      pointBorderColor: '#22A873',
+      labels: [],
       data: [],
     },
     {
-      label: 'Возвраты и поставки',
-      valueSuffix: 'шт.',
-      borderColor: '#98D920',
-      pointBorderColor: '#98D920',
+      label: 'Оборот по продажам FBO',
+      valueSuffix: '₽',
+      borderColor: '#AE80EA',
+      pointBorderColor: '#AE80EA',
+      labels: [],
+      data: [],
+    },
+    {
+      label: 'Оборот по продажам FBS',
+      valueSuffix: '₽',
+      borderColor: '#5480F2',
+      pointBorderColor: '#5480F2',
+      labels: [],
       data: [],
     },
   ],
@@ -310,56 +309,35 @@ const data2 = {
 
 const options = {}
 
-const setDefault1 = () => {
-  const labels = []
-  for (let i = 10; i <= 28; i++) {
-    labels.push(new Date(`2023-02-${i} 00:00:00`).getTime())
-  }
-  data1.labels = labels
+const setGraphicValues = () => {
+  const stats = info.value?.stats || []
 
-  const values1 = []
-  const values2 = []
-  const values3 = []
+  stats.forEach((item) => {
+    data.labels.push(new Date(item.date * 1000))
 
-  for (let i = 0; i <= 18; i++) {
-    values1.push(Math.floor(Math.random() * (135000 - 75000 + 1)) + 75000)
-    values2.push(Math.floor(Math.random() * (115000 - 10000 + 1)) + 10000)
-    values3.push(Math.floor(Math.random() * (100000 - 20000 + 1)) + 20000)
-  }
-  data1.datasets[0].data = values1
-  data1.datasets[1].data = values2
-  data1.datasets[2].data = values3
+    data.datasets[0].data.push(item.price)
+    data.datasets[1].data.push(item.profit_fbo)
+    data.datasets[2].data.push(item.profit_fbs)
+  })
 }
 
-const setDefault2 = () => {
-  const labels = []
-  for (let i = 10; i <= 28; i++) {
-    labels.push(new Date(`2023-02-${i} 00:00:00`).getTime())
-  }
-  data2.labels = labels
+const changeDate = (data) => {
+  day.value = data.day
 
-  const values1 = []
-  const values2 = []
-
-  for (let i = 0; i <= 18; i++) {
-    values1.push(Math.floor(Math.random() * (135000 - 75000 + 1)) + 75000)
-    values2.push(Math.floor(Math.random() * (115000 - 10000 + 1)) + 10000)
-  }
-  data2.datasets[0].data = values1
-  data2.datasets[1].data = values2
+  getItem()
 }
-
-setDefault1()
-setDefault2()
 
 const getItem = async () => {
   if (!slug) {
     return navigateTo('/lk')
   }
 
-  isLoading.value = true
+  // isLoading.value = true
   const { data } = await useFetch(`/api/products/${slug}`, {
     watch: false,
+    params: {
+      period: day.value,
+    },
   })
   isLoading.value = false
 
@@ -367,6 +345,7 @@ const getItem = async () => {
 }
 
 await getItem()
+setGraphicValues()
 </script>
 
 <style lang="scss" scoped>

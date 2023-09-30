@@ -3,34 +3,38 @@
     :to="`/lk/item/${item.product__articul}`"
     class="top-items-card"
   >
-    <div class="top-items-card__image">
-      <img
-        v-lazy-load
-        :data-src="getProductUrl(item.product__articul)"
-        alt=""
-      >
+    <div class="top-items-card__box">
+      <div class="top-items-card__image">
+        <img
+          v-lazy-load
+          :data-src="getProductUrl(item.product__articul)"
+          alt=""
+        >
+      </div>
+      <p class="top-items-card__reviews">
+        <span class="top-items-card__icon">
+          <UIBaseIcon name="lk/icon-star" />
+        </span>
+        {{ item.product__rating }}
+        <span>
+          ({{ item.product__feedbacks }} {{ declOfNum(item.product__feedbacks, ['отзыв', 'отзыва', 'отзывов']) }})
+        </span>
+      </p>
+      <p class="top-items-card__title">
+        {{ item.product__name }}
+      </p>
     </div>
-    <p class="top-items-card__reviews">
-      <span class="top-items-card__icon">
-        <UIBaseIcon name="lk/icon-star" />
-      </span>
-      {{ item.product__rating }}
-      <span>
-        ({{ item.product__feedbacks }} {{ declOfNum(item.product__feedbacks, ['отзыв', 'отзыва', 'отзывов']) }})
-      </span>
-    </p>
-    <p class="top-items-card__title">
-      {{ item.product__name }}
-    </p>
-    <p class="top-items-card__label">
-      Оборот товара
-    </p>
-    <p class="top-items-card__value">
-      {{ item?.[`profit_${day}_${type}`]?.toLocaleString() || 0 }} ₽
-      <!-- <span class="top-items-card__percent">
-        +2.2%
-      </span> -->
-    </p>
+    <div class="top-items-card__box">
+      <p class="top-items-card__label">
+        Оборот товара
+      </p>
+      <p class="top-items-card__value">
+        {{ item?.[`profit_${day}_${type}`]?.toLocaleString() || 0 }} ₽
+        <!-- <span class="top-items-card__percent">
+          +2.2%
+        </span> -->
+      </p>
+    </div>
   </NuxtLink>
 </template>
 
@@ -62,9 +66,15 @@ const getProductUrl = (id) => {
 .top-items-card {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   padding: 20px 16px;
   background: var(--white);
   border-radius: 12px;
+
+  &__box {
+    display: flex;
+    flex-direction: column;
+  }
 
   &__image {
     width: 140px;

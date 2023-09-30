@@ -53,13 +53,16 @@
             >
               <td v-if="headColumns[0].show">
                 <div class="niche-items-table-item">
-                  <div class="niche-items-table-item__image">
+                  <NuxtLink
+                    :to="`/lk/item/${item.product__articul}`"
+                    class="niche-items-table-item__image"
+                  >
                     <img
                       v-lazy-load
                       :data-src="getProductUrl(item.product__articul)"
                       alt=""
                     >
-                  </div>
+                  </NuxtLink>
                   <div class="niche-items-table-item__info">
                     <NuxtLink
                       :to="`/lk/item/${item.product__articul}`"
@@ -72,7 +75,6 @@
                     </NuxtLink>
                     <button
                       class="niche-items-table-item__article"
-                      rel="nofollow"
                       @click.prevent="copyText(item.product__articul)"
                     >
                       <UIBaseIcon name="lk/icon-wb" />
@@ -105,22 +107,24 @@
                   </span>
                 </div>
               </td>
-              <!-- <td>
+              <td>
                 <NuxtLink
-                  to="/lk/seller/1"
+                  :to="`/lk/seller/${item.product__supplier_id}`"
                   class="niche-items-table__link"
                 >
-                  {{ item.seller }}
+                  {{ item?.supplier?.name || '--' }}
+                  <br>
+                  {{ item?.supplier?.inn ? `(${item.supplier.inn})` : '' }}
                 </NuxtLink>
               </td>
               <td>
                 <NuxtLink
-                  to="/lk/seller/1"
+                  :to="`/lk/brand/${item.product__brand_id}`"
                   class="niche-items-table__link"
                 >
-                  {{ item.brand }}
+                  {{ item.product__brand }}
                 </NuxtLink>
-              </td> -->
+              </td>
               <td v-if="headColumns[2].show">
                 <p class="niche-items-table__stats">
                   {{ item[`profit_${day}_${fb}`].toLocaleString() || 0 }} ₽
@@ -171,11 +175,13 @@ const props = defineProps({
   },
 })
 
+const { $toast } = useNuxtApp()
+
 const headColumns = ref([
   { label: 'Название товара', show: true },
   { label: 'Цена', slug: 'price', sort: true, show: true },
-  // { label: 'Продавец', show: true },
-  // { label: 'Бренд', show: true },
+  { label: 'Продавец', show: true },
+  { label: 'Бренд', show: true },
   { label: 'Оборот', slug: 'profit_30_fbo', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
   { label: 'Продажи, шт.', slug: 'sales_30_fbo', sort: true, show: true },
 ])
@@ -244,7 +250,11 @@ const changeSort = (obj) => {
 const copyText = async (text) => {
   try {
     await copyTextToClipboard(text)
-  } catch (e) {}
+
+    $toast.success('Артикул товара скопирован')
+  } catch (e) {
+    $toast.success('Не удалось скопировать артикул товара')
+  }
 }
 
 const getProductUrl = (id) => {

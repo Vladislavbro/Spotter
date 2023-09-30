@@ -1,6 +1,6 @@
 <template>
   <div :class="['lk-date', { 'lk-date--calendar': calendarOnly }]">
-    <VueDatePicker
+    <!-- <VueDatePicker
       v-model="date"
       range
       format="dd.MM.yyyy"
@@ -26,7 +26,7 @@
           </button>
         </div>
       </template>
-    </VueDatePicker>
+    </VueDatePicker> -->
 
     <div
       v-if="!calendarOnly"
@@ -45,9 +45,9 @@
 </template>
 
 <script setup>
-import VueDatePicker from '@vuepic/vue-datepicker'
-import '@vuepic/vue-datepicker/dist/main.css'
-import { format, sub } from 'date-fns'
+// import VueDatePicker from '@vuepic/vue-datepicker'
+// import '@vuepic/vue-datepicker/dist/main.css'
+// import { format, sub } from 'date-fns'
 
 defineProps({
   calendarOnly: {
@@ -65,10 +65,11 @@ const days = [
 ]
 
 const day = ref(30)
-const date = ref([
-  format(sub(new Date(), { days: day.value }), 'yyyy-MM-dd'),
-  format(new Date(), 'yyyy-MM-dd'),
-])
+// const date = ref([
+//   format(sub(new Date(), { days: day.value }), 'yyyy-MM-dd'),
+//   format(new Date(), 'yyyy-MM-dd'),
+// ])
+const date = null
 
 const setDay = (data) => {
   day.value = data
@@ -76,10 +77,10 @@ const setDay = (data) => {
 }
 
 const setDefaultDate = () => {
-  date.value = [
-    format(sub(new Date(), { days: day.value }), 'yyyy-MM-dd'),
-    format(new Date(), 'yyyy-MM-dd'),
-  ]
+  // date.value = [
+  //   format(sub(new Date(), { days: day.value }), 'yyyy-MM-dd'),
+  //   format(new Date(), 'yyyy-MM-dd'),
+  // ]
 
   emitChange()
 }
@@ -87,7 +88,8 @@ const setDefaultDate = () => {
 const emitChange = () => {
   emits('change', {
     day: day.value,
-    date: date.value[1],
+    // date: date.value[1],
+    date,
   })
 }
 </script>
