@@ -167,12 +167,11 @@ class Parser(object):
                     ).first()
                     if q is None:
                         q = Query(
-                            product_name=pstat.product.name,
-                            first_product=pstat.product,
                             root=pstat.product.root,
                             features=features,
+                            parsing_id=self.config.current_parsing_id,
                             category_id=category.id,
-                            parsing_id=self.config.current_parsing_id
+                            first_product=pstat.product,
                         )
                         q.save()
                         print(q.root, q.features)

@@ -511,7 +511,7 @@ def queries_top(request):
             })
     else:
         config = Config.objects.filter(calculated=True).first()
-    items = Query.objects.prefetch_related('first_product__articul').filter(
+    items = Query.objects.prefetch_related('first_product').filter(
         parsing_id=config.current_parsing_id,
         # products_count__lte=2500,
         # products_count__gte=10,
@@ -572,7 +572,7 @@ def queries_top(request):
             'total': total,
             'items': [{
                 'id': i['id'],
-                'product_name': i.get('product_name'),
+                'product_name': get_product_name(i),
                 'product_image': get_product_image(i),
                 'scoring': i['scoring'],
                 'root': i['root'],
@@ -583,7 +583,14 @@ def queries_top(request):
                 'product_10_profit': i[f'product_10_profit_{period}_{fb}'],
                 'price_avg': i[f'price_avg_{period}'],
                 'profit': i[f'profit_{period}_{fb}'],
-            } for i in items.values()]
+            } for i in items.values(
+                'first_product__name', 'first_product__articul', 
+                'first_product__basket',
+                'scoring', 'root', 'features', 
+                'products_count', f'products_solded_{period}_{fb}', 
+                f'product_1_profit_{period}_{fb}', f'product_10_profit_{period}_{fb}',
+                f'price_avg_{period}', f'profit_{period}_{fb}'
+            )]
         })
     elif output == 'csv':
         return export_queries(items, dateTo, period, fb)
@@ -595,7 +602,19 @@ def queries_top(request):
 
 
 def get_product_image(product):
-    return product['product_basket']
+    basket = product['first_product__basket']
+    articul = product['first_product__articul']
+    if basket is None:
+        return None
+    image_url = f'https://basket-{basket}.wb.ru/'
+    image_url += f'vol{str(articul)[:4]}/part{str(articul)[:6]}/'
+    image_url += f'{articul}/images/big/1.webp'
+    return image_url
+
+
+def get_product_name(product):
+    name = product['first_product__name']
+    return ' '.join(name.split(' ')[:3])
 
 
 def get_keys(query):
