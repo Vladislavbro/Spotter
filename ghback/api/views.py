@@ -18,7 +18,7 @@ from api.parse import Parser
 from api.basket import Basket
 from api.migrate import Migrate
 from api.models import (Category, Product, ProductStat,
-                        Config, Query, CategoryStat)
+                        Config, Query, CategoryStat, Supplier)
 from api.parse import nlp
 from dotenv import load_dotenv
 import os
@@ -635,7 +635,7 @@ def get_keys(query):
             ) and len(w.lemma_) > 2
         )
     ]
-    return root[0].lemma_ if len(root) else None, features
+    return root[0].lemma_ if len(root) else None, [f.lemma_ for f in features]
 
 
 def queries_search(request):
@@ -957,6 +957,7 @@ def product(request, articul):
         parsing_id__lte=end.timestamp(),
     )
     if product:
+        supplier = Supplier.objects.get(wb_id=product.supplier_id)
         out = {
             'name': product.name,
             'articul': product.articul,
@@ -969,6 +970,7 @@ def product(request, articul):
             'supplier_id': product.supplier_id,
             'brand_id': product.brand_id,
             'brand': product.brand,
+            'supplier': model_to_dict(supplier) if supplier else None,
             'stats': [{
                 'date': stat.parsing_id,
                 'profit_fbo': stat.profit_fbo,
