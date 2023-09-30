@@ -612,8 +612,11 @@ def get_product_image(product):
     return image_url
 
 
-def get_product_name(product):
-    name = product['first_product__name']
+def get_product_name(query):
+    name = query['first_product__name']
+    if name is None:
+        words = [query['root']] + query['features'][:2]
+        return ' '.join(words)
     return ' '.join(name.split(' ')[:3])
 
 
