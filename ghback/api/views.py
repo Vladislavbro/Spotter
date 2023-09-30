@@ -722,7 +722,7 @@ def queries_search(request):
                 'id', 'price', 'priceU', f'profit_{period}_{fb}', 
                 f'sales_{period}_{fb}', 'product__name', 'product__articul', 
                 'product__rating', 'product__feedbacks', 'product__supplier_id',
-                'product__brand', 'product__brand_id'
+                'product__brand', 'product__brand_id', 'product__articul'
             ))
             supplier_ids = [p['product__supplier_id'] for p in response['items']]
             suppliers = Supplier.objects.filter(wb_id__in=supplier_ids).values()
