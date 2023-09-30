@@ -1,6 +1,6 @@
 <template>
   <NuxtLink
-    to="/lk/item/1"
+    :to="`/lk/item/${item.product__articul}`"
     class="top-items-card"
   >
     <div class="top-items-card__image">
