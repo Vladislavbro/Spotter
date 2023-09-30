@@ -672,7 +672,7 @@ def queries_search(request):
     #         'status': 'error',
     #         'message': f'Найдено товаров {total}. Уточните запрос'
     #     })
-    productstats = ProductStat.objects.prefetch_related('product', 'product__supplier').filter(
+    productstats = ProductStat.objects.prefetch_related('product').filter(
         parsing_id=config.current_parsing_id,
         product_id__in=product_ids
     )
@@ -1002,6 +1002,7 @@ def product(request, articul):
 
 
 def brand(request, brandId):
+    view = request.GET.get('view')
     period = int(request.GET.get('period', '30'))
     dateTo = request.GET.get('date')
     if dateTo:
@@ -1009,30 +1010,74 @@ def brand(request, brandId):
             hour=23, minute=59, second=59)
         start = (end - timedelta(days=period)).replace(
             hour=0, minute=0, second=0)
+        config = Config.objects.filter(
+            calculated=True,
+            current_parsing_id__lte=end.timestamp(),
+        ).first()
     else:
         end = datetime.now()
         start = (end - timedelta(days=period)).replace(
             hour=0, minute=0, second=0)
+        config = Config.objects.filter(calculated=True).first()
     product_ids = Product.objects.filter(
         brand_id=brandId,
     ).values_list('id', flat=True)
-    productstats = ProductStat.objects.prefetch_related('product').filter(
-        parsing_id__gte=start.timestamp(),
-        parsing_id__lte=end.timestamp(),
-        product_id__in=product_ids
-    )
-    return JsonResponse({
-        'graphs': list(productstats.values('parsing_id').annotate(
+    total = product_ids.count()
+    response = dict()
+    if 'graphs' in view:
+        productstats = ProductStat.objects.prefetch_related('product').filter(
+            parsing_id__gte=start.timestamp(),
+            parsing_id__lte=end.timestamp(),
+            product_id__in=product_ids
+        )
+        response['graphs'] = list(productstats.values('parsing_id').annotate(
             price=Avg('price'),
             profit_fbo=Sum('profit_fbo'),
             profit_fbs=Sum('profit_fbs'),
             sales_fbo=Sum('sales_fbo'),
             sales_fbs=Sum('sales_fbs'),
         ))
-    })
+    if 'suppliers' in view:
+        supplier_ids = list(Product.objects.filter(
+            brand_id=brandId,
+        ).values_list('supplier_id', flat=True))
+        response['suppliers'] = list(
+            Supplier.objects.filter(wb_id__in=supplier_ids).values()
+        )
+    if 'products' in view:
+        page = int(request.GET.get('page', '1'))
+        per_page = int(request.GET.get('per_page', '100'))
+        sort = request.GET.get('sort')
+        direction = request.GET.get('direction')
+        fb = 'fbo'
+        productstats = ProductStat.objects.prefetch_related('product').filter(
+            parsing_id=config.current_parsing_id,
+            product_id__in=product_ids
+        )
+        if sort is not None:
+            if direction == 'desc':
+                direction = '-'
+            else:
+                direction = ''
+            productstats = productstats.order_by(f'{direction}{sort}')
+        response['total'] = total
+        response['items'] = list(productstats[((page - 1) * per_page):page * per_page].values(
+            'id', 'price', 'priceU', f'profit_{period}_{fb}', 
+            f'sales_{period}_{fb}', 'product__name', 'product__articul', 
+            'product__rating', 'product__feedbacks', 'product__supplier_id',
+            'product__brand', 'product__brand_id'
+        ))
+        supplier_ids = [p['product__supplier_id'] for p in response['items']]
+        suppliers = Supplier.objects.filter(wb_id__in=supplier_ids).values()
+        for item in response['items']:
+            supplier = [s for s in suppliers if s['wb_id'] == item['product__supplier_id']]
+            if len(supplier):
+                item['supplier'] = supplier[0]
+    return JsonResponse(response)
 
 
 def supplier(request, supplierId):
+    view = request.GET.get('view')
     period = int(request.GET.get('period', '30'))
     dateTo = request.GET.get('date')
     if dateTo:
@@ -1040,27 +1085,67 @@ def supplier(request, supplierId):
             hour=23, minute=59, second=59)
         start = (end - timedelta(days=period)).replace(
             hour=0, minute=0, second=0)
+        config = Config.objects.filter(
+            calculated=True,
+            current_parsing_id__lte=end.timestamp(),
+        ).first()
     else:
         end = datetime.now()
         start = (end - timedelta(days=period)).replace(
             hour=0, minute=0, second=0)
+        config = Config.objects.filter(calculated=True).first()
     product_ids = Product.objects.filter(
         supplier_id=supplierId,
     ).values_list('id', flat=True)
-    productstats = ProductStat.objects.prefetch_related('product').filter(
-        parsing_id__gte=start.timestamp(),
-        parsing_id__lte=end.timestamp(),
-        product_id__in=product_ids
-    )
-    return JsonResponse({
-        'graphs': list(productstats.values('parsing_id').annotate(
+    total = product_ids.count()
+    response = dict()
+    if 'graphs' in view:
+        productstats = ProductStat.objects.prefetch_related('product').filter(
+            parsing_id__gte=start.timestamp(),
+            parsing_id__lte=end.timestamp(),
+            product_id__in=product_ids
+        )
+        response['graphs'] = list(productstats.values('parsing_id').annotate(
             price=Avg('price'),
             profit_fbo=Sum('profit_fbo'),
             profit_fbs=Sum('profit_fbs'),
             sales_fbo=Sum('sales_fbo'),
             sales_fbs=Sum('sales_fbs'),
         ))
-    })
+    if 'brands' in view:
+        response['brands'] = list(Product.objects.filter(
+            supplier_id=supplierId,
+        ).values('brand', 'brand_id'))
+    if 'products' in view:
+        page = int(request.GET.get('page', '1'))
+        per_page = int(request.GET.get('per_page', '100'))
+        sort = request.GET.get('sort')
+        direction = request.GET.get('direction')
+        fb = 'fbo'
+        productstats = ProductStat.objects.prefetch_related('product').filter(
+            parsing_id=config.current_parsing_id,
+            product_id__in=product_ids
+        )
+        if sort is not None:
+            if direction == 'desc':
+                direction = '-'
+            else:
+                direction = ''
+            productstats = productstats.order_by(f'{direction}{sort}')
+        response['total'] = total
+        response['items'] = list(productstats[((page - 1) * per_page):page * per_page].values(
+            'id', 'price', 'priceU', f'profit_{period}_{fb}', 
+            f'sales_{period}_{fb}', 'product__name', 'product__articul', 
+            'product__rating', 'product__feedbacks', 'product__supplier_id',
+            'product__brand', 'product__brand_id'
+        ))
+        supplier_ids = [p['product__supplier_id'] for p in response['items']]
+        suppliers = Supplier.objects.filter(wb_id__in=supplier_ids).values()
+        for item in response['items']:
+            supplier = [s for s in suppliers if s['wb_id'] == item['product__supplier_id']]
+            if len(supplier):
+                item['supplier'] = supplier[0]
+    return JsonResponse(response)
 
 
 def search(request):
