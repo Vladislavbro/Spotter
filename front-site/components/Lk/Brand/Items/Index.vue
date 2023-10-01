@@ -1,50 +1,24 @@
 <template>
-  <div class="niche-items">
+  <div class="brand-items">
     <template v-if="!isLoadingPage">
-      <div class="niche-items__info">
-        <LkTableTypes
-          :value="fb"
-          @change="changeType"
-        />
-
+      <div class="brand-items__info">
         <LkTableDate
           @change="changeDate"
         />
       </div>
 
-      <!-- <LkTableFilter class="niche-items__filter">
-        <UILkFilter
-          label="Рейтинг"
-        />
-        <UILkFilter
-          label="Оборот"
-        />
-        <UILkFilter
-          label="Продажи, шт"
-        />
-      </LkTableFilter> -->
-
-      <div class="niche-items__card">
-        <div class="niche-items__card-header">
-          <div class="niche-items__card-side">
+      <div class="brand-items__card">
+        <div class="brand-items__card-header">
+          <div class="brand-items__card-side">
             <LkTableSettings
               :array="headColumns"
             />
-
-            <LkTableSort
-              :array="headColumns"
-              :sort-slug="sortSlug"
-              :sort-direction="sortDirection"
-              @change="changeSort"
-            />
           </div>
-
-          <LkTableImport />
         </div>
 
         <LkTable
           :head-columns="headColumns"
-          class="niche-items__table niche-items-table"
+          class="brand-items__table brand-items-table"
         >
           <tbody>
             <tr
@@ -52,10 +26,10 @@
               :key="i"
             >
               <td v-if="headColumns[0].show">
-                <div class="niche-items-table-item">
+                <div class="brand-items-table-item">
                   <NuxtLink
                     :to="`/lk/item/${item.product__articul}`"
-                    class="niche-items-table-item__image"
+                    class="brand-items-table-item__image"
                   >
                     <img
                       v-lazy-load
@@ -63,18 +37,18 @@
                       alt=""
                     >
                   </NuxtLink>
-                  <div class="niche-items-table-item__info">
+                  <div class="brand-items-table-item__info">
                     <NuxtLink
                       :to="`/lk/item/${item.product__articul}`"
-                      class="niche-items-table-item__name"
+                      class="brand-items-table-item__name"
                     >
-                      <span class="niche-items-table-item__name-box">
+                      <span class="brand-items-table-item__name-box">
                         {{ item.product__name }}
                       </span>
                       <UIBaseIcon name="lk/icon-share" />
                     </NuxtLink>
                     <button
-                      class="niche-items-table-item__article"
+                      class="brand-items-table-item__article"
                       @click.prevent="copyText(item.product__articul)"
                     >
                       <UIBaseIcon name="lk/icon-wb" />
@@ -84,10 +58,10 @@
                       {{ item.product__articul }}
                       <UIBaseIcon name="lk/icon-copy" />
                     </button>
-                    <p class="niche-items-table-item__rating">
+                    <p class="brand-items-table-item__rating">
                       <UIBaseIcon name="lk/icon-star" />
                       {{ item.product__rating }}
-                      <span class="niche-items-table-item__reviews">
+                      <span class="brand-items-table-item__reviews">
                         ({{ item.product__feedbacks }} {{ declOfNum(item.product__feedbacks, ['отзыв', 'отзыва', 'отзывов']) }})
                       </span>
                     </p>
@@ -95,14 +69,14 @@
                 </div>
               </td>
               <td v-if="headColumns[1].show">
-                <div class="niche-items-table__price">
-                  <p class="niche-items-table__newprice">
+                <div class="brand-items-table__price">
+                  <p class="brand-items-table__newprice">
                     {{ item?.price.toLocaleString() || 0 }} ₽
-                    <span class="niche-items-table__price-percent">
+                    <span class="brand-items-table__price-percent">
                       {{ parseInt(100 - item.price / ( item.priceU / 100 )) }}%
                     </span>
                   </p>
-                  <span class="niche-items-table__oldprice">
+                  <span class="brand-items-table__oldprice">
                     {{ item?.priceU.toLocaleString() || 0 }} ₽
                   </span>
                 </div>
@@ -110,7 +84,7 @@
               <td>
                 <NuxtLink
                   :to="`/lk/seller/${item.product__supplier_id}`"
-                  class="niche-items-table__link"
+                  class="brand-items-table__link"
                 >
                   {{ item?.supplier?.name || '--' }}
                   <br>
@@ -120,23 +94,23 @@
               <td>
                 <NuxtLink
                   :to="`/lk/brand/${item.product__brand_id}?name=${item?.product__brand?.toLowerCase() || ''}`"
-                  class="niche-items-table__link"
+                  class="brand-items-table__link"
                 >
                   {{ item.product__brand }}
                 </NuxtLink>
               </td>
               <td v-if="headColumns[2].show">
-                <p class="niche-items-table__stats">
-                  {{ item[`profit_${day}_${fb}`].toLocaleString() || 0 }} ₽
-                  <!-- <span class="niche-items-table__stats-percent niche-items-table__stats-percent--good">
+                <p class="brand-items-table__stats">
+                  {{ item[`profit_${day}_fbo`].toLocaleString() || 0 }} ₽
+                  <!-- <span class="brand-items-table__stats-percent brand-items-table__stats-percent--good">
                     {{ item.turnover_percent }}
                   </span> -->
                 </p>
               </td>
               <td v-if="headColumns[3].show">
-                <p class="niche-items-table__stats">
-                  {{ item[`sales_${day}_${fb}`].toLocaleString() || 0 }}
-                  <!-- <span class="niche-items-table__stats-percent niche-items-table__stats-percent--good">
+                <p class="brand-items-table__stats">
+                  {{ item[`sales_${day}_fbo`].toLocaleString() || 0 }}
+                  <!-- <span class="brand-items-table__stats-percent brand-items-table__stats-percent--good">
                     {{ item.sales_percent }}
                   </span> -->
                 </p>
@@ -146,17 +120,17 @@
         </LkTable>
       </div>
 
-      <UILkButton
+      <!-- <UILkButton
         v-if="isShowBtn"
         text="Показать ещё"
         full-width
-        class="niche-items__show-more"
+        class="brand-items__show-more"
         @click.prevent="page += 1, getData()"
-      />
+      /> -->
     </template>
     <div
       v-else
-      class="niche-items__loader"
+      class="brand-items__loader"
     >
       <UILoader />
     </div>
@@ -183,62 +157,20 @@ const headColumns = ref([
 ])
 
 const items = ref([])
-const page = ref(1)
+// const page = ref(1)
 
-const fb = ref('fbo')
 const day = ref(30)
-const date = ref(null)
-const sortSlug = ref('price')
-const sortDirection = ref('asc')
+// const date = ref(null)
 
-const isShowBtn = ref(true)
+// const isShowBtn = ref(true)
 const isLoadingPage = ref(true)
 const isLoading = ref(false)
 
-const changeType = (value) => {
-  items.value = []
-  page.value = 1
-  fb.value = value
-
-  updateSort()
-
-  getData()
-}
-
 const changeDate = (data) => {
   items.value = []
-  page.value = 1
+  // page.value = 1
   day.value = data.day
-  date.value = data.date
-
-  updateSort()
-
-  getData()
-}
-
-const updateSort = () => {
-  headColumns.value.forEach((item) => {
-    if (item.slug) {
-      if (item.slug.startsWith('profit')) {
-        item.slug = `profit_${day.value}_${fb.value}`
-      } else if (item?.slug?.startsWith('sales')) {
-        item.slug = `sales_${day.value}_${fb.value}`
-      }
-    }
-  })
-
-  if (sortSlug.value.startsWith('profit')) {
-    sortSlug.value = `profit_${day.value}_${fb.value}`
-  } else if (sortSlug.value.startsWith('sales')) {
-    sortSlug.value = `sales_${day.value}_${fb.value}`
-  }
-}
-
-const changeSort = (obj) => {
-  items.value = []
-  page.value = 1
-  sortSlug.value = obj.slug
-  sortDirection.value = obj.direction
+  // date.value = data.date
 
   getData()
 }
@@ -257,48 +189,65 @@ const getProductUrl = (id) => {
   return new GenerateImgUrl(id).url()
 }
 
+// const getData = async () => {
+//   isLoading.value = true
+
+//   const params = {
+//     output: 'json',
+//     page: page.value,
+//     sort: sortSlug.value,
+//     direction: sortDirection.value,
+//     fb: fb.value,
+//   }
+
+//   if (day.value) {
+//     params.period = day.value
+//   }
+
+//   if (date.value) {
+//     params.dateTo = date.value
+//   }
+
+//   const { data } = await useFetch(`/api/queries/search?query=${slug}&view=products`, {
+//     watch: false,
+//     params,
+//   })
+
+//   const total = data?.value?.total || 0
+//   const array = data?.value?.items || []
+
+//   items.value.push(...array)
+
+//   isLoadingPage.value = false
+//   isLoading.value = false
+
+//   if (items.value.length >= total) {
+//     isShowBtn.value = false
+//   }
+// }
+
 const getData = async () => {
   isLoading.value = true
 
-  const params = {
-    output: 'json',
-    page: page.value,
-    sort: sortSlug.value,
-    direction: sortDirection.value,
-    fb: fb.value,
-  }
-
-  if (day.value) {
-    params.period = day.value
-  }
-
-  if (date.value) {
-    params.dateTo = date.value
-  }
-
-  const { data } = await useFetch(`/api/queries/search?query=${slug}&view=products`, {
+  const { data } = await useFetch(`/api/brands/${slug}`, {
     watch: false,
-    params,
+    query: {
+      view: 'products',
+      period: day.value,
+    },
   })
 
-  const total = data?.value?.total || 0
-  const array = data?.value?.items || []
-
-  items.value.push(...array)
+  items.value = data?.value?.items || []
 
   isLoadingPage.value = false
   isLoading.value = false
-
-  if (items.value.length >= total) {
-    isShowBtn.value = false
-  }
 }
 
 getData()
 </script>
 
 <style lang="scss" scoped>
-.niche-items {
+.brand-items {
   &__loader {
     display: flex;
     align-items: center;
@@ -356,7 +305,7 @@ getData()
   }
 }
 
-.niche-items-table {
+.brand-items-table {
   &__name {
     display: grid;
     grid-gap: 2px;
@@ -413,7 +362,7 @@ getData()
   }
 }
 
-.niche-items-table-item {
+.brand-items-table-item {
   display: flex;
   align-items: flex-start;
 

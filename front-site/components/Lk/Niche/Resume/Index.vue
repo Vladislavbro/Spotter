@@ -21,8 +21,7 @@
         />
 
         <LkNicheResumeTopItems
-          :items="topItems"
-          :type="fb"
+          :fb="fb"
           :day="day"
           class="niche-resume__top-items"
         />
@@ -34,6 +33,12 @@
 
         <LkNicheResumeGraphic />
       </template>
+      <div
+        v-else
+        class="niche-resume__loader"
+      >
+        <UILoader />
+      </div>
     </template>
     <div
       v-else
@@ -45,18 +50,14 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  slug: {
-    type: String,
-    default: '',
-  },
-})
+const route = useRoute()
+
+const { slug } = route.params
 
 const isLoadingPage = ref(true)
 const isLoading = ref(false)
 
 const item = ref(null)
-const topItems = ref([])
 const fb = ref('fbo')
 const day = ref(30)
 const date = ref(null)
@@ -349,7 +350,6 @@ const setPerspective = () => {
 
 const changeType = (value) => {
   item.value = null
-  topItems.value = []
   perspectives.value = []
   fb.value = value
 
@@ -358,7 +358,6 @@ const changeType = (value) => {
 
 const changeDate = (data) => {
   item.value = null
-  topItems.value = []
   perspectives.value = []
   day.value = data.day
   date.value = data.date
@@ -370,7 +369,6 @@ const getData = async () => {
   isLoading.value = true
 
   const params = {
-    output: 'json',
     fb: fb.value,
   }
 
@@ -378,30 +376,19 @@ const getData = async () => {
     params.period = day.value
   }
 
-  if (date.value) {
-    params.dateTo = date.value
-  }
+  // if (date.value) {
+  //   params.dateTo = date.value
+  // }
 
-  const { data } = await useFetch(`/api/queries/search?query=${props.slug}&view=summary`, {
+  const { data } = await useFetch(`/api/queries/search?query=${slug}&view=summary`, {
     watch: false,
     params,
-  })
-
-  const productsQuery = await useFetch(`/api/queries/search?query=${props.slug}&view=products`, {
-    watch: false,
-    params: {
-      ...params,
-      sort: `profit_${day.value}_${fb.value}`,
-      direction: 'desc',
-      per_page: 5,
-    },
   })
 
   isLoading.value = false
   isLoadingPage.value = false
 
   item.value = data?.value
-  topItems.value = productsQuery?.data?.value?.items || []
 
   setPerspective()
 }

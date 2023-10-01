@@ -1,18 +1,21 @@
 <template>
   <div class="top-card">
     <div class="top-card__box">
-      <div class="top-card__image">
+      <NuxtLink
+        :to="`/lk/niche/${item?.product_name?.toLowerCase()}`"
+        class="top-card__image"
+      >
         <img
           v-if="item.product_articul"
           v-lazy-load
           :data-src="getProductUrl(item.product_articul)"
           alt=""
         >
-      </div>
+      </NuxtLink>
 
       <div class="top-card__content">
         <NuxtLink
-          :to="`/lk/niche/${item.product_name}`"
+          :to="`/lk/niche/${item?.product_name?.toLowerCase()}`"
           class="top-card__name"
         >
           {{ item.product_name }}
@@ -42,7 +45,7 @@
           </div>
 
           <NuxtLink
-            :to="`/lk/niche/${item.product_name}`"
+            :to="`/lk/niche/${item?.product_name?.toLowerCase()}`"
             class="top-card__link"
           >
             Товары и аналитика
