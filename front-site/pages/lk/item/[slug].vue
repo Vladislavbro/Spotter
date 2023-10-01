@@ -104,10 +104,10 @@
                       Продавец
                     </p>
                     <NuxtLink
-                      :to="`/lk/seller/${info.supplier_id}`"
+                      :to="`/lk/seller/${info.supplier_id}?name=${info?.supplier?.name || ''}&id=${info?.supplier?.wb_id || ''}`"
                       class="item-lk-card__value item-lk-card__value--link"
                     >
-                      {{ info?.supplier?.name || '--' }}
+                      {{ info?.supplier?.name || '' }}
                       {{ info?.supplier?.inn ? `(${info?.supplier?.inn})` : '' }}
                     </NuxtLink>
                   </div>

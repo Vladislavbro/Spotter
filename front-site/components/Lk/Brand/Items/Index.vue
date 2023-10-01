@@ -17,6 +17,7 @@
         </div>
 
         <LkTable
+          v-if="!isLoading"
           :head-columns="headColumns"
           class="brand-items__table brand-items-table"
         >
@@ -83,7 +84,7 @@
               </td>
               <td>
                 <NuxtLink
-                  :to="`/lk/seller/${item.product__supplier_id}`"
+                  :to="`/lk/seller/${item.product__supplier_id}?name=${item?.supplier?.name || ''}&id=${item?.supplier?.wb_id || ''}`"
                   class="brand-items-table__link"
                 >
                   {{ item?.supplier?.name || '--' }}
@@ -118,15 +119,14 @@
             </tr>
           </tbody>
         </LkTable>
-      </div>
 
-      <!-- <UILkButton
-        v-if="isShowBtn"
-        text="Показать ещё"
-        full-width
-        class="brand-items__show-more"
-        @click.prevent="page += 1, getData()"
-      /> -->
+        <div
+          v-else
+          class="brand-items__loader"
+        >
+          <UILoader />
+        </div>
+      </div>
     </template>
     <div
       v-else
@@ -157,20 +157,14 @@ const headColumns = ref([
 ])
 
 const items = ref([])
-// const page = ref(1)
-
 const day = ref(30)
-// const date = ref(null)
 
-// const isShowBtn = ref(true)
 const isLoadingPage = ref(true)
 const isLoading = ref(false)
 
 const changeDate = (data) => {
   items.value = []
-  // page.value = 1
   day.value = data.day
-  // date.value = data.date
 
   getData()
 }
@@ -188,43 +182,6 @@ const copyText = async (text) => {
 const getProductUrl = (id) => {
   return new GenerateImgUrl(id).url()
 }
-
-// const getData = async () => {
-//   isLoading.value = true
-
-//   const params = {
-//     output: 'json',
-//     page: page.value,
-//     sort: sortSlug.value,
-//     direction: sortDirection.value,
-//     fb: fb.value,
-//   }
-
-//   if (day.value) {
-//     params.period = day.value
-//   }
-
-//   if (date.value) {
-//     params.dateTo = date.value
-//   }
-
-//   const { data } = await useFetch(`/api/queries/search?query=${slug}&view=products`, {
-//     watch: false,
-//     params,
-//   })
-
-//   const total = data?.value?.total || 0
-//   const array = data?.value?.items || []
-
-//   items.value.push(...array)
-
-//   isLoadingPage.value = false
-//   isLoading.value = false
-
-//   if (items.value.length >= total) {
-//     isShowBtn.value = false
-//   }
-// }
 
 const getData = async () => {
   isLoading.value = true
@@ -288,20 +245,6 @@ getData()
     display: grid;
     grid-gap: 8px;
     grid-template-columns: repeat(2, auto);
-  }
-
-  &__show-more {
-    height: 48px;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 16px;
-    color: var(--blackMain);
-    background: none;
-    border-color: #D9D9E0;
-
-    &:hover {
-      background: none;
-    }
   }
 }
 

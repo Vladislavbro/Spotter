@@ -1,182 +1,211 @@
 <template>
   <div class="seller-items">
-    <div class="seller-items__info">
-      <LkTableTypes />
-
-      <LkTableDate />
-    </div>
-
-    <LkTableFilter class="seller-items__filter">
-      <UILkFilter
-        label="Рейтинг"
-      />
-      <UILkFilter
-        label="Оборот"
-      />
-      <UILkFilter
-        label="Продажи, шт"
-      />
-    </LkTableFilter>
-
-    <div class="seller-items__card">
-      <div class="seller-items__card-header">
-        <div class="seller-items__card-side">
-          <LkTableSettings
-            :array="headColumns"
-          />
-
-          <LkTableSort
-            :array="headColumns"
-          />
-        </div>
-
-        <LkTableImport />
+    <template v-if="!isLoadingPage">
+      <div class="seller-items__info">
+        <LkTableDate
+          @change="changeDate"
+        />
       </div>
 
-      <LkTable
-        :head-columns="headColumns"
-        class="seller-items__table seller-items-table"
-      >
-        <tbody>
-          <tr
-            v-for="(item, i) in bodyColumns"
-            :key="i"
-          >
-            <td>
-              <div class="seller-items-table-item">
-                <div class="seller-items-table-item__image">
-                  <img
-                    src="@/assets/images/lk/item-niche-items-test.jpg"
-                    alt=""
-                  >
-                </div>
-                <div class="seller-items-table-item__info">
+      <div class="seller-items__card">
+        <div class="seller-items__card-header">
+          <div class="seller-items__card-side">
+            <LkTableSettings
+              :array="headColumns"
+            />
+          </div>
+        </div>
+
+        <LkTable
+          v-if="!isLoading"
+          :head-columns="headColumns"
+          class="seller-items__table seller-items-table"
+        >
+          <tbody>
+            <tr
+              v-for="(item, i) in items"
+              :key="i"
+            >
+              <td v-if="headColumns[0].show">
+                <div class="seller-items-table-item">
                   <NuxtLink
-                    to="/lk/item/1"
-                    class="seller-items-table-item__name"
+                    :to="`/lk/item/${item.product__articul}`"
+                    class="seller-items-table-item__image"
                   >
-                    <span class="seller-items-table-item__name-box">
-                      {{ item.name }}
-                    </span>
-                    <UIBaseIcon name="lk/icon-share" />
+                    <img
+                      v-lazy-load
+                      :data-src="getProductUrl(item.product__articul)"
+                      alt=""
+                    >
                   </NuxtLink>
-                  <a
-                    href="#"
-                    class="seller-items-table-item__article"
-                    @click.prevent="copyText(item.article)"
-                  >
-                    <UIBaseIcon name="lk/icon-wb" />
-                    <span>
-                      Артикул:
-                    </span>
-                    {{ item.article }}
-                    <UIBaseIcon name="lk/icon-copy" />
-                  </a>
-                  <p class="seller-items-table-item__rating">
-                    <UIBaseIcon name="lk/icon-star" />
-                    {{ item.rating }}
-                    <span class="seller-items-table-item__reviews">
-                      ({{ item.reviews }} отзывов)
+                  <div class="seller-items-table-item__info">
+                    <NuxtLink
+                      :to="`/lk/item/${item.product__articul}`"
+                      class="seller-items-table-item__name"
+                    >
+                      <span class="seller-items-table-item__name-box">
+                        {{ item.product__name }}
+                      </span>
+                      <UIBaseIcon name="lk/icon-share" />
+                    </NuxtLink>
+                    <button
+                      class="seller-items-table-item__article"
+                      @click.prevent="copyText(item.product__articul)"
+                    >
+                      <UIBaseIcon name="lk/icon-wb" />
+                      <span>
+                        Артикул:
+                      </span>
+                      {{ item.product__articul }}
+                      <UIBaseIcon name="lk/icon-copy" />
+                    </button>
+                    <p class="seller-items-table-item__rating">
+                      <UIBaseIcon name="lk/icon-star" />
+                      {{ item.product__rating }}
+                      <span class="seller-items-table-item__reviews">
+                        ({{ item.product__feedbacks }} {{ declOfNum(item.product__feedbacks, ['отзыв', 'отзыва', 'отзывов']) }})
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </td>
+              <td v-if="headColumns[1].show">
+                <div class="seller-items-table__price">
+                  <p class="seller-items-table__newprice">
+                    {{ item?.price.toLocaleString() || 0 }} ₽
+                    <span class="seller-items-table__price-percent">
+                      {{ parseInt(100 - item.price / ( item.priceU / 100 )) }}%
                     </span>
                   </p>
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="seller-items-table__price">
-                <p class="seller-items-table__newprice">
-                  {{ item.price }}
-                  <span class="seller-items-table__price-percent">
-                    {{ item.price_percent }}
+                  <span class="seller-items-table__oldprice">
+                    {{ item?.priceU.toLocaleString() || 0 }} ₽
                   </span>
+                </div>
+              </td>
+              <td>
+                <NuxtLink
+                  :to="`/lk/seller/${item.product__supplier_id}?name=${item?.supplier?.name || ''}&id=${item?.supplier?.wb_id || ''}`"
+                  class="seller-items-table__link"
+                >
+                  {{ item?.supplier?.name || '--' }}
+                  <br>
+                  {{ item?.supplier?.inn ? `(${item.supplier.inn})` : '' }}
+                </NuxtLink>
+              </td>
+              <td>
+                <NuxtLink
+                  :to="`/lk/brand/${item.product__brand_id}?name=${item?.product__brand?.toLowerCase() || ''}`"
+                  class="seller-items-table__link"
+                >
+                  {{ item.product__brand }}
+                </NuxtLink>
+              </td>
+              <td v-if="headColumns[2].show">
+                <p class="seller-items-table__stats">
+                  {{ item[`profit_${day}_fbo`].toLocaleString() || 0 }} ₽
                 </p>
-                <span class="seller-items-table__oldprice">
-                  {{ item.price_old }}
-                </span>
-              </div>
-            </td>
-            <td>
-              <NuxtLink
-                to="/lk/seller/1"
-                class="seller-items-table__link"
-              >
-                {{ item.seller }}
-              </NuxtLink>
-            </td>
-            <td>
-              <NuxtLink
-                to="/lk/seller/1"
-                class="seller-items-table__link"
-              >
-                {{ item.brand }}
-              </NuxtLink>
-            </td>
-            <td>
-              <p class="seller-items-table__stats">
-                {{ item.turnover }}
-                <span class="seller-items-table__stats-percent seller-items-table__stats-percent--good">
-                  {{ item.turnover_percent }}
-                </span>
-              </p>
-            </td>
-            <td>
-              <p class="seller-items-table__stats">
-                {{ item.sales }}
-                <span class="seller-items-table__stats-percent seller-items-table__stats-percent--good">
-                  {{ item.sales_percent }}
-                </span>
-              </p>
-            </td>
-          </tr>
-        </tbody>
-      </LkTable>
-    </div>
+              </td>
+              <td v-if="headColumns[3].show">
+                <p class="seller-items-table__stats">
+                  {{ item[`sales_${day}_fbo`].toLocaleString() || 0 }}
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </LkTable>
 
-    <UILkButton
-      text="Показать ещё"
-      full-width
-      class="seller-items__show-more"
-    />
+        <div
+          v-else
+          class="seller-items__loader"
+        >
+          <UILoader />
+        </div>
+      </div>
+    </template>
+    <div
+      v-else
+      class="seller-items__loader"
+    >
+      <UILoader />
+    </div>
   </div>
 </template>
 
 <script setup>
-import copyTextToClipboard from '@/utils/copyTextToClipboard'
+import copyTextToClipboard from '@/utils/copyTextToClipboard.js'
+import GenerateImgUrl from '@/utils/generateImgUrl.js'
+import declOfNum from '@/utils/declOfNum.js'
 
-const headColumns = [
+const route = useRoute()
+const { $toast } = useNuxtApp()
+
+const { slug } = route.params
+
+const headColumns = ref([
   { label: 'Название товара', show: true },
-  { label: 'Цена', show: true },
+  { label: 'Цена', slug: 'price', sort: true, show: true },
   { label: 'Продавец', show: true },
   { label: 'Бренд', show: true },
-  { label: 'Оборот', show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
-  { label: 'Продажи, шт.', show: true },
-]
+  { label: 'Оборот', slug: 'profit_30_fbo', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
+  { label: 'Продажи, шт.', slug: 'sales_30_fbo', sort: true, show: true },
+])
 
-const bodyColumns = [
-  {
-    name: 'Топлёное масло ГХИ, 440 мл / без лактозы / без сахара Артикул',
-    article: '80012708',
-    rating: '4.9',
-    reviews: '2384',
-    price: '990 ₽',
-    price_percent: '-70%',
-    price_old: '7 100 ₽',
-    seller: 'Чугунов Александр Валентинович (370701981555)',
-    brand: 'Olesa Chugunova',
-    turnover: '710 478 ₽',
-    turnover_percent: '+2,2%',
-    sales: '183 368',
-    sales_percent: '+2,2%',
-  },
-]
+const items = ref([])
+const day = ref(30)
+
+const isLoadingPage = ref(true)
+const isLoading = ref(false)
+
+const changeDate = (data) => {
+  items.value = []
+  day.value = data.day
+
+  getData()
+}
 
 const copyText = async (text) => {
-  const msg = await copyTextToClipboard(text)
+  try {
+    await copyTextToClipboard(text)
+
+    $toast.success('Артикул товара скопирован')
+  } catch (e) {
+    $toast.success('Не удалось скопировать артикул товара')
+  }
 }
+
+const getProductUrl = (id) => {
+  return new GenerateImgUrl(id).url()
+}
+
+const getData = async () => {
+  isLoading.value = true
+
+  const { data } = await useFetch(`/api/suppliers/${slug}`, {
+    watch: false,
+    query: {
+      view: 'products',
+      period: day.value,
+    },
+  })
+
+  items.value = data?.value?.items || []
+
+  isLoadingPage.value = false
+  isLoading.value = false
+}
+
+getData()
 </script>
 
 <style lang="scss" scoped>
 .seller-items {
+  &__loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 100px 0;
+  }
+
   &__info {
     display: grid;
     align-items: center;
@@ -210,20 +239,6 @@ const copyText = async (text) => {
     display: grid;
     grid-gap: 8px;
     grid-template-columns: repeat(2, auto);
-  }
-
-  &__show-more {
-    height: 48px;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 16px;
-    color: var(--blackMain);
-    background: none;
-    border-color: #D9D9E0;
-
-    &:hover {
-      background: none;
-    }
   }
 }
 

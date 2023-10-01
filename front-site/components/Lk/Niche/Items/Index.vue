@@ -109,10 +109,10 @@
               </td>
               <td>
                 <NuxtLink
-                  :to="`/lk/seller/${item.product__supplier_id}`"
+                  :to="`/lk/seller/${item.product__supplier_id}?name=${item?.supplier?.name || ''}&id=${item?.supplier?.wb_id || ''}`"
                   class="niche-items-table__link"
                 >
-                  {{ item?.supplier?.name || '--' }}
+                  {{ item?.supplier?.name }}
                   <br>
                   {{ item?.supplier?.inn ? `(${item.supplier.inn})` : '' }}
                 </NuxtLink>

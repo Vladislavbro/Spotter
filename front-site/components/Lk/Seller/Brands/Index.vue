@@ -1,15 +1,15 @@
 <template>
-  <div class="brand-sellers">
+  <div class="seller-brands">
     <template v-if="!isLoadingPage">
-      <div class="brand-sellers__info">
+      <div class="seller-brands__info">
         <LkTableDate
           @change="changeDate"
         />
       </div>
 
-      <div class="brand-sellers__card">
-        <div class="brand-sellers__card-header">
-          <div class="brand-sellers__card-side">
+      <div class="seller-brands__card">
+        <div class="seller-brands__card-header">
+          <div class="seller-brands__card-side">
             <LkTableSettings
               :array="headColumns"
             />
@@ -19,7 +19,7 @@
         <LkTable
           v-if="!isLoading"
           :head-columns="headColumns"
-          class="brand-sellers__table brand-sellers-table"
+          class="seller-brands__table seller-brands-table"
         >
           <tbody>
             <tr
@@ -28,20 +28,11 @@
             >
               <td v-if="headColumns[0].show">
                 <NuxtLink
-                  :to="`/lk/seller/${item.id}`"
-                  class="brand-sellers-table__name"
+                  :to="`/lk/brand/${item.brand_id}?name=${item?.brand?.toLowerCase() || ''}`"
+                  class="seller-brands-table__name"
                 >
-                  {{ item.name }}
+                  {{ item.brand }}
                 </NuxtLink>
-              </td>
-              <td v-if="headColumns[1].show">
-                {{ item.inn }}
-              </td>
-              <td v-if="headColumns[2].show">
-                {{ item.ogrn }}
-              </td>
-              <td v-if="headColumns[3].show">
-                {{ item.trademark }}
               </td>
             </tr>
           </tbody>
@@ -49,7 +40,7 @@
 
         <div
           v-else
-          class="brand-sellers__loader"
+          class="seller-brands__loader"
         >
           <UILoader />
         </div>
@@ -57,7 +48,7 @@
     </template>
     <div
       v-else
-      class="brand-sellers__loader"
+      class="seller-brands__loader"
     >
       <UILoader />
     </div>
@@ -70,10 +61,7 @@ const route = useRoute()
 const { slug } = route.params
 
 const headColumns = ref([
-  { label: 'Продавец', slug: 'name', show: true },
-  { label: 'ИНН', slug: 'inn', show: true },
-  { label: 'ОГРН', slug: 'ogrn', show: true },
-  { label: 'Торговая марка', slug: 'trademark', show: true },
+  { label: 'Бренд', slug: 'brand', show: true },
 ])
 
 const items = ref([])
@@ -92,15 +80,15 @@ const changeDate = (data) => {
 const getData = async () => {
   isLoading.value = true
 
-  const { data } = await useFetch(`/api/brands/${slug}`, {
+  const { data } = await useFetch(`/api/suppliers/${slug}`, {
     watch: false,
     query: {
-      view: 'suppliers',
+      view: 'brands',
       period: day.value,
     },
   })
 
-  items.value = data?.value?.suppliers || []
+  items.value = data?.value?.brands || []
 
   isLoadingPage.value = false
   isLoading.value = false
@@ -110,7 +98,7 @@ getData()
 </script>
 
 <style lang="scss" scoped>
-.brand-sellers {
+.seller-brands {
   &__loader {
     display: flex;
     align-items: center;
@@ -154,7 +142,7 @@ getData()
   }
 }
 
-.brand-sellers-table {
+.seller-brands-table {
   &__name {
     display: flex;
     align-items: center;

@@ -3,26 +3,23 @@
     <div class="container-lk">
       <div class="seller-lk__box seller-lk__box--pad">
         <LkGoBack
-          to="/lk/item/1"
+          to="/lk"
           text="Вернуться к товарам"
           class="seller-lk__back"
         />
 
-        <div
-          v-if="!isLoading"
-          class="seller-lk__box"
-        >
+        <div class="seller-lk__box">
           <div class="seller-lk__card seller-lk-card">
             <p class="seller-lk-card__label">
               <UIBaseIcon name="lk/icon-wb" />
               Продавцы
             </p>
             <a
-              href="/"
+              :href="`https://www.wildberries.ru/seller/${wbId}`"
               target="_blank"
               class="seller-lk-card__link"
             >
-              Чугунов Александр Валентинович (370701981555)
+              {{ sellerName }}
               <UIBaseIcon name="lk/icon-share" />
             </a>
           </div>
@@ -35,41 +32,33 @@
               @click.prevent="toggleTab(i)"
             >
               {{ item.label }}
-              <span
+              <!-- <span
                 v-if="item.count"
                 class="seller-lk-tab__count"
               >
                 {{ item.count }}
-              </span>
+              </span> -->
             </button>
           </div>
 
           <hr class="seller-lk__hr">
 
           <div class="seller-lk__content">
-            <LkSellerResume
-              :graphs="graphs"
-            />
-
-            <!-- <transition
+            <transition
               name="fade"
               mode="out-in"
             >
-              <LkSellerResume
+              <LazyLkSellerResume
                 v-if="tabs[0].active"
               />
               <LazyLkSellerItems
                 v-else-if="tabs[1].active"
               />
-            </transition> -->
+              <LazyLkSellerBrands
+                v-else-if="tabs[2].active"
+              />
+            </transition>
           </div>
-        </div>
-
-        <div
-          v-else
-          class="seller-lk__loader"
-        >
-          <UILoader />
         </div>
       </div>
     </div>
@@ -83,15 +72,13 @@ definePageMeta({
 
 const route = useRoute()
 
+const { name: sellerName, id: wbId } = route.query
 const { slug } = route.params
 
-const isLoading = ref(false)
-// const info = ref(null)
-const graphs = ref([])
 const tabs = ref([
   { label: 'Сводка', active: true },
-  // { label: 'Товары', count: '1200', active: false },
-  // { label: 'Продавцы', count: '620', active: false },
+  { label: 'Товары', active: false },
+  { label: 'Бренды', active: false },
 ])
 
 const toggleTab = (i) => {
@@ -100,19 +87,6 @@ const toggleTab = (i) => {
   })
   tabs.value[i].active = true
 }
-
-const getData = async () => {
-  isLoading.value = true
-  const { data } = await useFetch(`/api/suppliers/${slug}`, {
-    watch: false,
-  })
-  isLoading.value = false
-
-  // info.value = data?.value || null
-  graphs.value = data?.value?.graphs || []
-}
-
-getData()
 </script>
 
 <style lang="scss" scoped>
@@ -192,6 +166,7 @@ getData()
     font-weight: 600;
     font-size: 24px;
     line-height: 32px;
+    text-transform: capitalize;
   }
 }
 

@@ -3,193 +3,148 @@
     <div class="seller-resume__info">
       <!-- <LkTableTypes /> -->
 
-      <LkTableDate />
+      <LkTableDate
+        @change="changeDate"
+      />
     </div>
 
-    <div class="seller-resume__graphics">
-      <div class="seller-resume__graphic seller-resume-graphic">
-        <p class="seller-resume-graphic__title">
-          Оборот и средний чек
-        </p>
-        <div class="seller-resume-graphic__badges">
-          <span class="badge badge--blue">
-            Оборот по заказам:
-            <span class="badge__value">
-              10 425 866 ₽
+    <div class="seller-resume__box">
+      <div v-if="!isLoading" class="seller-resume__graphics">
+        <div class="seller-resume__graphic seller-resume-graphic">
+          <p class="seller-resume-graphic__title">
+            Оборот и средний чек
+          </p>
+          <div class="seller-resume-graphic__badges">
+            <span
+              v-for="(item, i) in data.datasets"
+              :key="i"
+              class="badge"
+            >
+              {{ item.label }}:
+              <span class="badge__value">
+                {{ item.data.reduce((sum, a) => sum + a, 0).toLocaleString() }}
+                {{ item.valueSuffix }}
+              </span>
             </span>
-          </span>
-          <span class="badge badge--purple">
-            Оборот по продажам:
-            <span class="badge__value">
-              10 425 866 ₽
+            <!-- <span class="badge badge--purple">
+              Оборот по продажам:
+              <span class="badge__value">
+                10 425 866 ₽
+              </span>
             </span>
-          </span>
-          <span class="badge">
-            Оборот по счетчику WB:
-            <span class="badge__value">
-              8 425 866 ₽
+            <span class="badge">
+              Оборот по счетчику WB:
+              <span class="badge__value">
+                8 425 866 ₽
+              </span>
             </span>
-          </span>
-          <span class="badge badge--orange">
-            Средний чек:
-            <span class="badge__value">
-              866 ₽
-            </span>
-          </span>
-        </div>
+            <span class="badge badge--orange">
+              Средний чек:
+              <span class="badge__value">
+                866 ₽
+              </span>
+            </span> -->
+          </div>
 
-        <div class="seller-resume-graphic__chart">
-          <LkChart
-            :data="data1"
-            :options="options"
-          />
+          <div class="seller-resume-graphic__chart">
+            <LkChart
+              :data="data"
+              :options="options"
+            />
+          </div>
         </div>
       </div>
 
-      <!-- <div class="seller-resume__graphic seller-resume-graphic">
-        <p class="seller-resume-graphic__title">
-          Остатки, возвраты и поставки
-        </p>
-        <div class="seller-resume-graphic__badges">
-          <span class="badge badge--green">
-            Остатки:
-            <span class="badge__value">
-              75,9%
-            </span>
-          </span>
-          <span class="badge badge--yellow">
-            Возвраты и поставки:
-            <span class="badge__value">
-              24%
-            </span>
-          </span>
-        </div>
-
-        <div class="seller-resume-graphic__chart">
-          <LkChart
-            :data="data2"
-            :options="options"
-          />
-        </div>
-      </div> -->
+      <div
+        v-else
+        class="seller-resume__loader"
+      >
+        <UILoader />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-const props = defineProps({
-  graphs: {
-    type: Array,
-    default: () => ([]),
-  },
-})
+import { sub } from 'date-fns'
 
-// let width, height
-// function getGradient (ctx, chartArea, colors) {
-//   const chartWidth = chartArea.right - chartArea.left
-//   const chartHeight = chartArea.bottom - chartArea.top
-//   let gradient
-//   if (!gradient || width !== chartWidth || height !== chartHeight) {
-//     width = chartWidth
-//     height = chartHeight
-//     gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
-//     gradient.addColorStop(1, colors[0])
-//     gradient.addColorStop(0, colors[1])
-//   }
+const route = useRoute()
 
-//   return gradient
-// }
+const { slug } = route.params
 
-const data1 = {
+const day = ref(30)
+const isLoading = ref(true)
+// const isLoadingGraphs = ref(false)
+const graphs = ref([])
+
+const data = ref({
   labels: [],
   datasets: [
     {
-      label: 'Оборот по заказам',
+      label: 'Цена',
+      valueSuffix: '₽',
+      borderColor: '#FF8F6D',
+      pointBorderColor: '#FF8F6D',
+      data: [],
+    },
+    {
+      label: 'Оборот FBO',
       valueSuffix: '₽',
       borderColor: '#5480F2',
       pointBorderColor: '#5480F2',
       data: [],
     },
     {
-      label: 'Оборот по продажам',
+      label: 'Оборот FBS',
       valueSuffix: '₽',
       borderColor: '#AE80EA',
       pointBorderColor: '#AE80EA',
       data: [],
     },
-    {
-      label: 'Средний чек',
-      valueSuffix: '₽',
-      borderColor: '#FF8F6D',
-      pointBorderColor: '#FF8F6D',
-      data: [],
-    },
   ],
-}
-
-// const data2 = {
-//   labels: [],
-//   datasets: [
-//     {
-//       label: 'Остатки',
-//       valueSuffix: 'шт.',
-//       borderColor: '#22A873',
-//       pointBorderColor: '#22A873',
-//       data: [],
-//     },
-//     {
-//       label: 'Возвраты и поставки',
-//       valueSuffix: 'шт.',
-//       borderColor: '#98D920',
-//       pointBorderColor: '#98D920',
-//       data: [],
-//     },
-//   ],
-// }
+})
 
 const options = {}
 
-const setDefault1 = () => {
-  const labels = []
-  for (let i = 10; i <= 28; i++) {
-    labels.push(new Date(`2023-02-${i} 00:00:00`).getTime())
-  }
-  data1.labels = labels
+const setGraphicValues = () => {
+  data.value.labels = []
+  data.value.datasets[0].data = []
+  data.value.datasets[1].data = []
+  data.value.datasets[2].data = []
 
-  const values1 = []
-  const values2 = []
-  const values3 = []
+  graphs.value.forEach((item, i) => {
+    data.value.labels.push(sub(new Date().setHours(0, 0, 0, 0), { days: i }))
 
-  for (let i = 0; i <= 18; i++) {
-    values1.push(Math.floor(Math.random() * (135000 - 75000 + 1)) + 75000)
-    values2.push(Math.floor(Math.random() * (115000 - 10000 + 1)) + 10000)
-    values3.push(Math.floor(Math.random() * (100000 - 20000 + 1)) + 20000)
-  }
-  data1.datasets[0].data = values1
-  data1.datasets[1].data = values2
-  data1.datasets[2].data = values3
+    data.value.datasets[0].data.push(item.price)
+    data.value.datasets[1].data.push(item.profit_fbo)
+    data.value.datasets[2].data.push(item.profit_fbs)
+  })
 }
 
-// const setDefault2 = () => {
-//   const labels = []
-//   for (let i = 10; i <= 28; i++) {
-//     labels.push(new Date(`2023-02-${i} 00:00:00`).getTime())
-//   }
-//   data2.labels = labels
+const changeDate = (data) => {
+  day.value = data.day
 
-//   const values1 = []
-//   const values2 = []
+  getData()
+}
 
-//   for (let i = 0; i <= 18; i++) {
-//     values1.push(Math.floor(Math.random() * (135000 - 75000 + 1)) + 75000)
-//     values2.push(Math.floor(Math.random() * (115000 - 10000 + 1)) + 10000)
-//   }
-//   data2.datasets[0].data = values1
-//   data2.datasets[1].data = values2
-// }
+const getData = async () => {
+  isLoading.value = true
 
-setDefault1()
-// setDefault2()
+  const { data } = await useFetch(`/api/suppliers/${slug}`, {
+    watch: false,
+    query: {
+      view: 'graphs',
+      period: day.value,
+    },
+  })
+
+  graphs.value = data?.value?.graphs || []
+  setGraphicValues()
+
+  isLoading.value = false
+}
+
+getData()
 </script>
 
 <style lang="scss" scoped>
@@ -215,6 +170,13 @@ setDefault1()
     padding: 24px 40px 40px;
     background: var(--white);
     border-radius: 16px;
+  }
+
+  &__loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 50px 0;
   }
 }
 
