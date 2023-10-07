@@ -127,9 +127,9 @@ const sortDirection = ref('asc')
 const initialFilters = reactive({
   scoring: {
     from: 0,
-    to: 10,
+    to: 15,
     minValue: 0,
-    maxValue: 10,
+    maxValue: 15,
   },
   price_avg: {
     from: 0,

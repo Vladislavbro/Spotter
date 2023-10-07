@@ -1,6 +1,6 @@
 <template>
-  <div class="seller-resume">
-    <div class="seller-resume__info">
+  <div class="brand-resume">
+    <div class="brand-resume__info">
       <!-- <LkTableTypes /> -->
 
       <LkTableDate
@@ -8,13 +8,13 @@
       />
     </div>
 
-    <div class="seller-resume__box">
-      <div v-if="!isLoading" class="seller-resume__graphics">
-        <div class="seller-resume__graphic seller-resume-graphic">
-          <p class="seller-resume-graphic__title">
+    <div class="brand-resume__box">
+      <div v-if="!isLoading" class="brand-resume__graphics">
+        <div class="brand-resume__graphic brand-resume-graphic">
+          <p class="brand-resume-graphic__title">
             Оборот и средний чек
           </p>
-          <div class="seller-resume-graphic__badges">
+          <div class="brand-resume-graphic__badges">
             <span
               v-for="(item, i) in data.datasets"
               :key="i"
@@ -46,7 +46,7 @@
             </span> -->
           </div>
 
-          <div class="seller-resume-graphic__chart">
+          <div class="brand-resume-graphic__chart">
             <LkChart
               :data="data"
               :options="options"
@@ -57,7 +57,7 @@
 
       <div
         v-else
-        class="seller-resume__loader"
+        class="brand-resume__loader"
       >
         <UILoader />
       </div>
@@ -130,7 +130,7 @@ const changeDate = (data) => {
 const getData = async () => {
   isLoading.value = true
 
-  const { data } = await useFetch(`/api/suppliers/${slug}`, {
+  const { data } = await useFetch(`/api/brands/${slug}`, {
     watch: false,
     query: {
       view: 'graphs',
@@ -150,7 +150,7 @@ getData()
 <style lang="scss" scoped>
 @import '@/assets/styles/components/badge.scss';
 
-.seller-resume {
+.brand-resume {
   display: flex;
   flex-direction: column;
 
@@ -180,7 +180,7 @@ getData()
   }
 }
 
-.seller-resume-graphic {
+.brand-resume-graphic {
   display: flex;
   flex-direction: column;
 

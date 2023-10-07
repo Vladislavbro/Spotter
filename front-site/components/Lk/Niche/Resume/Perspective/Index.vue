@@ -18,13 +18,13 @@
           <div
             :class="[
               'perspective-point',
-              { 'perspective-point--bad' : item.scoring <= 3 },
-              { 'perspective-point--normal' : item.scoring > 3 && item.scoring <= 6 },
-              { 'perspective-point--good' : item.scoring > 6 },
+              { 'perspective-point--bad' : item.scoring <= 5 },
+              { 'perspective-point--normal' : item.scoring > 5 && item.scoring <= 10 },
+              { 'perspective-point--good' : item.scoring > 10 },
             ]"
           >
             <p class="perspective-point__title">
-              {{ item.scoring }}/10
+              {{ item.scoring }}/15
             </p>
             <div class="perspective-point__desc">
               {{ getPerspectiveTitle }}

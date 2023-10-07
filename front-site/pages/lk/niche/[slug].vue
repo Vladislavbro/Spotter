@@ -13,11 +13,12 @@
         </h1>
 
         <div class="niche-lk__tabs">
-          <button
-            v-for="(item, i) in tabs"
-            :key="i"
-            :class="['niche-lk__tab niche-lk-tab', { 'niche-lk-tab--active' : item.active }]"
-            @click.prevent="toggleTab(i)"
+          <a
+            v-for="item in tabs"
+            :key="item.slug"
+            :href="`#${item.slug}`"
+            :class="['niche-lk__tab niche-lk-tab', { 'niche-lk-tab--active' : item.slug === tabActive }]"
+            @click.prevent="navigateTo(`#${item.slug}`)"
           >
             {{ item.label }}
             <!-- <span
@@ -26,7 +27,7 @@
             >
               {{ item.count }}
             </span> -->
-          </button>
+          </a>
         </div>
 
         <hr class="niche-lk__hr">
@@ -37,12 +38,10 @@
             mode="out-in"
           >
             <LkNicheResume
-              v-if="tabs[0].active"
-              :slug="slug"
+              v-if="tabActive === 'common'"
             />
             <LazyLkNicheItems
-              v-else-if="tabs[1].active"
-              :slug="slug"
+              v-else-if="tabActive === 'items'"
             />
           </transition>
         </div>
@@ -60,18 +59,25 @@ const route = useRoute()
 
 const { slug } = route.params
 
+const tabActive = ref('common')
 const tabs = ref([
-  { label: 'Сводка', active: true },
-  { label: 'Товары', count: '1200', active: false },
+  { label: 'Сводка', slug: 'common' },
+  { label: 'Товары', slug: 'items', count: '1200' },
   // { label: 'Продавцы', count: '620', active: false },
 ])
 
-const toggleTab = (i) => {
-  tabs.value.forEach((item) => {
-    item.active = false
-  })
-  tabs.value[i].active = true
+watch(() => route.hash, (hash) => {
+  setTab(hash)
+})
+
+const setTab = (data) => {
+  const hash = (data || route.hash).replace('#', '')
+  if (hash) {
+    tabActive.value = hash
+  }
 }
+
+setTab()
 </script>
 
 <style lang="scss" scoped>

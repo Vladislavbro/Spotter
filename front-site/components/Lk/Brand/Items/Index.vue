@@ -1,15 +1,15 @@
 <template>
-  <div class="seller-items">
+  <div class="brand-items">
     <template v-if="!isLoadingPage">
-      <div class="seller-items__info">
+      <div class="brand-items__info">
         <LkTableDate
           @change="changeDate"
         />
       </div>
 
-      <div class="seller-items__card">
-        <div class="seller-items__card-header">
-          <div class="seller-items__card-side">
+      <div class="brand-items__card">
+        <div class="brand-items__card-header">
+          <div class="brand-items__card-side">
             <LkTableSettings
               :array="headColumns"
             />
@@ -19,7 +19,7 @@
         <LkTable
           v-if="!isLoading"
           :head-columns="headColumns"
-          class="seller-items__table seller-items-table"
+          class="brand-items__table brand-items-table"
         >
           <tbody>
             <tr
@@ -27,10 +27,10 @@
               :key="i"
             >
               <td v-if="headColumns[0].show">
-                <div class="seller-items-table-item">
+                <div class="brand-items-table-item">
                   <NuxtLink
                     :to="`/lk/item/${item.product__articul}`"
-                    class="seller-items-table-item__image"
+                    class="brand-items-table-item__image"
                   >
                     <img
                       v-lazy-load
@@ -38,18 +38,18 @@
                       alt=""
                     >
                   </NuxtLink>
-                  <div class="seller-items-table-item__info">
+                  <div class="brand-items-table-item__info">
                     <NuxtLink
                       :to="`/lk/item/${item.product__articul}`"
-                      class="seller-items-table-item__name"
+                      class="brand-items-table-item__name"
                     >
-                      <span class="seller-items-table-item__name-box">
+                      <span class="brand-items-table-item__name-box">
                         {{ item.product__name }}
                       </span>
                       <UIBaseIcon name="lk/icon-share" />
                     </NuxtLink>
                     <button
-                      class="seller-items-table-item__article"
+                      class="brand-items-table-item__article"
                       @click.prevent="copyText(item.product__articul)"
                     >
                       <UIBaseIcon name="lk/icon-wb" />
@@ -59,10 +59,10 @@
                       {{ item.product__articul }}
                       <UIBaseIcon name="lk/icon-copy" />
                     </button>
-                    <p class="seller-items-table-item__rating">
+                    <p class="brand-items-table-item__rating">
                       <UIBaseIcon name="lk/icon-star" />
                       {{ item.product__rating }}
-                      <span class="seller-items-table-item__reviews">
+                      <span class="brand-items-table-item__reviews">
                         ({{ item.product__feedbacks }} {{ declOfNum(item.product__feedbacks, ['отзыв', 'отзыва', 'отзывов']) }})
                       </span>
                     </p>
@@ -70,14 +70,14 @@
                 </div>
               </td>
               <td v-if="headColumns[1].show">
-                <div class="seller-items-table__price">
-                  <p class="seller-items-table__newprice">
+                <div class="brand-items-table__price">
+                  <p class="brand-items-table__newprice">
                     {{ item?.price.toLocaleString() || 0 }} ₽
-                    <span class="seller-items-table__price-percent">
+                    <span class="brand-items-table__price-percent">
                       {{ parseInt(100 - item.price / ( item.priceU / 100 )) }}%
                     </span>
                   </p>
-                  <span class="seller-items-table__oldprice">
+                  <span class="brand-items-table__oldprice">
                     {{ item?.priceU.toLocaleString() || 0 }} ₽
                   </span>
                 </div>
@@ -85,7 +85,7 @@
               <td>
                 <NuxtLink
                   :to="`/lk/seller/${item.product__supplier_id}?name=${item?.supplier?.name || ''}&id=${item?.supplier?.wb_id || ''}`"
-                  class="seller-items-table__link"
+                  class="brand-items-table__link"
                 >
                   {{ item?.supplier?.name || '--' }}
                   <br>
@@ -95,19 +95,25 @@
               <td>
                 <NuxtLink
                   :to="`/lk/brand/${item.product__brand_id}?name=${item?.product__brand?.toLowerCase() || ''}`"
-                  class="seller-items-table__link"
+                  class="brand-items-table__link"
                 >
                   {{ item.product__brand }}
                 </NuxtLink>
               </td>
               <td v-if="headColumns[2].show">
-                <p class="seller-items-table__stats">
+                <p class="brand-items-table__stats">
                   {{ item[`profit_${day}_fbo`].toLocaleString() || 0 }} ₽
+                  <!-- <span class="brand-items-table__stats-percent brand-items-table__stats-percent--good">
+                    {{ item.turnover_percent }}
+                  </span> -->
                 </p>
               </td>
               <td v-if="headColumns[3].show">
-                <p class="seller-items-table__stats">
+                <p class="brand-items-table__stats">
                   {{ item[`sales_${day}_fbo`].toLocaleString() || 0 }}
+                  <!-- <span class="brand-items-table__stats-percent brand-items-table__stats-percent--good">
+                    {{ item.sales_percent }}
+                  </span> -->
                 </p>
               </td>
             </tr>
@@ -116,7 +122,7 @@
 
         <div
           v-else
-          class="seller-items__loader"
+          class="brand-items__loader"
         >
           <UILoader />
         </div>
@@ -124,7 +130,7 @@
     </template>
     <div
       v-else
-      class="seller-items__loader"
+      class="brand-items__loader"
     >
       <UILoader />
     </div>
@@ -180,7 +186,7 @@ const getProductUrl = (id) => {
 const getData = async () => {
   isLoading.value = true
 
-  const { data } = await useFetch(`/api/suppliers/${slug}`, {
+  const { data } = await useFetch(`/api/brands/${slug}`, {
     watch: false,
     query: {
       view: 'products',
@@ -198,7 +204,7 @@ getData()
 </script>
 
 <style lang="scss" scoped>
-.seller-items {
+.brand-items {
   &__loader {
     display: flex;
     align-items: center;
@@ -242,7 +248,7 @@ getData()
   }
 }
 
-.seller-items-table {
+.brand-items-table {
   &__name {
     display: grid;
     grid-gap: 2px;
@@ -299,7 +305,7 @@ getData()
   }
 }
 
-.seller-items-table-item {
+.brand-items-table-item {
   display: flex;
   align-items: flex-start;
 

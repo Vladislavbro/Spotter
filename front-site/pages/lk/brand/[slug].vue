@@ -1,74 +1,64 @@
 <template>
-  <div class="seller-lk">
+  <div class="brand-lk">
     <div class="container-lk">
-      <div class="seller-lk__box seller-lk__box--pad">
+      <div class="brand-lk__box brand-lk__box--pad">
         <LkGoBack
-          to="/lk/item/1"
+          to="/lk"
           text="Вернуться к товарам"
-          class="seller-lk__back"
+          class="brand-lk__back"
         />
 
-        <div
-          v-if="!isLoading"
-          class="seller-lk__box"
-        >
-          <div class="seller-lk__card seller-lk-card">
-            <p class="seller-lk-card__label">
+        <div class="brand-lk__box">
+          <div class="brand-lk__card brand-lk-card">
+            <p class="brand-lk-card__label">
               <UIBaseIcon name="lk/icon-wb" />
               Бренды
             </p>
             <a
-              href="/"
+              :href="wbLink"
               target="_blank"
-              class="seller-lk-card__link"
+              class="brand-lk-card__link"
             >
-              Чугунов Александр Валентинович (370701981555)
+              {{ brandName }}
               <UIBaseIcon name="lk/icon-share" />
             </a>
           </div>
 
-          <div class="seller-lk__tabs">
+          <div class="brand-lk__tabs">
             <button
               v-for="(item, i) in tabs"
               :key="i"
-              :class="['seller-lk-card__tab seller-lk-tab', { 'seller-lk-tab--active' : item.active }]"
+              :class="['brand-lk-card__tab brand-lk-tab', { 'brand-lk-tab--active' : item.active }]"
               @click.prevent="toggleTab(i)"
             >
               {{ item.label }}
-              <span
+              <!-- <span
                 v-if="item.count"
-                class="seller-lk-tab__count"
+                class="brand-lk-tab__count"
               >
                 {{ item.count }}
-              </span>
+              </span> -->
             </button>
           </div>
 
-          <hr class="seller-lk__hr">
+          <hr class="brand-lk__hr">
 
-          <div class="seller-lk__content">
-            <LkSellerResume
-              :graphs="graphs"
-            />
-            <!-- <transition
+          <div class="brand-lk__content">
+            <transition
               name="fade"
               mode="out-in"
             >
-              <LkSellerResume
+              <LazyLkBrandResume
                 v-if="tabs[0].active"
               />
-              <LazyLkSellerItems
+              <LazyLkBrandItems
                 v-else-if="tabs[1].active"
               />
-            </transition> -->
+              <LazyLkBrandSellers
+                v-else-if="tabs[2].active"
+              />
+            </transition>
           </div>
-        </div>
-
-        <div
-          v-else
-          class="seller-lk__loader"
-        >
-          <UILoader />
         </div>
       </div>
     </div>
@@ -82,15 +72,13 @@ definePageMeta({
 
 const route = useRoute()
 
+const { name: brandName } = route.query
 const { slug } = route.params
 
-const isLoading = ref(false)
-// const info = ref(null)
-const graphs = ref([])
 const tabs = ref([
   { label: 'Сводка', active: true },
-  // { label: 'Товары', count: '1200', active: false },
-  // { label: 'Продавцы', count: '620', active: false },
+  { label: 'Товары', active: false },
+  { label: 'Продавцы', active: false },
 ])
 
 const toggleTab = (i) => {
@@ -100,25 +88,17 @@ const toggleTab = (i) => {
   tabs.value[i].active = true
 }
 
-const getData = async () => {
-  isLoading.value = true
-  const { data } = await useFetch(`/api/brands/${slug}`, {
-    watch: false,
-    query: {
-      // period: 7,
-    },
-  })
-  isLoading.value = false
-
-  // info.value = data?.value || null
-  graphs.value = data?.value?.graphs || []
-}
-
-getData()
+const wbLink = computed(() => {
+  let name = '#'
+  if (brandName && slug) {
+    name = `https://www.wildberries.ru/brands/${brandName.toLowerCase()}-${slug}`
+  }
+  return name
+})
 </script>
 
 <style lang="scss" scoped>
-.seller-lk {
+.brand-lk {
   &__box {
     width: 100%;
     display: flex;
@@ -164,7 +144,7 @@ getData()
   }
 }
 
-.seller-lk-card {
+.brand-lk-card {
   width: 100%;
   display: grid;
   grid-gap: 8px;
@@ -194,10 +174,11 @@ getData()
     font-weight: 600;
     font-size: 24px;
     line-height: 32px;
+    text-transform: capitalize;
   }
 }
 
-.seller-lk-tab {
+.brand-lk-tab {
   display: flex;
   align-items: center;
   height: 44px;

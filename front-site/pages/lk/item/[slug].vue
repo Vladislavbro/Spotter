@@ -4,220 +4,219 @@
       <div class="container-lk">
         <div class="item-lk__box">
           <LkGoBack
-            link="/lk"
+            :link="info?.name ? `/lk/niche/${info.name.toLowerCase()}#items` : '/lk'"
             text="Вернуться к товарам"
             class="item-lk__back"
           />
 
-          <div
-            v-if="info"
-            class="item-lk__card item-lk-card"
-          >
-            <div class="item-lk-card__header">
-              <a
-                href="/"
-                target="_blank"
-                class="item-lk-card__link"
-              >
-                {{ info.name }}
-                <UIBaseIcon name="lk/icon-share" />
-              </a>
-              <div class="item-lk-card__stats">
-                <div class="item-lk-card__stat item-lk-card-stat">
-                  <span class="item-lk-card-stat__stars">
+          <template v-if="info">
+            <div class="item-lk__card item-lk-card">
+              <div class="item-lk-card__header">
+                <a
+                  :href="`https://www.wildberries.ru/catalog/${info.articul}/detail.aspx`"
+                  target="_blank"
+                  rel="nofollow"
+                  class="item-lk-card__link"
+                >
+                  {{ info.name }}
+                  <UIBaseIcon name="lk/icon-share" />
+                </a>
+                <div class="item-lk-card__stats">
+                  <div class="item-lk-card__stat item-lk-card-stat">
+                    <span class="item-lk-card-stat__stars">
+                      <UIBaseIcon
+                        v-for="i in 5"
+                        :key="i"
+                        name="lk/icon-star"
+                      />
+                    </span>
+                    <span class="item-lk-card-stat__label">
+                      {{ info.rating }}
+                      <small>
+                        ({{ info.feedbacks }} {{ declOfNum(info.feedbacks, ['отзыв', 'отзыва', 'отзывов']) }})
+                      </small>
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="item-lk-card__stat item-lk-card-stat"
+                    @click.prevent="copyText(info.articul)"
+                  >
                     <UIBaseIcon
-                      v-for="i in 5"
+                      name="lk/icon-wb"
+                      class="item-lk-card-stat__icon"
+                    />
+                    <span class="item-lk-card-stat__label">
+                      Артикул:
+                    </span>
+                    {{ info.articul }}
+                    <UIBaseIcon name="lk/icon-copy" />
+                  </button>
+
+                  <div class="item-lk-card__stat item-lk-card-stat">
+                    <span class="item-lk-card-stat__label">
+                      Добавлено:
+                    </span>
+                    {{ dateFormat(info.created_at) }}
+                  </div>
+                </div>
+              </div>
+              <div class="item-lk-card__body">
+                <div class="item-lk-card__image">
+                  <img
+                    v-lazy-load
+                    :data-src="getProductUrl(info.articul)"
+                    alt=""
+                  >
+                </div>
+                <div class="item-lk-card__list">
+                  <div class="item-lk-card__row">
+                    <p class="item-lk-card__label">
+                      Основная категория
+                    </p>
+                    <NuxtLink
+                      v-for="(item, i) in info.categories"
                       :key="i"
-                      name="lk/icon-star"
-                    />
-                  </span>
-                  <span class="item-lk-card-stat__label">
-                    {{ info.rating }}
-                    <small>
-                      ({{ info.feedbacks }} {{ declOfNum(info.feedbacks, ['отзыв', 'отзыва', 'отзывов']) }})
-                    </small>
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  class="item-lk-card__stat item-lk-card-stat"
-                  @click.prevent="copyText(info.articul)"
-                >
-                  <UIBaseIcon
-                    name="lk/icon-wb"
-                    class="item-lk-card-stat__icon"
-                  />
-                  <span class="item-lk-card-stat__label">
-                    Артикул:
-                  </span>
-                  {{ info.articul }}
-                  <UIBaseIcon name="lk/icon-copy" />
-                </button>
-
-                <div class="item-lk-card__stat item-lk-card-stat">
-                  <span class="item-lk-card-stat__label">
-                    Добавлено:
-                  </span>
-                  {{ dateFormat(info.created_at) }}
+                      :to="`/lk/category`"
+                      class="item-lk-card__value item-lk-card__value--link"
+                    >
+                      {{ item.name }}
+                      <UIBaseIcon
+                        name="lk/icon-arrow-left"
+                        class="item-lk-card__arrow"
+                      />
+                    </NuxtLink>
+                  </div>
+                  <div class="item-lk-card__row">
+                    <p class="item-lk-card__label">
+                      Бренд
+                    </p>
+                    <NuxtLink
+                      :to="`/lk/brand/${info.brand_id}?name=${info?.brand?.toLowerCase() || ''}`"
+                      class="item-lk-card__value item-lk-card__value--link"
+                    >
+                      {{ info.brand }}
+                    </NuxtLink>
+                  </div>
+                  <div class="item-lk-card__row">
+                    <p class="item-lk-card__label">
+                      Продавец
+                    </p>
+                    <NuxtLink
+                      :to="`/lk/seller/${info.supplier_id}?name=${info?.supplier?.name || ''}&id=${info?.supplier?.wb_id || ''}`"
+                      class="item-lk-card__value item-lk-card__value--link"
+                    >
+                      {{ info?.supplier?.name || '' }}
+                      {{ info?.supplier?.inn ? `(${info?.supplier?.inn})` : '' }}
+                    </NuxtLink>
+                  </div>
+                  <div class="item-lk-card__row">
+                    <p class="item-lk-card__label">
+                      Цена
+                    </p>
+                    <p class="item-lk-card__value">
+                      {{ info?.priceU.toLocaleString() || 0 }} ₽
+                    </p>
+                  </div>
+                  <div class="item-lk-card__row">
+                    <p class="item-lk-card__label">
+                      Скидка
+                    </p>
+                    <p class="item-lk-card__value">
+                      {{ parseInt(100 - info.price / (info.priceU / 100)) }} %
+                    </p>
+                  </div>
+                  <div class="item-lk-card__row">
+                    <p class="item-lk-card__label">
+                      Сумма продажи
+                    </p>
+                    <p class="item-lk-card__value">
+                      {{ info?.price.toLocaleString() || 0 }} ₽
+                    </p>
+                  </div>
+                  <!-- <div class="item-lk-card__row">
+                    <p class="item-lk-card__label">
+                      Персональная скидка
+                    </p>
+                    <p class="item-lk-card__value">
+                      24 %
+                    </p>
+                  </div> -->
                 </div>
               </div>
             </div>
-            <div class="item-lk-card__body">
-              <div class="item-lk-card__image">
-                <img
-                  v-lazy-load
-                  :data-src="getProductUrl(info.articul)"
-                  alt=""
-                >
-              </div>
-              <div class="item-lk-card__list">
-                <div class="item-lk-card__row">
-                  <p class="item-lk-card__label">
-                    Основная категория
-                  </p>
-                  <NuxtLink
-                    v-for="(item, i) in info.categories"
+
+            <div class="item-lk__info">
+              <!-- <LkTableTypes
+                :value="fb"
+                @change="changeType"
+              /> -->
+
+              <LkTableDate
+                @change="changeDate"
+              />
+            </div>
+
+            <div class="item-lk__graphics">
+              <div class="item-lk-graphic">
+                <p class="item-lk-graphic__title">
+                  Цена и оборот
+                </p>
+                <div class="item-lk-graphic__badges">
+                  <span
+                    v-for="(item, i) in data.datasets"
                     :key="i"
-                    :to="`/lk/category`"
-                    class="item-lk-card__value item-lk-card__value--link"
+                    :class="['badge', { 'badge--orange' : i === 0, 'badge--purple' : i === 1, 'badge--blue' : i === 2 }]"
                   >
-                    {{ item.name }}
-                    <UIBaseIcon
-                      name="lk/icon-arrow-left"
-                      class="item-lk-card__arrow"
-                    />
-                  </NuxtLink>
+                    {{ item.label }}:
+                    <span class="badge__value">
+                      {{ item.data.reduce((sum, a) => sum + a, 0).toLocaleString() }}
+                      {{ item.valueSuffix }}
+                    </span>
+                  </span>
                 </div>
-                <div class="item-lk-card__row">
-                  <p class="item-lk-card__label">
-                    Бренд
-                  </p>
-                  <NuxtLink
-                    :to="`/lk/brand/${info.brand_id}`"
-                    class="item-lk-card__value item-lk-card__value--link"
-                  >
-                    {{ info.brand }}
-                  </NuxtLink>
+                <div class="item-lk-graphic__chart">
+                  <LkChart
+                    :data="data"
+                    :options="options"
+                  />
                 </div>
-                <div class="item-lk-card__row">
-                  <p class="item-lk-card__label">
-                    Продавец
-                  </p>
-                  <NuxtLink
-                    :to="`/lk/seller/${info.supplier_id}`"
-                    class="item-lk-card__value item-lk-card__value--link"
-                  >
-                    <!-- ИП Сельская Дарья (320774600299021) -->
-                    --
-                  </NuxtLink>
-                </div>
-                <div class="item-lk-card__row">
-                  <p class="item-lk-card__label">
-                    Цена
-                  </p>
-                  <p class="item-lk-card__value">
-                    {{ info?.priceU.toLocaleString() || 0 }} ₽
-                  </p>
-                </div>
-                <div class="item-lk-card__row">
-                  <p class="item-lk-card__label">
-                    Скидка
-                  </p>
-                  <p class="item-lk-card__value">
-                    {{ parseInt(100 - info.price / (info.priceU / 100)) }} %
-                  </p>
-                </div>
-                <div class="item-lk-card__row">
-                  <p class="item-lk-card__label">
-                    Сумма продажи
-                  </p>
-                  <p class="item-lk-card__value">
-                    {{ info?.price.toLocaleString() || 0 }} ₽
-                  </p>
-                </div>
-                <!-- <div class="item-lk-card__row">
-                  <p class="item-lk-card__label">
-                    Персональная скидка
-                  </p>
-                  <p class="item-lk-card__value">
-                    24 %
-                  </p>
-                </div> -->
               </div>
+
+              <!-- <div class="item-lk-graphic">
+                <p class="item-lk-graphic__title">
+                  Скидки
+                </p>
+                <div class="item-lk-graphic__badges">
+                  <span class="badge badge--green">
+                    Скидка:
+                    <span class="badge__value">
+                      75,9%
+                    </span>
+                  </span>
+                  <span class="badge badge--yellow">
+                    Персональная скидка:
+                    <span class="badge__value">
+                      24%
+                    </span>
+                  </span>
+                </div>
+                <div class="item-lk-graphic__chart">
+                  <LkChart
+                    :data="data2"
+                    :options="options"
+                  />
+                </div>
+              </div> -->
             </div>
-          </div>
+          </template>
 
-          <div class="item-lk__info">
-            <LkTableTypes />
-
-            <LkTableDate />
-          </div>
-
-          <div class="item-lk__graphics">
-            <div class="item-lk-graphic">
-              <p class="item-lk-graphic__title">
-                Цена и оборот
-              </p>
-              <div class="item-lk-graphic__badges">
-                <span class="badge badge--orange">
-                  Цена:
-                  <span class="badge__value">
-                    866 ₽
-                  </span>
-                </span>
-                <span class="badge badge--purple">
-                  Оборот по продажам:
-                  <span class="badge__value">
-                    10 425 866 ₽
-                  </span>
-                </span>
-                <span class="badge badge--blue">
-                  Оборот по заказам::
-                  <span class="badge__value">
-                    10 425 866 ₽
-                  </span>
-                </span>
-                <span class="badge">
-                  Оборот по счетчику WB:
-                  <span class="badge__value">
-                    8 425 866 ₽
-                  </span>
-                </span>
-              </div>
-              <div class="item-lk-graphic__chart">
-                <LkChart
-                  :data="data1"
-                  :options="options"
-                />
-              </div>
-            </div>
-
-            <div class="item-lk-graphic">
-              <p class="item-lk-graphic__title">
-                Скидки
-              </p>
-              <div class="item-lk-graphic__badges">
-                <span class="badge badge--green">
-                  Скидка:
-                  <span class="badge__value">
-                    75,9%
-                  </span>
-                </span>
-                <span class="badge badge--yellow">
-                  Персональная скидка:
-                  <span class="badge__value">
-                    24%
-                  </span>
-                </span>
-              </div>
-              <div class="item-lk-graphic__chart">
-                <LkChart
-                  :data="data2"
-                  :options="options"
-                />
-              </div>
-            </div>
+          <div
+            v-else
+            class="item-lk__loader"
+          >
+            Товар не найден
           </div>
         </div>
       </div>
@@ -243,14 +242,24 @@ definePageMeta({
   layout: 'lk',
 })
 
+const { $toast } = useNuxtApp()
 const route = useRoute()
 
 const { slug } = route.params
+
 const isLoading = ref(false)
 const info = ref(null)
+// const fb = ref('fbo')
+const day = ref(30)
 
 const copyText = async (text) => {
-  await copyTextToClipboard(text)
+  try {
+    await copyTextToClipboard(text)
+
+    $toast.success('Артикул товара скопирован')
+  } catch (e) {
+    $toast.success('Не удалось скопировать артикул товара')
+  }
 }
 
 const dateFormat = (date) => {
@@ -261,48 +270,31 @@ const getProductUrl = (id) => {
   return new GenerateImgUrl(id, 'big').url()
 }
 
-const data1 = {
+const data = {
   labels: [],
   datasets: [
     {
-      label: 'Оборот по заказам',
-      valueSuffix: '₽',
-      borderColor: '#5480F2',
-      pointBorderColor: '#5480F2',
-      data: [],
-    },
-    {
-      label: 'Оборот по продажам',
-      valueSuffix: '₽',
-      borderColor: '#AE80EA',
-      pointBorderColor: '#AE80EA',
-      data: [],
-    },
-    {
-      label: 'Средний чек',
+      label: 'Цена',
       valueSuffix: '₽',
       borderColor: '#FF8F6D',
       pointBorderColor: '#FF8F6D',
-      data: [],
-    },
-  ],
-}
-
-const data2 = {
-  labels: [],
-  datasets: [
-    {
-      label: 'Остатки',
-      valueSuffix: 'шт.',
-      borderColor: '#22A873',
-      pointBorderColor: '#22A873',
+      labels: [],
       data: [],
     },
     {
-      label: 'Возвраты и поставки',
-      valueSuffix: 'шт.',
-      borderColor: '#98D920',
-      pointBorderColor: '#98D920',
+      label: 'Оборот по продажам FBO',
+      valueSuffix: '₽',
+      borderColor: '#AE80EA',
+      pointBorderColor: '#AE80EA',
+      labels: [],
+      data: [],
+    },
+    {
+      label: 'Оборот по продажам FBS',
+      valueSuffix: '₽',
+      borderColor: '#5480F2',
+      pointBorderColor: '#5480F2',
+      labels: [],
       data: [],
     },
   ],
@@ -310,56 +302,35 @@ const data2 = {
 
 const options = {}
 
-const setDefault1 = () => {
-  const labels = []
-  for (let i = 10; i <= 28; i++) {
-    labels.push(new Date(`2023-02-${i} 00:00:00`).getTime())
-  }
-  data1.labels = labels
+const setGraphicValues = () => {
+  const stats = info.value?.stats || []
 
-  const values1 = []
-  const values2 = []
-  const values3 = []
+  stats.forEach((item) => {
+    data.labels.push(new Date(item.date * 1000))
 
-  for (let i = 0; i <= 18; i++) {
-    values1.push(Math.floor(Math.random() * (135000 - 75000 + 1)) + 75000)
-    values2.push(Math.floor(Math.random() * (115000 - 10000 + 1)) + 10000)
-    values3.push(Math.floor(Math.random() * (100000 - 20000 + 1)) + 20000)
-  }
-  data1.datasets[0].data = values1
-  data1.datasets[1].data = values2
-  data1.datasets[2].data = values3
+    data.datasets[0].data.push(item.price)
+    data.datasets[1].data.push(item.profit_fbo)
+    data.datasets[2].data.push(item.profit_fbs)
+  })
 }
 
-const setDefault2 = () => {
-  const labels = []
-  for (let i = 10; i <= 28; i++) {
-    labels.push(new Date(`2023-02-${i} 00:00:00`).getTime())
-  }
-  data2.labels = labels
+const changeDate = (data) => {
+  day.value = data.day
 
-  const values1 = []
-  const values2 = []
-
-  for (let i = 0; i <= 18; i++) {
-    values1.push(Math.floor(Math.random() * (135000 - 75000 + 1)) + 75000)
-    values2.push(Math.floor(Math.random() * (115000 - 10000 + 1)) + 10000)
-  }
-  data2.datasets[0].data = values1
-  data2.datasets[1].data = values2
+  getItem()
 }
-
-setDefault1()
-setDefault2()
 
 const getItem = async () => {
   if (!slug) {
     return navigateTo('/lk')
   }
 
-  isLoading.value = true
+  // isLoading.value = true
   const { data } = await useFetch(`/api/products/${slug}`, {
     watch: false,
+    params: {
+      period: day.value,
+    },
   })
   isLoading.value = false
 
@@ -367,6 +338,7 @@ const getItem = async () => {
 }
 
 await getItem()
+setGraphicValues()
 </script>
 
 <style lang="scss" scoped>
@@ -411,6 +383,8 @@ await getItem()
     align-items: center;
     justify-content: center;
     margin: 100px auto;
+    font-size: 32px;
+    font-weight: bold;
   }
 }
 

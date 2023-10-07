@@ -4,17 +4,27 @@
       ТОП-5 товаров ниши
     </p>
 
-    <div class="top-items__cards">
+    <div
+      v-if="!isLoading"
+      class="top-items__cards"
+    >
       <LkNicheResumeTopItemsCard
         v-for="(item, i) in items"
         :key="i"
         :item="item"
-        :type="type"
+        :type="fb"
         :day="day"
       />
     </div>
+    <div
+      v-else
+      class="top-items__loader"
+    >
+      <UILoader />
+    </div>
 
     <UILkButton
+      to="#items"
       text="Смотреть все товары"
       class="top-items__btn"
     />
@@ -22,12 +32,8 @@
 </template>
 
 <script setup>
-defineProps({
-  items: {
-    type: Array,
-    default: () => ([]),
-  },
-  type: {
+const props = defineProps({
+  fb: {
     type: String,
     default: 'fbo',
   },
@@ -36,6 +42,50 @@ defineProps({
     default: 30,
   },
 })
+
+const route = useRoute()
+
+const { slug } = route.params
+
+const items = ref([])
+const isLoading = ref(true)
+
+watch(() => props.fb, () => {
+  getItems()
+})
+
+watch(() => props.day, () => {
+  getItems()
+})
+
+const getItems = async () => {
+  isLoading.value = true
+  items.value = []
+
+  const params = {
+    output: 'json',
+    fb: props.fb,
+  }
+
+  if (props.day) {
+    params.period = props.day
+  }
+
+  const { data } = await useFetch(`/api/queries/search?query=${slug}&view=products`, {
+    watch: false,
+    params: {
+      ...params,
+      sort: `profit_${props.day}_${props.fb}`,
+      direction: 'desc',
+      per_page: 5,
+    },
+  })
+  isLoading.value = false
+
+  items.value = data?.value?.items || []
+}
+
+getItems()
 </script>
 
 <style lang="scss" scoped>
@@ -54,6 +104,13 @@ defineProps({
     display: grid;
     grid-gap: 16px;
     grid-template-columns: repeat(5, 1fr);
+    margin-bottom: 32px;
+  }
+
+  &__loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 32px;
   }
 
