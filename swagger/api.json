@@ -511,7 +511,21 @@
                         "required": true,
                         "in": "query",
                         "type": "string"
-                    }
+                    },
+                    {
+                        "name": "view",
+                        "in": "query",
+                        "required": true,
+                        "description": "Что искать: товары, категории, бренды, продавцы, ключевые слова. Необходимо выбрать параметр из доступных",
+                        "type": "string",
+                        "enum": [
+                            "products",
+                            "categories",
+                            "brands",
+                            "suppliers",
+                            "keys"
+                        ]
+                    },
                 ],
                 "responses": {
                     "200": {
@@ -647,6 +661,11 @@
                         "required": true,
                         "in": "body",
                         "type": "string"
+                    },
+                    {
+                        "name": "phone",
+                        "in": "body",
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -750,6 +769,11 @@
                     },
                     {
                         "name": "email",
+                        "in": "body",
+                        "type": "string"
+                    },
+                    {
+                        "name": "phone",
                         "in": "body",
                         "type": "string"
                     },
@@ -1156,6 +1180,9 @@
                     "type": "string"
                 },
                 "last_name": {
+                    "type": "string"
+                },
+                "customer__phone": {
                     "type": "string"
                 },
                 "customer__subscribe_type": {

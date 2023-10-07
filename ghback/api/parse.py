@@ -1184,7 +1184,7 @@ class Parser(object):
         elif response['profit'] >= 5000000 and response['profit'] <= 100000000:
             response['scoring'] += 1
         elif response['profit'] > 100000000:
-            response['scoring'] -= 5
+            response['scoring'] -= 1
         # 8 Востребованность ниши - изменение количества продавцов 
         # с начала периода
         response['suppliers'] = curr_stat['product__supplier_id__count']
