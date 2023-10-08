@@ -622,9 +622,14 @@ def get_product_image(product):
 
 def get_product_name(query):
     name = query['first_product__name']
+    name = re.sub('[^a-zA-Zа-яА-Я0-9]', ' ', name)
+    name = re.sub('\s+', ' ', name).strip()
     if name is None:
         words = [query['root']] + query['features'][:2]
         return ' '.join(words)
+    words = name.split(' ')
+    if len(words) > 3 and morph.parse(words[2])[0].tag.POS == 'PREP':
+        return ' '.join(name.split(' ')[:4])
     return ' '.join(name.split(' ')[:3])
 
 
@@ -1177,8 +1182,8 @@ def search(request):
             Q(articul__icontains=query)
         )
         response['items'] = products.values(
-            'name', 'articul', 'basket', 'brand', 'brand_id', 
-            'supplier_id', 'rating', 'feedbacks', 'price', 
+            'name', 'articul', 'basket', 'brand', 'brand_id',
+            'supplier_id', 'rating', 'feedbacks', 'price',
             'priceU'
         )[:50]
 
