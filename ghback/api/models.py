@@ -142,6 +142,7 @@ class Product(models.Model):
             models.Index(fields=['parsed_at']),
             models.Index(fields=['root', 'features']),
             models.Index(fields=['basket']),
+            models.Index(fields=['supplier_id']),
         ]
 
 
