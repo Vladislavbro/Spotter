@@ -75,7 +75,7 @@
             class="top__list"
           >
             <LkTopCard
-              v-for="item in items"
+              v-for="item in itemsSort"
               :key="item.id"
               :item="item"
             />
@@ -156,6 +156,20 @@ const filters = ref({})
 const isShowBtn = ref(true)
 const isLoadingPage = ref(true)
 const isLoading = ref(false)
+
+const itemsSort = computed(() => {
+  if (sortSlug.value === 'scoring') {
+    return items.value.sort((a, b) => {
+      if (sortDirection.value === 'desc') {
+        return b.scoring.scoring - a.scoring.scoring
+      } else {
+        return a.scoring.scoring - b.scoring.scoring
+      }
+    })
+  }
+
+  return items.value
+})
 
 const changeType = (value) => {
   items.value = []
