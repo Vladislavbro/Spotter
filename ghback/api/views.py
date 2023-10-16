@@ -106,7 +106,7 @@ def me(request):
     if request.user.is_authenticated:
         user = User.objects.prefetch_related('customer').filter(
             pk=request.user.id).values(
-                'id', 'email', 'first_name', 'last_name',
+                'id', 'email', 'first_name', 'last_name', 'customer__phone',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser').first()
         return JsonResponse(user)
@@ -117,7 +117,7 @@ def me(request):
             User.objects.prefetch_related('customer').filter(
                 email='test@test.ru'
             ).values(
-                'id', 'email', 'first_name', 'last_name',
+                'id', 'email', 'first_name', 'last_name', 'customer__phone',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser'
             ).first()
@@ -204,6 +204,7 @@ def signup(request):
     user.save()
     customer = Customer(
         user=user,
+        phone=body.get('phone', '').strip(),
         subscribe_type='demo',
         subscribe_until=(datetime.now() + timedelta(days=5)).timestamp()
     )
@@ -221,7 +222,7 @@ def accounts(request):
         user = User.objects.get(pk=request.user.id)
         if user.is_superuser:
             accounts = User.objects.prefetch_related('customer').all().values(
-                'id', 'email', 'first_name', 'last_name',
+                'id', 'email', 'first_name', 'last_name', 'customer__phone',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser')
             return JsonResponse({'accounts': list(accounts)})
@@ -243,10 +244,14 @@ def account(request):
                     customer.subscribe_until = body['subscribe_until']
                     customer.subscribe_type = body['subscribe_type']
                     customer.save()
+                if body.get('phone'):
+                    customer = Customer.objects.get(user=user)
+                    customer.phone = body['phone']
+                    customer.save()
                 user = User.objects.prefetch_related('customer').filter(
                     pk=body.get('id')).values(
                         'id', 'email', 'first_name', 'last_name',
-                        'customer__subscribe_type',
+                        'customer__subscribe_type', 'customer__phone',
                         'customer__subscribe_until', 'is_staff',
                         'is_superuser').first()
                 return JsonResponse(user)
@@ -269,15 +274,16 @@ def account(request):
                 customer = Customer(
                     user=user
                 )
-                customer.save()
+                if body.get('phone'):
+                    customer.phone = body['phone']
                 if body.get('subscribe_until'):
                     customer.subscribe_until = body['subscribe_until']
                     customer.subscribe_type = body['subscribe_type']
-                    customer.save()
+                customer.save()
                 return JsonResponse(User.objects.prefetch_related(
                     'customer').filter(pk=user.id).values(
                         'id', 'email', 'first_name', 'last_name',
-                        'customer__subscribe_type',
+                        'customer__subscribe_type', 'customer__phone',
                         'customer__subscribe_until', 'is_staff',
                         'is_superuser').first())
     return JsonResponse({})
@@ -513,6 +519,7 @@ def queries_top(request):
         config = Config.objects.filter(calculated=True).first()
     items = Query.objects.prefetch_related('first_product').filter(
         parsing_id=config.current_parsing_id,
+        scoring__gt=0,
         # products_count__lte=2500,
         # products_count__gte=10,
     )
@@ -615,9 +622,14 @@ def get_product_image(product):
 
 def get_product_name(query):
     name = query['first_product__name']
+    name = re.sub('[^a-zA-Zа-яА-Я0-9]', ' ', name)
+    name = re.sub('\s+', ' ', name).strip()
     if name is None:
         words = [query['root']] + query['features'][:2]
         return ' '.join(words)
+    words = name.split(' ')
+    if len(words) > 3 and morph.parse(words[2])[0].tag.POS == 'PREP':
+        return ' '.join(name.split(' ')[:4])
     return ' '.join(name.split(' ')[:3])
 
 
@@ -1151,33 +1163,73 @@ def supplier(request, supplierId):
 
 def search(request):
     query = request.GET.get('query')
-    root, features = get_keys(query)
-    names = list(Product.objects.filter(
-        root=root, features__contains=features
-    ).values('name').distinct()[:100])
-    # words = [n['name'].lower().split(' ') for n in names]
-    variants = []
-    for name in names:
-        name = re.sub(r'\W', ' ', name['name'])
-        name = re.sub(r'\s+', ' ', name)
-        words = name.lower().split(' ')
-        if root in words:
-            variant = []
-            index = words.index(root)
-            variant.append(words[index])
-            if len(words) > index + 1:
-                if len(words[index + 1]) > 2:
-                    variant.append(words[index + 1])
-                elif len(words) > index + 2 and len(words[index + 2]) > 2:
-                    variant += words[index + 1:index + 3]
-            if len(variant) > 1:
-                variants.append(' '.join(variant))
-    return JsonResponse({
+    views = ['products', 'categories', 'brands', 'suppliers', 'keys']
+    view = request.GET.get('view')
+    response = JsonResponse({
         'query': query,
-        'features': features,
-        'root': root,
-        'variants': list(set(variants))
+        'view': view,
     })
+    if view not in views:
+        message = (
+            'Необходимо выбрать что искать, '
+            f'варианты: {", ".join(views)}'
+        )
+        response['message'] = message
+
+    if view == 'products':
+        products = Product.objects.filter(
+            Q(name__icontains=query) | 
+            Q(articul__icontains=query)
+        )
+        response['items'] = products.values(
+            'name', 'articul', 'basket', 'brand', 'brand_id',
+            'supplier_id', 'rating', 'feedbacks', 'price',
+            'priceU'
+        )[:50]
+
+    if view == 'categories':
+        categories = Category.objects.filter(name__icontains=query)
+        response['items'] = list(categories.values()[:50])
+
+    if view == 'brands':
+        products = Product.objects.filter(brand__icontains=query)
+        brands = list(products.values_list('brand', flat=True).distinct()[:50])
+        response['items'] = brands
+
+    if view == 'suppliers':
+        suppliers = Supplier.objects.filter(
+            Q(name__icontains=query) | 
+            Q(trademark__icontains=query)
+        )
+        response['items'] = list(suppliers.values()[:50])
+
+    if view == 'keys':
+        root, features = get_keys(query)
+        names = list(Product.objects.filter(
+            root=root, features__contains=features
+        ).values('name').distinct()[:100])
+        # words = [n['name'].lower().split(' ') for n in names]
+        variants = []
+        for name in names:
+            name = re.sub(r'\W', ' ', name['name'])
+            name = re.sub(r'\s+', ' ', name)
+            words = name.lower().split(' ')
+            if root in words:
+                variant = []
+                index = words.index(root)
+                variant.append(words[index])
+                if len(words) > index + 1:
+                    if len(words[index + 1]) > 2:
+                        variant.append(words[index + 1])
+                    elif len(words) > index + 2 and len(words[index + 2]) > 2:
+                        variant += words[index + 1:index + 3]
+                if len(variant) > 1:
+                    variants.append(' '.join(variant))
+        response['features'] = features
+        response['root'] = root
+        response['variants'] = list(set(variants))
+
+    return response
 
 
 @csrf_exempt
