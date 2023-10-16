@@ -28,7 +28,7 @@
             >
               <td v-if="headColumns[0].show">
                 <NuxtLink
-                  :to="`/lk/seller/${item.id}`"
+                  :to="`/lk/seller/${item.wb_id}?name=${item.name}`"
                   class="brand-sellers-table__name"
                 >
                   {{ item.name }}

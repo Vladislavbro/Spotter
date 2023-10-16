@@ -1,17 +1,18 @@
 <template>
-  <NuxtLink
-    :to="link"
+  <a
+    :href="link"
     class="go-back"
+    @click.prevent="goTo()"
   >
     <span class="go-back__icon">
       <UIBaseIcon name="lk/icon-arrow-left" />
     </span>
     {{ text }}
-  </NuxtLink>
+  </a>
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   link: {
     type: String,
     default: '',
@@ -19,8 +20,22 @@ defineProps({
   text: {
     type: String,
     default: '',
-  }
+  },
 })
+
+const router = useRouter()
+
+const goTo = () => {
+  if (props.link) {
+    return router.push(props.link)
+  }
+
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    router.push('/lk')
+  }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -107,6 +107,7 @@ definePageMeta({
 
 const headColumns = ref([
   // { label: 'Название, характеристики', sort: false, show: true },
+  { label: 'Рейтинг', slug: 'scoring', sort: true, show: true },
   { label: 'Товары, шт.', slug: 'products_count', sort: true, show: true },
   { label: 'Товары с продажами', slug: 'products_solded_30_fbo', sort: true, show: true },
   { label: 'Средний чек', slug: 'price_avg', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
@@ -121,8 +122,8 @@ const page = ref(1)
 const fb = ref('fbo')
 const day = ref(null)
 const date = ref(null)
-const sortSlug = ref('products_count')
-const sortDirection = ref('asc')
+const sortSlug = ref('scoring')
+const sortDirection = ref('desc')
 
 const initialFilters = reactive({
   scoring: {

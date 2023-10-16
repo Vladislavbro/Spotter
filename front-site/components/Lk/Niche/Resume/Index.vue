@@ -31,7 +31,10 @@
           class="niche-resume__stats"
         />
 
-        <LkNicheResumeGraphic />
+        <LkNicheResumeGraphic
+          :fb="fb"
+          :day="day"
+        />
       </template>
       <div
         v-else
@@ -94,28 +97,28 @@ const setPerspective = () => {
   const profitTopSupDiff = item?.value?.profit_top_sup_diff || 0 // Объем рынка у топ 10 (динамика)
   const productSoldedDiff = item?.value?.product_solded_diff || 0 // SPP - Процент товаров с продажами (динамика)
 
-  const salesSpeedAvg = item?.value?.sales_speed_avg || 0 // Средняя скорость продаж
-  const supplierProfitAvg = item?.value?.supplier_profit_avg || 0 // Средний оборот на продавца
-  const supplierSoldDiff = item?.value?.supplier_sold_diff || 0 // SPS - процент продавцов с продажами
+  // const salesSpeedAvg = item?.value?.sales_speed_avg || 0 // Средняя скорость продаж
+  // const supplierProfitAvg = item?.value?.supplier_profit_avg || 0 // Средний оборот на продавца
+  // const supplierSoldDiff = item?.value?.supplier_sold_diff || 0 // SPS - процент продавцов с продажами
 
-  const item1 = { title: '', text: '', score: 0, type: 'sales', type_text: 'Продажи' }
-  const item2 = { title: '', text: '', score: 0, type: 'sales', type_text: 'Продажи' }
-  const item3 = { title: '', text: '', score: 0, type: 'sales', type_text: 'Продажи' }
-  const item4 = { title: '', text: '', score: 0, type: 'sales', type_text: 'Продажи' }
+  const item1 = { title: '', text: '', score: 0, type: 'sales', type_text: 'Продажи', show: true }
+  const item2 = { title: '', text: '', score: 0, type: 'sales', type_text: 'Продажи', show: true }
+  const item3 = { title: '', text: '', score: 0, type: 'sales', type_text: 'Продажи', show: true }
+  const item4 = { title: '', text: '', score: 0, type: 'sales', type_text: 'Продажи', show: true }
 
-  const item5 = { title: '', text: '', score: 0, type: 'shop', type_text: 'Рынок' }
-  const item6 = { title: '', text: '', score: 0, type: 'shop', type_text: 'Рынок' }
-  const item7 = { title: '', text: '', score: 0, type: 'shop', type_text: 'Рынок' }
+  const item5 = { title: '', text: '', score: 0, type: 'shop', type_text: 'Рынок', show: true }
+  const item6 = { title: '', text: '', score: 0, type: 'shop', type_text: 'Рынок', show: true }
+  const item7 = { title: '', text: '', score: 0, type: 'shop', type_text: 'Рынок', show: true }
 
-  const item8 = { title: '', text: '', score: 0, type: 'conc', type_text: 'Конкуренция' }
-  const item9 = { title: '', text: '', score: 0, type: 'conc', type_text: 'Конкуренция' }
-  const item10 = { title: '', text: '', score: 0, type: 'conc', type_text: 'Конкуренция' }
-  const item11 = { title: '', text: '', score: 0, type: 'conc', type_text: 'Конкуренция' }
-  const item12 = { title: '', text: '', score: 0, type: 'conc', type_text: 'Конкуренция' }
+  const item8 = { title: '', text: '', score: 0, type: 'conc', type_text: 'Конкуренция', show: true }
+  const item9 = { title: '', text: '', score: 0, type: 'conc', type_text: 'Конкуренция', show: false }
+  const item10 = { title: '', text: '', score: 0, type: 'conc', type_text: 'Конкуренция', show: false }
+  const item11 = { title: '', text: '', score: 0, type: 'conc', type_text: 'Конкуренция', show: false }
+  const item12 = { title: '', text: '', score: 0, type: 'conc', type_text: 'Конкуренция', show: false }
 
-  const item13 = { title: '', text: '', score: 0, type: '', type_text: 'Доп показатели' }
-  const item14 = { title: '', text: '', score: 0, type: '', type_text: 'Доп показатели' }
-  const item15 = { title: '', text: '', score: 0, type: '', type_text: 'Доп показатели' }
+  // const item13 = { title: '', text: '', score: 0, type: '', type_text: 'Доп показатели' }
+  // const item14 = { title: '', text: '', score: 0, type: '', type_text: 'Доп показатели' }
+  // const item15 = { title: '', text: '', score: 0, type: '', type_text: 'Доп показатели' }
 
   if (priceAvgDiff > 1.01) {
     item1.title = 'Средний чек растет'
@@ -276,7 +279,7 @@ const setPerspective = () => {
     item11.title = 'Объем рынка у топ 10 (динамика)'
     item11.text = ''
     item11.score = -1
-  } else if (profitTopSupDiff <= 1.01 && productSoldedDiff >= 0.9) {
+  } else if (profitTopSupDiff <= 1.01 && profitTopSupDiff >= 0.9) {
     item11.title = 'Объем рынка у топ 10 (динамика)'
     item11.text = ''
     item11.score = 0
@@ -302,50 +305,50 @@ const setPerspective = () => {
   }
   perspectives.value.push(item12)
 
-  if (salesSpeedAvg >= 1) {
-    item13.title = 'Средняя скорость продаж'
-    item13.text = ''
-    item13.score = 1
-  } else if (salesSpeedAvg >= 0.3 && salesSpeedAvg < 1) {
-    item13.title = 'Средняя скорость продаж'
-    item13.text = ''
-    item13.score = 0
-  } else if (salesSpeedAvg < 0.3) {
-    item13.title = 'Средняя скорость продаж'
-    item13.text = ''
-    item13.score = -1
-  }
-  perspectives.value.push(item13)
+  // if (salesSpeedAvg >= 1) {
+  //   item13.title = 'Средняя скорость продаж'
+  //   item13.text = ''
+  //   item13.score = 1
+  // } else if (salesSpeedAvg >= 0.3 && salesSpeedAvg < 1) {
+  //   item13.title = 'Средняя скорость продаж'
+  //   item13.text = ''
+  //   item13.score = 0
+  // } else if (salesSpeedAvg < 0.3) {
+  //   item13.title = 'Средняя скорость продаж'
+  //   item13.text = ''
+  //   item13.score = -1
+  // }
+  // perspectives.value.push(item13)
 
-  if (supplierProfitAvg >= 100000) {
-    item14.title = 'Средний оборот на продавца'
-    item14.text = ''
-    item14.score = 1
-  } else if (supplierProfitAvg >= 20000 && supplierProfitAvg < 100000) {
-    item14.title = 'Средний оборот на продавца'
-    item14.text = ''
-    item14.score = 0
-  } else if (supplierProfitAvg < 20000) {
-    item14.title = 'Средний оборот на продавца'
-    item14.text = ''
-    item14.score = -1
-  }
-  perspectives.value.push(item14)
+  // if (supplierProfitAvg >= 100000) {
+  //   item14.title = 'Средний оборот на продавца'
+  //   item14.text = ''
+  //   item14.score = 1
+  // } else if (supplierProfitAvg >= 20000 && supplierProfitAvg < 100000) {
+  //   item14.title = 'Средний оборот на продавца'
+  //   item14.text = ''
+  //   item14.score = 0
+  // } else if (supplierProfitAvg < 20000) {
+  //   item14.title = 'Средний оборот на продавца'
+  //   item14.text = ''
+  //   item14.score = -1
+  // }
+  // perspectives.value.push(item14)
 
-  if (supplierSoldDiff >= 0.5) {
-    item15.title = 'SPS - процент продавцов с продажами'
-    item15.text = ''
-    item15.score = 1
-  } else if (supplierSoldDiff >= 0.2 && supplierSoldDiff < 0.5) {
-    item15.title = 'SPS - процент продавцов с продажами'
-    item15.text = ''
-    item15.score = 0
-  } else if (supplierSoldDiff < 0.2) {
-    item15.title = 'SPS - процент продавцов с продажами'
-    item15.text = ''
-    item15.score = -1
-  }
-  perspectives.value.push(item15)
+  // if (supplierSoldDiff >= 0.5) {
+  //   item15.title = 'SPS - процент продавцов с продажами'
+  //   item15.text = ''
+  //   item15.score = 1
+  // } else if (supplierSoldDiff >= 0.2 && supplierSoldDiff < 0.5) {
+  //   item15.title = 'SPS - процент продавцов с продажами'
+  //   item15.text = ''
+  //   item15.score = 0
+  // } else if (supplierSoldDiff < 0.2) {
+  //   item15.title = 'SPS - процент продавцов с продажами'
+  //   item15.text = ''
+  //   item15.score = -1
+  // }
+  // perspectives.value.push(item15)
 }
 
 const changeType = (value) => {

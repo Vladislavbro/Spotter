@@ -104,7 +104,7 @@
                       Продавец
                     </p>
                     <NuxtLink
-                      :to="`/lk/seller/${info.supplier_id}?name=${info?.supplier?.name || ''}&id=${info?.supplier?.wb_id || ''}`"
+                      :to="`/lk/seller/${info.supplier_id}?name=${info?.supplier?.name || ''}`"
                       class="item-lk-card__value item-lk-card__value--link"
                     >
                       {{ info?.supplier?.name || '' }}

@@ -37,7 +37,7 @@
             name="fade"
             mode="out-in"
           >
-            <LkNicheResume
+            <LazyLkNicheResume
               v-if="tabActive === 'common'"
             />
             <LazyLkNicheItems
@@ -59,7 +59,7 @@ const route = useRoute()
 
 const { slug } = route.params
 
-const tabActive = ref('common')
+const tabActive = ref(null)
 const tabs = ref([
   { label: 'Сводка', slug: 'common' },
   { label: 'Товары', slug: 'items', count: '1200' },
@@ -72,12 +72,12 @@ watch(() => route.hash, (hash) => {
 
 const setTab = (data) => {
   const hash = (data || route.hash).replace('#', '')
-  if (hash) {
-    tabActive.value = hash
-  }
+  tabActive.value = hash || 'common'
 }
 
-setTab()
+onMounted(() => {
+  setTab()
+})
 </script>
 
 <style lang="scss" scoped>

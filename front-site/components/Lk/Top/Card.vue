@@ -84,7 +84,7 @@
           Товаров с продажами:
         </p>
         <p class="top-card__value">
-          {{ item.products_solded || 0 }}
+          {{ item.products_solded || 0 }} %
         </p>
       </div>
     </div>
