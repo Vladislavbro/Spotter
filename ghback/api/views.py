@@ -656,7 +656,8 @@ def queries_search(request):
     view = request.GET.get('view')
     query = request.GET.get('query')
     if request.GET.get('product_id'):
-        product = Product.objects.get(pk=request.GET.get('product_id'))
+        product_id = int(request.GET.get('product_id'))
+        product = Product.objects.get(pk=product_id)
         query_root, query_features = product.root, product.features
     else:
         query_root, query_features = get_keys(query)
