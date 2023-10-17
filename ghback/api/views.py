@@ -1186,11 +1186,11 @@ def search(request):
             Q(name__icontains=query) | 
             Q(articul__icontains=query)
         )
-        response['items'] = products.values(
+        response['items'] = list(products.values(
             'name', 'articul', 'basket', 'brand', 'brand_id',
             'supplier_id', 'rating', 'feedbacks', 'price',
             'priceU'
-        )[:50]
+        )[:50])
 
     if view == 'categories':
         categories = Category.objects.filter(name__icontains=query)
