@@ -84,7 +84,7 @@
               </td>
               <td>
                 <NuxtLink
-                  :to="`/lk/seller/${item.product__supplier_id}?name=${item?.supplier?.name || ''}&id=${item?.supplier?.wb_id || ''}`"
+                  :to="`/lk/seller/${item.product__supplier_id}?name=${item?.supplier?.name || ''}`"
                   class="brand-items-table__link"
                 >
                   {{ item?.supplier?.name || '--' }}

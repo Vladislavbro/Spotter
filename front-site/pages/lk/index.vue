@@ -75,7 +75,7 @@
             class="top__list"
           >
             <LkTopCard
-              v-for="item in items"
+              v-for="item in itemsSort"
               :key="item.id"
               :item="item"
             />
@@ -107,6 +107,7 @@ definePageMeta({
 
 const headColumns = ref([
   // { label: 'Название, характеристики', sort: false, show: true },
+  { label: 'Рейтинг', slug: 'scoring', sort: true, show: true },
   { label: 'Товары, шт.', slug: 'products_count', sort: true, show: true },
   { label: 'Товары с продажами', slug: 'products_solded_30_fbo', sort: true, show: true },
   { label: 'Средний чек', slug: 'price_avg', sort: true, show: true, info: 'Изменение по отношению к прошлому периоду в процентах' },
@@ -121,8 +122,8 @@ const page = ref(1)
 const fb = ref('fbo')
 const day = ref(null)
 const date = ref(null)
-const sortSlug = ref('products_count')
-const sortDirection = ref('asc')
+const sortSlug = ref('scoring')
+const sortDirection = ref('desc')
 
 const initialFilters = reactive({
   scoring: {
@@ -155,6 +156,20 @@ const filters = ref({})
 const isShowBtn = ref(true)
 const isLoadingPage = ref(true)
 const isLoading = ref(false)
+
+const itemsSort = computed(() => {
+  if (sortSlug.value === 'scoring') {
+    return items.value.sort((a, b) => {
+      if (sortDirection.value === 'desc') {
+        return b.scoring.scoring - a.scoring.scoring
+      } else {
+        return a.scoring.scoring - b.scoring.scoring
+      }
+    })
+  }
+
+  return items.value
+})
 
 const changeType = (value) => {
   items.value = []

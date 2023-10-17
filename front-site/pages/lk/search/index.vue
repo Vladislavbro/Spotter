@@ -8,17 +8,17 @@
           </p>
           <div class="search-lk-card__list">
             <button
-              v-for="(item, i) in listWhat"
+              v-for="(item, i) in types"
               :key="i"
-              :class="['search-lk-card__btn', { 'search-lk-card__btn--active' : item.value === what}]"
-              @click.prevent="what = item.value"
+              :class="['search-lk-card__btn', { 'search-lk-card__btn--active' : item.value === type}]"
+              @click.prevent="changeType(item.value)"
             >
               {{ item.label }}
             </button>
           </div>
         </div>
 
-        <div class="search-lk-card">
+        <!-- <div class="search-lk-card">
           <p class="search-lk-card__title">
             Как ищем?
           </p>
@@ -32,7 +32,7 @@
               {{ item.label }}
             </button>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <div class="search-lk__content">
@@ -155,22 +155,22 @@ definePageMeta({
   layout: 'lk',
 })
 
-const listWhat = [
-  { label: 'Товары', value: 'items' },
+const types = [
+  { label: 'Товары', value: 'products' },
   { label: 'Категории', value: 'categories' },
   { label: 'Бренды', value: 'brands' },
-  { label: 'Продавцы', value: 'sellers' },
-  { label: 'Ключевые слова', value: 'words' },
+  { label: 'Продавцы', value: 'suppliers' },
+  { label: 'Ключевые слова', value: 'keys' },
 ]
+const type = ref('products')
 
-const listHow = [
-  { label: 'По названию товара', value: 'name' },
-  { label: 'По артикулу товара', value: 'article' },
-  { label: 'По типу товара', value: 'type' },
-]
+// const listHow = [
+//   { label: 'По названию товара', value: 'name' },
+//   { label: 'По артикулу товара', value: 'article' },
+//   { label: 'По типу товара', value: 'type' },
+// ]
 
-const what = ref('items')
-const how = ref('name')
+// const how = ref('name')
 
 const search = ref('')
 
@@ -205,10 +205,24 @@ const searchResults = (query) => {
   getResults(query)
 }
 
+const changeType = (value) => {
+  type.value = value
+
+  if (search.value) {
+    isLoadHints.value = true
+    hints.value = []
+    results.value = []
+
+    getHints()
+  }
+}
+
 const getHints = async () => {
   const { data } = await useFetch('/api/search', {
+    watch: false,
     params: {
       query: search.value,
+      view: type.value,
     },
   })
   isLoadHints.value = false
@@ -221,6 +235,7 @@ const getResults = async (query) => {
 
   const { data } = await useFetch('/api/queries/search', {
     params: {
+      watch: false,
       query,
       view: 'products',
     },

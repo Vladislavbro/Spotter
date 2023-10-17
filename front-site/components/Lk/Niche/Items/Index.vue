@@ -109,7 +109,7 @@
               </td>
               <td>
                 <NuxtLink
-                  :to="`/lk/seller/${item.product__supplier_id}?name=${item?.supplier?.name || ''}&id=${item?.supplier?.wb_id || ''}`"
+                  :to="`/lk/seller/${item.product__supplier_id}?name=${item?.supplier?.name || ''}`"
                   class="niche-items-table__link"
                 >
                   {{ item?.supplier?.name }}
@@ -144,10 +144,17 @@
             </tr>
           </tbody>
         </LkTable>
+
+        <div
+          v-if="isLoading"
+          class="niche-items__loader"
+        >
+          <UILoader />
+        </div>
       </div>
 
       <UILkButton
-        v-if="isShowBtn"
+        v-if="isShowBtn && !isLoading"
         text="Показать ещё"
         full-width
         class="niche-items__show-more"
@@ -188,8 +195,8 @@ const page = ref(1)
 const fb = ref('fbo')
 const day = ref(30)
 const date = ref(null)
-const sortSlug = ref('price')
-const sortDirection = ref('asc')
+const sortSlug = ref('profit_30_fbo')
+const sortDirection = ref('desc')
 
 const isShowBtn = ref(true)
 const isLoadingPage = ref(true)
@@ -272,9 +279,9 @@ const getData = async () => {
     params.period = day.value
   }
 
-  if (date.value) {
-    params.dateTo = date.value
-  }
+  // if (date.value) {
+  //   params.dateTo = date.value
+  // }
 
   const { data } = await useFetch(`/api/queries/search?query=${slug}&view=products`, {
     watch: false,
