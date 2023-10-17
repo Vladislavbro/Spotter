@@ -1170,10 +1170,10 @@ def search(request):
     query = request.GET.get('query')
     views = ['products', 'categories', 'brands', 'suppliers', 'keys']
     view = request.GET.get('view')
-    response = JsonResponse({
+    response = {
         'query': query,
         'view': view,
-    })
+    }
     if view not in views:
         message = (
             'Необходимо выбрать что искать, '
@@ -1234,7 +1234,7 @@ def search(request):
         response['root'] = root
         response['variants'] = list(set(variants))
 
-    return response
+    return JsonResponse(response)
 
 
 @csrf_exempt
