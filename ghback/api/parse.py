@@ -158,20 +158,21 @@ class Parser(object):
                     parsing_id=self.config.current_parsing_id,
                     product_id__in=product_ids).order_by(sort)[0:50]
                 for pstat in pstats:
-                    features = pstat.product.features
+                    product = pstat.product
+                    features = product.features
                     features.sort()
                     q = Query.objects.filter(
-                        root=pstat.product.root,
+                        root=product.root,
                         features=features,
                         parsing_id=self.config.current_parsing_id
                     ).first()
                     if q is None:
                         q = Query(
-                            root=pstat.product.root,
+                            root=product.root,
                             features=features,
                             parsing_id=self.config.current_parsing_id,
                             category_id=category.id,
-                            first_product=pstat.product,
+                            first_product=product,
                         )
                         q.save()
                         print(q.root, q.features)

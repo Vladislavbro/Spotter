@@ -579,6 +579,7 @@ def queries_top(request):
             'total': total,
             'items': [{
                 'id': i['id'],
+                'product_id': i['first_product__id'],
                 'product_name': get_product_name(i),
                 'product_image': get_product_image(i),
                 'product_articul': i['first_product__articul'],
@@ -592,7 +593,7 @@ def queries_top(request):
                 'price_avg': i[f'price_avg_{period}'],
                 'profit': i[f'profit_{period}_{fb}'],
             } for i in items.values(
-                'first_product__name', 'first_product__articul', 
+                'first_product__id', 'first_product__name', 'first_product__articul', 
                 'first_product__basket',
                 'id', 'scoring', 'root', 'features', 
                 'products_count', f'products_solded_{period}_{fb}', 
@@ -654,7 +655,11 @@ def get_keys(query):
 def queries_search(request):
     view = request.GET.get('view')
     query = request.GET.get('query')
-    query_root, query_features = get_keys(query)
+    if request.GET.get('product_id'):
+        product = Product.objects.get(pk=request.GET.get('product_id'))
+        query_root, query_features = product.root, product.features
+    else:
+        query_root, query_features = get_keys(query)
     # query_root, query_features = 'рубашка', ['белый', 'офисный']
     period = int(request.GET.get('period', '30'))
     fb = request.GET.get('fb', 'fbo')
@@ -1128,7 +1133,7 @@ def supplier(request, supplierId):
     if 'brands' in view:
         response['brands'] = list(Product.objects.filter(
             supplier_id=supplierId,
-        ).values('brand', 'brand_id'))
+        ).values('brand', 'brand_id').distinct())
     if 'products' in view:
         page = int(request.GET.get('page', '1'))
         per_page = int(request.GET.get('per_page', '100'))
