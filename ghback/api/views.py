@@ -18,16 +18,13 @@ from api.parse import Parser
 from api.basket import Basket
 from api.migrate import Migrate
 from api.models import (Category, Product, ProductStat,
-                        Config, Query, CategoryStat, Supplier)
+                        Config, Query, CategoryStat)
 from api.parse import nlp
 from dotenv import load_dotenv
 import os
 import random
 import string
-import pymorphy2
 
-
-morph = pymorphy2.MorphAnalyzer()
 load_dotenv()
 UNISENDER_KEY = os.getenv('UNISENDER_KEY')
 
@@ -106,7 +103,7 @@ def me(request):
     if request.user.is_authenticated:
         user = User.objects.prefetch_related('customer').filter(
             pk=request.user.id).values(
-                'id', 'email', 'first_name', 'last_name', 'customer__phone',
+                'id', 'username', 'email', 'first_name', 'last_name',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser').first()
         return JsonResponse(user)
@@ -117,7 +114,7 @@ def me(request):
             User.objects.prefetch_related('customer').filter(
                 email='test@test.ru'
             ).values(
-                'id', 'email', 'first_name', 'last_name', 'customer__phone',
+                'id', 'username', 'email', 'first_name', 'last_name',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser'
             ).first()
@@ -130,7 +127,7 @@ def me(request):
 
 def log_in(request):
     body = json.loads(request.body)
-    user = authenticate(username=body['email'].strip(),
+    user = authenticate(username=body['username'].strip(),
                         password=body['password'])
     if user is not None:
         login(request, user)
@@ -148,7 +145,7 @@ def change_password(request):
         user.save()
         send_mail_v2(
             subject='Пароль успешно изменен', 
-            content='Email: ' + user.email + '<br>Пароль: ' + body['new_password'], 
+            content='Логин: ' + user.username + '<br>Пароль: ' + body['new_password'], 
             email=user.email, user_id=user.id)
         return JsonResponse({'status': 'success', 
                              'message': 'Пароль успешно изменен'})
@@ -167,7 +164,7 @@ def change_password_v2(request):
         user.save()
         send_mail_v2(
             subject='Пароль успешно изменен', 
-            content='Email: ' + user.email + '<br>Пароль: ' + password,
+            content='Логин: ' + user.username + '<br>Пароль: ' + password,
             email=user.email, user_id=user.id)
         return JsonResponse({'status': 'success',
                              'message': 'Новый пароль отправлен на email'})
@@ -195,7 +192,7 @@ def signup(request):
                 'выберите другой или восстановите пароль.'
             )})
     user = User(
-        username=body['email'].strip(),
+        username=body['username'].strip(),
         email=body['email'].strip(),
         last_name=body['last_name'].strip(),
         first_name=body['first_name'].strip(),
@@ -204,7 +201,6 @@ def signup(request):
     user.save()
     customer = Customer(
         user=user,
-        phone=body.get('phone', '').strip(),
         subscribe_type='demo',
         subscribe_until=(datetime.now() + timedelta(days=5)).timestamp()
     )
@@ -212,7 +208,7 @@ def signup(request):
     login(request, user)
     send_mail_v2(
         subject='Успешная регистрация на сайте SPOTTER.FUN!', 
-        content='Email: ' + body['email'] + '<br>Пароль: ' + body['password'], 
+        content='Логин: ' + body['username'] + '<br>Пароль: ' + body['password'], 
         email=user.email, user_id=user.id)
     return JsonResponse({'status': 'success', 'user': model_to_dict(user)})
 
@@ -222,7 +218,7 @@ def accounts(request):
         user = User.objects.get(pk=request.user.id)
         if user.is_superuser:
             accounts = User.objects.prefetch_related('customer').all().values(
-                'id', 'email', 'first_name', 'last_name', 'customer__phone',
+                'id', 'username', 'email', 'first_name', 'last_name',
                 'customer__subscribe_type', 'customer__subscribe_until',
                 'is_staff', 'is_superuser')
             return JsonResponse({'accounts': list(accounts)})
@@ -244,14 +240,10 @@ def account(request):
                     customer.subscribe_until = body['subscribe_until']
                     customer.subscribe_type = body['subscribe_type']
                     customer.save()
-                if body.get('phone'):
-                    customer = Customer.objects.get(user=user)
-                    customer.phone = body['phone']
-                    customer.save()
                 user = User.objects.prefetch_related('customer').filter(
                     pk=body.get('id')).values(
-                        'id', 'email', 'first_name', 'last_name',
-                        'customer__subscribe_type', 'customer__phone',
+                        'id', 'username', 'email', 'first_name', 'last_name',
+                        'customer__subscribe_type',
                         'customer__subscribe_until', 'is_staff',
                         'is_superuser').first()
                 return JsonResponse(user)
@@ -263,8 +255,15 @@ def account(request):
                             'Пользователь с таким email уже существует, '
                             'выберите другой или восстановите пароль.'
                         )})
+                if User.objects.filter(username=body['username'].strip()).first():
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': (
+                            'Пользователь с таким логином уже существует, '
+                            'выберите другой или восстановите пароль.'
+                        )})
                 user = User(
-                    username=body['email'].strip(),
+                    username=body['username'].strip(),
                     email=body['email'].strip(),
                     last_name=body['last_name'].strip(),
                     first_name=body['first_name'].strip(),
@@ -274,16 +273,15 @@ def account(request):
                 customer = Customer(
                     user=user
                 )
-                if body.get('phone'):
-                    customer.phone = body['phone']
+                customer.save()
                 if body.get('subscribe_until'):
                     customer.subscribe_until = body['subscribe_until']
                     customer.subscribe_type = body['subscribe_type']
-                customer.save()
+                    customer.save()
                 return JsonResponse(User.objects.prefetch_related(
                     'customer').filter(pk=user.id).values(
-                        'id', 'email', 'first_name', 'last_name',
-                        'customer__subscribe_type', 'customer__phone',
+                        'id', 'username', 'email', 'first_name', 'last_name',
+                        'customer__subscribe_type',
                         'customer__subscribe_until', 'is_staff',
                         'is_superuser').first())
     return JsonResponse({})
@@ -373,19 +371,12 @@ def parser(request):
 
 
 def baskets(request):
-    native_ids = [t.native_id for t in threading.enumerate()]
-    config = Config.objects.first()
-    native_id = None
-    if config.baskets_thread_id not in native_ids:
-        t = threading.Thread(target=Basket, args=(), kwargs={})
-        t.setDaemon(True)
-        t.start()
-        native_id = t.native_id
-        config.baskets_thread_id = t.native_id
-        config.save()
-        print('baskets', t.native_id)
+    t = threading.Thread(target=Basket, args=(), kwargs={})
+    t.setDaemon(True)
+    t.start()
+    print('baskets', t.native_id)
     return JsonResponse({
-        'native_id': native_id,
+        'native_id': t.native_id,
         'status': 'success'
     })
 
@@ -517,9 +508,8 @@ def queries_top(request):
             })
     else:
         config = Config.objects.filter(calculated=True).first()
-    items = Query.objects.prefetch_related('first_product').filter(
+    items = Query.objects.filter(
         parsing_id=config.current_parsing_id,
-        scoring__gt=0,
         # products_count__lte=2500,
         # products_count__gte=10,
     )
@@ -579,10 +569,6 @@ def queries_top(request):
             'total': total,
             'items': [{
                 'id': i['id'],
-                'product_name': get_product_name(i),
-                'product_image': get_product_image(i),
-                'product_articul': i['first_product__articul'],
-                'scoring': i['scoring'],
                 'root': i['root'],
                 'features': ' '.join(i['features']),
                 'products_count': i['products_count'],
@@ -591,14 +577,7 @@ def queries_top(request):
                 'product_10_profit': i[f'product_10_profit_{period}_{fb}'],
                 'price_avg': i[f'price_avg_{period}'],
                 'profit': i[f'profit_{period}_{fb}'],
-            } for i in items.values(
-                'first_product__name', 'first_product__articul', 
-                'first_product__basket',
-                'id', 'scoring', 'root', 'features', 
-                'products_count', f'products_solded_{period}_{fb}', 
-                f'product_1_profit_{period}_{fb}', f'product_10_profit_{period}_{fb}',
-                f'price_avg_{period}', f'profit_{period}_{fb}'
-            )]
+            } for i in items.values()]
         })
     elif output == 'csv':
         return export_queries(items, dateTo, period, fb)
@@ -609,52 +588,19 @@ def queries_top(request):
         })
 
 
-def get_product_image(product):
-    basket = product['first_product__basket']
-    articul = product['first_product__articul']
-    if basket is None:
-        return None
-    image_url = f'https://basket-{basket}.wb.ru/'
-    image_url += f'vol{str(articul)[:4]}/part{str(articul)[:6]}/'
-    image_url += f'{articul}/images/big/1.webp'
-    return image_url
-
-
-def get_product_name(query):
-    name = query['first_product__name']
-    name = re.sub('[^a-zA-Zа-яА-Я0-9]', ' ', name)
-    name = re.sub('\s+', ' ', name).strip()
-    if name is None:
-        words = [query['root']] + query['features'][:2]
-        return ' '.join(words)
-    words = name.split(' ')
-    if len(words) > 3 and morph.parse(words[2])[0].tag.POS == 'PREP':
-        return ' '.join(name.split(' ')[:4])
-    return ' '.join(name.split(' ')[:3])
-
-
-def get_keys(query):
-    query = re.sub(r'[\W\d]', ' ', query)
-    query = re.sub(r'\s+', ' ', query)
-    doc = nlp(query.strip())
-    features = list(set([w for w in doc if morph.parse(w.lemma_)[0].tag.POS == 'ADJF' or w.tag_ == 'ADJ']))
-    doc = [t for t in doc if t not in features]
-    root = [
-        w for w in doc if (
-            (
-                morph.parse(w.lemma_)[0].tag.POS == 'NOUN' or 
-                w.dep_ == 'ROOT' or 
-                w.tag_ == 'NOUN'
-            ) and len(w.lemma_) > 2
-        )
-    ]
-    return root[0].lemma_ if len(root) else None, [f.lemma_ for f in features]
-
-
 def queries_search(request):
     view = request.GET.get('view')
     query = request.GET.get('query')
-    query_root, query_features = get_keys(query)
+    doc = nlp(query)
+    root = [w for w in doc if w.dep_ == 'ROOT'][0]
+    if root.tag_ != 'NOUN':
+        nsubj = [w for w in doc if w.dep_ == 'nsubj']
+        if len(nsubj):
+            root = nsubj[0]
+    query_root = root.lemma_
+    features = list(set([w.lemma_ for w in doc if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
+    features.sort()
+    query_features = features
     # query_root, query_features = 'рубашка', ['белый', 'офисный']
     period = int(request.GET.get('period', '30'))
     fb = request.GET.get('fb', 'fbo')
@@ -734,15 +680,8 @@ def queries_search(request):
             response['items'] = list(productstats[((page - 1) * per_page):page * per_page].values(
                 'id', 'price', 'priceU', f'profit_{period}_{fb}', 
                 f'sales_{period}_{fb}', 'product__name', 'product__articul', 
-                'product__rating', 'product__feedbacks', 'product__supplier_id',
-                'product__brand', 'product__brand_id', 'product__articul'
+                'product__rating', 'product__feedbacks',
             ))
-            supplier_ids = [p['product__supplier_id'] for p in response['items']]
-            suppliers = Supplier.objects.filter(wb_id__in=supplier_ids).values()
-            for item in response['items']:
-                supplier = [s for s in suppliers if s['wb_id'] == item['product__supplier_id']]
-                if len(supplier):
-                    item['supplier'] = supplier[0]
     if 'graphs' in view:
         start = (datetime.now() - timedelta(days=30)).replace(
                 hour=0, minute=0, second=0, microsecond=0).timestamp()
@@ -977,7 +916,6 @@ def product(request, articul):
         parsing_id__lte=end.timestamp(),
     )
     if product:
-        supplier = Supplier.objects.get(wb_id=product.supplier_id)
         out = {
             'name': product.name,
             'articul': product.articul,
@@ -990,7 +928,6 @@ def product(request, articul):
             'supplier_id': product.supplier_id,
             'brand_id': product.brand_id,
             'brand': product.brand,
-            'supplier': model_to_dict(supplier) if supplier else None,
             'stats': [{
                 'date': stat.parsing_id,
                 'profit_fbo': stat.profit_fbo,
@@ -1015,7 +952,6 @@ def product(request, articul):
 
 
 def brand(request, brandId):
-    view = request.GET.get('view', '')
     period = int(request.GET.get('period', '30'))
     dateTo = request.GET.get('date')
     if dateTo:
@@ -1023,74 +959,30 @@ def brand(request, brandId):
             hour=23, minute=59, second=59)
         start = (end - timedelta(days=period)).replace(
             hour=0, minute=0, second=0)
-        config = Config.objects.filter(
-            calculated=True,
-            current_parsing_id__lte=end.timestamp(),
-        ).first()
     else:
         end = datetime.now()
         start = (end - timedelta(days=period)).replace(
             hour=0, minute=0, second=0)
-        config = Config.objects.filter(calculated=True).first()
     product_ids = Product.objects.filter(
         brand_id=brandId,
     ).values_list('id', flat=True)
-    total = product_ids.count()
-    response = dict()
-    if 'graphs' in view:
-        productstats = ProductStat.objects.prefetch_related('product').filter(
-            parsing_id__gte=start.timestamp(),
-            parsing_id__lte=end.timestamp(),
-            product_id__in=product_ids
-        )
-        response['graphs'] = list(productstats.values('parsing_id').annotate(
+    productstats = ProductStat.objects.prefetch_related('product').filter(
+        parsing_id__gte=start.timestamp(),
+        parsing_id__lte=end.timestamp(),
+        product_id__in=product_ids
+    )
+    return JsonResponse({
+        'graphs': list(productstats.values('parsing_id').annotate(
             price=Avg('price'),
             profit_fbo=Sum('profit_fbo'),
             profit_fbs=Sum('profit_fbs'),
             sales_fbo=Sum('sales_fbo'),
             sales_fbs=Sum('sales_fbs'),
         ))
-    if 'suppliers' in view:
-        supplier_ids = list(Product.objects.filter(
-            brand_id=brandId,
-        ).values_list('supplier_id', flat=True))
-        response['suppliers'] = list(
-            Supplier.objects.filter(wb_id__in=supplier_ids).values()
-        )
-    if 'products' in view:
-        page = int(request.GET.get('page', '1'))
-        per_page = int(request.GET.get('per_page', '100'))
-        sort = request.GET.get('sort')
-        direction = request.GET.get('direction')
-        fb = 'fbo'
-        productstats = ProductStat.objects.prefetch_related('product').filter(
-            parsing_id=config.current_parsing_id,
-            product_id__in=product_ids
-        )
-        if sort is not None:
-            if direction == 'desc':
-                direction = '-'
-            else:
-                direction = ''
-            productstats = productstats.order_by(f'{direction}{sort}')
-        response['total'] = total
-        response['items'] = list(productstats[((page - 1) * per_page):page * per_page].values(
-            'id', 'price', 'priceU', f'profit_{period}_{fb}', 
-            f'sales_{period}_{fb}', 'product__name', 'product__articul', 
-            'product__rating', 'product__feedbacks', 'product__supplier_id',
-            'product__brand', 'product__brand_id'
-        ))
-        supplier_ids = [p['product__supplier_id'] for p in response['items']]
-        suppliers = Supplier.objects.filter(wb_id__in=supplier_ids).values()
-        for item in response['items']:
-            supplier = [s for s in suppliers if s['wb_id'] == item['product__supplier_id']]
-            if len(supplier):
-                item['supplier'] = supplier[0]
-    return JsonResponse(response)
+    })
 
 
 def supplier(request, supplierId):
-    view = request.GET.get('view')
     period = int(request.GET.get('period', '30'))
     dateTo = request.GET.get('date')
     if dateTo:
@@ -1098,138 +990,67 @@ def supplier(request, supplierId):
             hour=23, minute=59, second=59)
         start = (end - timedelta(days=period)).replace(
             hour=0, minute=0, second=0)
-        config = Config.objects.filter(
-            calculated=True,
-            current_parsing_id__lte=end.timestamp(),
-        ).first()
     else:
         end = datetime.now()
         start = (end - timedelta(days=period)).replace(
             hour=0, minute=0, second=0)
-        config = Config.objects.filter(calculated=True).first()
     product_ids = Product.objects.filter(
         supplier_id=supplierId,
     ).values_list('id', flat=True)
-    total = product_ids.count()
-    response = dict()
-    if 'graphs' in view:
-        productstats = ProductStat.objects.prefetch_related('product').filter(
-            parsing_id__gte=start.timestamp(),
-            parsing_id__lte=end.timestamp(),
-            product_id__in=product_ids
-        )
-        response['graphs'] = list(productstats.values('parsing_id').annotate(
+    productstats = ProductStat.objects.prefetch_related('product').filter(
+        parsing_id__gte=start.timestamp(),
+        parsing_id__lte=end.timestamp(),
+        product_id__in=product_ids
+    )
+    return JsonResponse({
+        'graphs': list(productstats.values('parsing_id').annotate(
             price=Avg('price'),
             profit_fbo=Sum('profit_fbo'),
             profit_fbs=Sum('profit_fbs'),
             sales_fbo=Sum('sales_fbo'),
             sales_fbs=Sum('sales_fbs'),
         ))
-    if 'brands' in view:
-        response['brands'] = list(Product.objects.filter(
-            supplier_id=supplierId,
-        ).values('brand', 'brand_id'))
-    if 'products' in view:
-        page = int(request.GET.get('page', '1'))
-        per_page = int(request.GET.get('per_page', '100'))
-        sort = request.GET.get('sort')
-        direction = request.GET.get('direction')
-        fb = 'fbo'
-        productstats = ProductStat.objects.prefetch_related('product').filter(
-            parsing_id=config.current_parsing_id,
-            product_id__in=product_ids
-        )
-        if sort is not None:
-            if direction == 'desc':
-                direction = '-'
-            else:
-                direction = ''
-            productstats = productstats.order_by(f'{direction}{sort}')
-        response['total'] = total
-        response['items'] = list(productstats[((page - 1) * per_page):page * per_page].values(
-            'id', 'price', 'priceU', f'profit_{period}_{fb}', 
-            f'sales_{period}_{fb}', 'product__name', 'product__articul', 
-            'product__rating', 'product__feedbacks', 'product__supplier_id',
-            'product__brand', 'product__brand_id'
-        ))
-        supplier_ids = [p['product__supplier_id'] for p in response['items']]
-        suppliers = Supplier.objects.filter(wb_id__in=supplier_ids).values()
-        for item in response['items']:
-            supplier = [s for s in suppliers if s['wb_id'] == item['product__supplier_id']]
-            if len(supplier):
-                item['supplier'] = supplier[0]
-    return JsonResponse(response)
+    })
 
 
 def search(request):
     query = request.GET.get('query')
-    views = ['products', 'categories', 'brands', 'suppliers', 'keys']
-    view = request.GET.get('view')
-    response = JsonResponse({
+    doc = nlp(query)
+    root = [w for w in doc if w.dep_ == 'ROOT'][0]
+    if root.tag_ != 'NOUN':
+        nsubj = [w for w in doc if w.dep_ == 'nsubj']
+        if len(nsubj):
+            root = nsubj[0]
+    root = root.lemma_
+    features = list(set([w.lemma_ for w in doc 
+                         if w.tag_ == 'ADJ' and len(w.lemma_) > 1]))
+    features.sort()
+    names = list(Product.objects.filter(
+        root=root, features__contains=features
+    ).values('name').distinct()[:100])
+    # words = [n['name'].lower().split(' ') for n in names]
+    variants = []
+    for name in names:
+        name = re.sub(r'\W', ' ', name['name'])
+        name = re.sub(r'\s+', ' ', name)
+        words = name.lower().split(' ')
+        if root in words:
+            variant = []
+            index = words.index(root)
+            variant.append(words[index])
+            if len(words) > index + 1:
+                if len(words[index + 1]) > 2:
+                    variant.append(words[index + 1])
+                elif len(words) > index + 2 and len(words[index + 2]) > 2:
+                    variant += words[index + 1:index + 3]
+            if len(variant) > 1:
+                variants.append(' '.join(variant))
+    return JsonResponse({
         'query': query,
-        'view': view,
+        'features': features,
+        'root': root,
+        'variants': list(set(variants))
     })
-    if view not in views:
-        message = (
-            'Необходимо выбрать что искать, '
-            f'варианты: {", ".join(views)}'
-        )
-        response['message'] = message
-
-    if view == 'products':
-        products = Product.objects.filter(
-            Q(name__icontains=query) | 
-            Q(articul__icontains=query)
-        )
-        response['items'] = products.values(
-            'name', 'articul', 'basket', 'brand', 'brand_id',
-            'supplier_id', 'rating', 'feedbacks', 'price',
-            'priceU'
-        )[:50]
-
-    if view == 'categories':
-        categories = Category.objects.filter(name__icontains=query)
-        response['items'] = list(categories.values()[:50])
-
-    if view == 'brands':
-        products = Product.objects.filter(brand__icontains=query)
-        brands = list(products.values_list('brand', flat=True).distinct()[:50])
-        response['items'] = brands
-
-    if view == 'suppliers':
-        suppliers = Supplier.objects.filter(
-            Q(name__icontains=query) | 
-            Q(trademark__icontains=query)
-        )
-        response['items'] = list(suppliers.values()[:50])
-
-    if view == 'keys':
-        root, features = get_keys(query)
-        names = list(Product.objects.filter(
-            root=root, features__contains=features
-        ).values('name').distinct()[:100])
-        # words = [n['name'].lower().split(' ') for n in names]
-        variants = []
-        for name in names:
-            name = re.sub(r'\W', ' ', name['name'])
-            name = re.sub(r'\s+', ' ', name)
-            words = name.lower().split(' ')
-            if root in words:
-                variant = []
-                index = words.index(root)
-                variant.append(words[index])
-                if len(words) > index + 1:
-                    if len(words[index + 1]) > 2:
-                        variant.append(words[index + 1])
-                    elif len(words) > index + 2 and len(words[index + 2]) > 2:
-                        variant += words[index + 1:index + 3]
-                if len(variant) > 1:
-                    variants.append(' '.join(variant))
-        response['features'] = features
-        response['root'] = root
-        response['variants'] = list(set(variants))
-
-    return response
 
 
 @csrf_exempt
