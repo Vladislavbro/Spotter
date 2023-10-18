@@ -1055,7 +1055,7 @@ class Parser(object):
         query = Query.objects.get(pk=query_id)
         # date = datetime.now()
         # fb = 'fbo'
-        config = Config.objects.filter(calculated=True).first()
+        config = Config.objects.filter(parsing_done=True).first()
         if query.first_product_id:
             product = Product.objects.get(pk=query.first_product_id)
             query_root, query_features = self.get_keys(product.name)
