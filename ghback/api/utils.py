@@ -3,7 +3,7 @@ from django.db.models import Sum, Avg, Q, Count
 from datetime import datetime, timedelta
 
 
-def get_scoring_product_ids(product_ids, config):
+def get_scoring_productstats(product_ids, config):
     # print('get_query_scoring', model_to_dict(query))
 
     date = datetime.now()
