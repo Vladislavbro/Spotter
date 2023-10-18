@@ -8,31 +8,31 @@
           </p>
           <div class="search-lk-card__list">
             <button
-              v-for="(item, i) in types"
+              v-for="(item, i) in views"
               :key="i"
-              :class="['search-lk-card__btn', { 'search-lk-card__btn--active' : item.value === type}]"
-              @click.prevent="changeType(item.value)"
+              :class="['search-lk-card__btn', { 'search-lk-card__btn--active' : item.value === view}]"
+              @click.prevent="changeView(item.value)"
             >
               {{ item.label }}
             </button>
           </div>
         </div>
 
-        <!-- <div class="search-lk-card">
+        <div class="search-lk-card">
           <p class="search-lk-card__title">
             Как ищем?
           </p>
           <div class="search-lk-card__list">
             <button
-              v-for="(item, i) in listHow"
+              v-for="(item, i) in types"
               :key="i"
-              :class="['search-lk-card__btn', { 'search-lk-card__btn--active' : item.value === how}]"
-              @click.prevent="how = item.value"
+              :class="['search-lk-card__btn', { 'search-lk-card__btn--active' : item.value === type}]"
+              @click.prevent="type = item.value"
             >
               {{ item.label }}
             </button>
           </div>
-        </div> -->
+        </div>
       </div>
 
       <div class="search-lk__content">
@@ -96,21 +96,24 @@
               </div>
               <template v-else-if="results.length">
                 <NuxtLink
-                  v-for="(item, i) in results"
+                  v-for="(item, i) in finalResults"
                   :key="i"
-                  :to="`/lk/item/${item.product__articul}`"
+                  :to="item.link"
                   class="search-lk-results__category search-lk-results-category"
                 >
                   <div class="search-lk-results-category__name">
-                    {{ item.product__name }}
+                    {{ item.name }}
                     <!-- <span class="search-lk-results-category__category">
                       Красота / ногти
                     </span> -->
                   </div>
-                  <div class="search-lk-results-category__image">
+                  <div
+                    v-if="item.articul"
+                    class="search-lk-results-category__image"
+                  >
                     <img
                       v-lazy-load
-                      :data-src="getProductUrl(item.product__articul)"
+                      :data-src="getProductUrl(item.articul)"
                       alt=""
                     >
                   </div>
@@ -155,22 +158,22 @@ definePageMeta({
   layout: 'lk',
 })
 
-const types = [
+const views = [
   { label: 'Товары', value: 'products' },
-  { label: 'Категории', value: 'categories' },
-  { label: 'Бренды', value: 'brands' },
+  // { label: 'Категории', value: 'categories' },
+  // { label: 'Бренды', value: 'brands' },
   { label: 'Продавцы', value: 'suppliers' },
-  { label: 'Ключевые слова', value: 'keys' },
+  // { label: 'Ключевые слова', value: 'keys' },
 ]
-const type = ref('products')
+const view = ref('products')
 
-// const listHow = [
-//   { label: 'По названию товара', value: 'name' },
-//   { label: 'По артикулу товара', value: 'article' },
-//   { label: 'По типу товара', value: 'type' },
-// ]
+const types = [
+  { label: 'По названию товара', value: 'name' },
+  { label: 'По артикулу товара', value: 'articul' },
+  // { label: 'По типу товара', value: 'type' },
+]
 
-// const how = ref('name')
+const type = ref('name')
 
 const search = ref('')
 
@@ -179,11 +182,30 @@ const isLoadResults = ref(false)
 const hints = ref([])
 const results = ref([])
 
-const clear = () => {
-  search.value = ''
-  hints.value = []
-  results.value = []
-}
+const finalResults = computed(() => {
+  return results.value.map((item) => {
+    if (view.value === 'products') {
+      let link = ''
+      if (type.value === 'name') {
+        link = `/lk/niche/${item.name}`
+      } else if (type.value === 'articul') {
+        link = `/lk/item/${item.articul}`
+      }
+      return {
+        name: item.name,
+        link,
+        articul: item.articul,
+      }
+    } else if (view.value === 'suppliers') {
+      return {
+        name: `${item.name} (${item.inn}) | ${item.trademark}`,
+        link: `/lk/seller/${item.wb_id}?name=${item.name}`,
+      }
+    }
+
+    return {}
+  })
+})
 
 watch(() => search.value, (value) => {
   results.value = []
@@ -193,6 +215,12 @@ watch(() => search.value, (value) => {
     debounced(search.value)
   }
 })
+
+const clear = () => {
+  search.value = ''
+  hints.value = []
+  results.value = []
+}
 
 const getProductUrl = (id) => {
   return new GenerateImgUrl(id).url()
@@ -205,8 +233,8 @@ const searchResults = (query) => {
   getResults(query)
 }
 
-const changeType = (value) => {
-  type.value = value
+const changeView = (value) => {
+  view.value = value
 
   if (search.value) {
     isLoadHints.value = true
@@ -222,12 +250,16 @@ const getHints = async () => {
     watch: false,
     params: {
       query: search.value,
-      view: type.value,
+      view: view.value,
     },
   })
   isLoadHints.value = false
 
-  hints.value = data?.value?.variants || []
+  if (view.value === 'keys') {
+    hints.value = data?.value?.variants || []
+  } else {
+    results.value = data?.value?.items || []
+  }
 }
 
 const getResults = async (query) => {

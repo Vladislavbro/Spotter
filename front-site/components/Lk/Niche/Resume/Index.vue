@@ -56,6 +56,7 @@
 const route = useRoute()
 
 const { slug } = route.params
+const { product_id: productId } = route.query
 
 const isLoadingPage = ref(true)
 const isLoading = ref(false)
@@ -373,6 +374,10 @@ const getData = async () => {
 
   const params = {
     fb: fb.value,
+  }
+
+  if (productId) {
+    params.product_id = productId
   }
 
   if (day.value) {
