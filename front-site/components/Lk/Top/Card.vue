@@ -2,7 +2,7 @@
   <div class="top-card">
     <div class="top-card__box">
       <NuxtLink
-        :to="`/lk/niche/${item?.product_name?.toLowerCase()}`"
+        :to="link"
         class="top-card__image"
       >
         <img
@@ -15,7 +15,7 @@
 
       <div class="top-card__content">
         <NuxtLink
-          :to="`/lk/niche/${item?.product_name?.toLowerCase()}`"
+          :to="link"
           class="top-card__name"
         >
           {{ item.product_name }}
@@ -45,7 +45,7 @@
           </div>
 
           <NuxtLink
-            :to="`/lk/niche/${item?.product_name?.toLowerCase()}`"
+            :to="link"
             class="top-card__link"
           >
             Товары и аналитика
@@ -99,6 +99,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+})
+
+const link = computed(() => {
+  return `/lk/niche/${props.item?.product_name?.toLowerCase()}?product_id=${props.item?.product_id}`
 })
 
 const scoring = computed(() => {
