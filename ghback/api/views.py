@@ -1020,7 +1020,7 @@ def search(request):
             Q(articul__icontains=query)
         )
         response['items'] = list(products.values(
-            'name', 'articul', 'basket', 'brand', 'brand_id',
+            'id', 'name', 'articul', 'basket', 'brand', 'brand_id',
             'supplier_id', 'rating', 'feedbacks', 'price',
             'priceU'
         )[:50])
@@ -1031,7 +1031,7 @@ def search(request):
 
     if view == 'brands':
         products = Product.objects.filter(brand__icontains=query)
-        brands = list(products.values_list('brand', flat=True).distinct()[:50])
+        brands = list(products.values('brand', 'brand_id').distinct()[:50])
         response['items'] = brands
 
     if view == 'suppliers':
