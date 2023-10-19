@@ -226,6 +226,13 @@ const finalResults = computed(() => {
 })
 
 const fastSearch = computed(() => {
+  if (view.value === 'products' && type.value === 'name') {
+    return {
+      name: search.value,
+      link: `/lk/niche/${search.value}`,
+    }
+  }
+
   return finalResults.value.find(item => item.name.toLowerCase() === search.value.toLowerCase())
 })
 
