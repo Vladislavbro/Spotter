@@ -1031,7 +1031,7 @@ def search(request):
 
     if view == 'brands':
         products = Product.objects.filter(brand__icontains=query)
-        brands = list(products.values('brand' 'brand_id').distinct()[:50])
+        brands = list(products.values('brand', 'brand_id').distinct()[:50])
         response['items'] = brands
 
     if view == 'suppliers':
