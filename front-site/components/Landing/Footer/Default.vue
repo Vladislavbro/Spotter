@@ -1,5 +1,5 @@
 <template>
-  <footer :class="['footer', { 'footer--light' : themeLight }]">
+  <footer id="contacts" :class="['footer', { 'footer--light' : themeLight }]">
     <div :class="getContainerClass">
       <div class="footer__box">
         <div class="footer__col">

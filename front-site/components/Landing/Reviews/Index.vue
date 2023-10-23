@@ -1,5 +1,5 @@
 <template>
-  <div class="reviews">
+  <div id="reviews" class="reviews">
     <div class="container">
       <div class="reviews__box">
         <div class="reviews__header">

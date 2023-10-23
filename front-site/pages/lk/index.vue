@@ -41,10 +41,10 @@
             @submit="setFilters()"
           >
             <UILkFilter
-              v-model:from="initialFilters.scoring.from"
-              v-model:to="initialFilters.scoring.to"
-              label="Оценка"
-              :max-value="initialFilters.scoring.maxValue"
+              v-model:from="initialFilters.products_solded.from"
+              v-model:to="initialFilters.products_solded.to"
+              label="Товары с продажами, %"
+              :max-value="initialFilters.products_solded.maxValue"
             />
             <UILkFilter
               v-model:from="initialFilters.profit.from"
@@ -62,12 +62,12 @@
               label="Средний чек, ₽"
               :max-value="initialFilters.price_avg.maxValue"
             />
-            <!-- <UILkFilter
-              v-model:from="initialFilters.products_solded.from"
-              v-model:to="initialFilters.products_solded.to"
-              label="Товары с продажами"
-              :max-value="initialFilters.products_solded.maxValue"
-            /> -->
+            <UILkFilter
+              v-model:from="initialFilters.scoring.from"
+              v-model:to="initialFilters.scoring.to"
+              label="Оценка"
+              :max-value="initialFilters.scoring.maxValue"
+            />
           </LkTableFilter>
 
           <div
@@ -146,9 +146,9 @@ const initialFilters = reactive({
   },
   products_solded: {
     from: 0,
-    to: 999999,
+    to: 999,
     minValue: 0,
-    maxValue: 999999,
+    maxValue: 999,
   },
 })
 const filters = ref({})

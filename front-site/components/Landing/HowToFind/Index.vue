@@ -1,5 +1,5 @@
 <template>
-  <div class="how-to-find">
+  <div id="opportunity" class="how-to-find">
     <div class="container">
       <div class="how-to-find__box">
         <div class="how-to-find__cards">

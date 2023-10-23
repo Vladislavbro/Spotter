@@ -32,7 +32,7 @@ const { isAdmin } = storeToRefs(useUserStore())
 
 const menu = [
   { name: 'Топ ниши', link: '/lk', icon: 'icon-star' },
-  { name: 'Категории', link: '/lk/category', icon: 'icon-category' },
+  // { name: 'Категории', link: '/lk/category', icon: 'icon-category' },
   // { name: 'Продавцы', link: '/lk/sellers', icon: 'icon-users' },
   { name: 'Тарифы', link: '/lk/subscribes', icon: 'icon-card' },
 ]

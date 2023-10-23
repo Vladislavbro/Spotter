@@ -4,7 +4,6 @@
       <div class="container-lk">
         <div class="item-lk__box">
           <LkGoBack
-            :link="info?.name ? `/lk/niche/${info.name.toLowerCase()}#items` : '/lk'"
             text="Вернуться к товарам"
             class="item-lk__back"
           />
@@ -244,6 +243,7 @@ definePageMeta({
 
 const { $toast } = useNuxtApp()
 const route = useRoute()
+const router = useRouter()
 
 const { slug } = route.params
 
@@ -270,7 +270,7 @@ const getProductUrl = (id) => {
   return new GenerateImgUrl(id, 'big').url()
 }
 
-const data = {
+const data = ref({
   labels: [],
   datasets: [
     {
@@ -298,19 +298,24 @@ const data = {
       data: [],
     },
   ],
-}
+})
 
 const options = {}
 
 const setGraphicValues = () => {
   const stats = info.value?.stats || []
 
-  stats.forEach((item) => {
-    data.labels.push(new Date(item.date * 1000))
+  data.value.labels = []
+  data.value.datasets[0].data = []
+  data.value.datasets[1].data = []
+  data.value.datasets[2].data = []
 
-    data.datasets[0].data.push(item.price)
-    data.datasets[1].data.push(item.profit_fbo)
-    data.datasets[2].data.push(item.profit_fbs)
+  stats.forEach((item) => {
+    data.value.labels.push(new Date(item.date * 1000))
+
+    data.value.datasets[0].data.push(item.price)
+    data.value.datasets[1].data.push(item.profit_fbo)
+    data.value.datasets[2].data.push(item.profit_fbs)
   })
 }
 
@@ -335,10 +340,11 @@ const getItem = async () => {
   isLoading.value = false
 
   info.value = data?.value || null
+
+  setGraphicValues()
 }
 
-await getItem()
-setGraphicValues()
+getItem()
 </script>
 
 <style lang="scss" scoped>

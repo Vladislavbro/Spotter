@@ -128,6 +128,10 @@ const changeDate = (data) => {
 }
 
 const getData = async () => {
+  if (!slug) {
+    return navigateTo('/lk')
+  }
+
   isLoading.value = true
 
   const { data } = await useFetch(`/api/brands/${slug}`, {
