@@ -196,6 +196,8 @@ const getData = async () => {
 
   items.value = data?.value?.items || []
 
+  items.value.sort((a, b) => b[`profit_${day.value}_fbo`] - a[`profit_${day.value}_fbo`])
+
   isLoadingPage.value = false
   isLoading.value = false
 }

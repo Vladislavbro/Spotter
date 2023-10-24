@@ -46,6 +46,7 @@
               v-model="search"
               placeholder="Поиск по товару, бренду, продавцу и нише"
               class="search-lk__input"
+              @enter="onEnter()"
             />
 
             <a
@@ -67,7 +68,7 @@
           </p>
 
           <div class="search-lk__results search-lk-results">
-            <div class="search-lk-results__list">
+            <div v-if="isLoadHints || hints.length" class="search-lk-results__list">
               <div
                 v-if="isLoadHints"
                 class="search-lk__loader"
@@ -95,6 +96,18 @@
                 <UILoader />
               </div>
               <template v-else-if="results.length">
+                <p
+                  v-if="fastSearch"
+                  class="search-lk-results__fast-search"
+                >
+                  Искать по
+                  <NuxtLink
+                    :to="fastSearch.link"
+                  >
+                    {{ fastSearch.name }}
+                  </NuxtLink>
+                </p>
+
                 <NuxtLink
                   v-for="(item, i) in finalResults"
                   :key="i"
@@ -161,7 +174,7 @@ definePageMeta({
 const views = [
   { label: 'Товары', value: 'products' },
   // { label: 'Категории', value: 'categories' },
-  // { label: 'Бренды', value: 'brands' },
+  { label: 'Бренды', value: 'brands' },
   { label: 'Продавцы', value: 'suppliers' },
   // { label: 'Ключевые слова', value: 'keys' },
 ]
@@ -196,6 +209,11 @@ const finalResults = computed(() => {
         link,
         articul: item.articul,
       }
+    } else if (view.value === 'brands') {
+      return {
+        name: item.brand,
+        link: `/lk/brand/${item.brand_id}?name=${item.brand.toLowerCase()}`,
+      }
     } else if (view.value === 'suppliers') {
       return {
         name: `${item.name} (${item.inn}) | ${item.trademark}`,
@@ -203,8 +221,19 @@ const finalResults = computed(() => {
       }
     }
 
-    return {}
-  })
+    return null
+  }).filter(item => item !== null)
+})
+
+const fastSearch = computed(() => {
+  if (view.value === 'products' && type.value === 'name') {
+    return {
+      name: search.value,
+      link: `/lk/niche/${search.value}`,
+    }
+  }
+
+  return finalResults.value.find(item => item.name.toLowerCase() === search.value.toLowerCase())
 })
 
 watch(() => search.value, (value) => {
@@ -220,6 +249,12 @@ const clear = () => {
   search.value = ''
   hints.value = []
   results.value = []
+}
+
+const onEnter = () => {
+  if (fastSearch.value) {
+    navigateTo(fastSearch.value.link)
+  }
 }
 
 const getProductUrl = (id) => {
@@ -450,6 +485,18 @@ const debounced = debounce(getHints, 500)
 
   &__category {
     padding: 6px 0;
+  }
+
+  &__fast-search {
+    margin-bottom: 20px;
+
+    color: #8B8B90;
+    font-size: 15px;
+    line-height: 18px;
+
+    a {
+      font-weight: 700;
+    }
   }
 }
 

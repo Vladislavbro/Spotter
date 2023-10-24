@@ -108,11 +108,11 @@ const router = useRouter()
 const isMobileMenu = ref(false)
 
 const menuList = [
-  { label: 'Возможности', link: '#' },
-  { label: 'Как пользоваться', link: '#' },
-  { label: 'Отзывы', link: '#' },
-  { label: 'Тарифы', link: '#' },
-  { label: 'Контакты', link: '#' },
+  { label: 'Возможности', link: '#opportunity' },
+  { label: 'Как пользоваться', link: '#how-to-use' },
+  { label: 'Отзывы', link: '#reviews' },
+  { label: 'Тарифы', link: '#tarifs' },
+  { label: 'Контакты', link: '#contacts' },
 ]
 
 const linkInMobileMenu = (link) => {

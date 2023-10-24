@@ -1,5 +1,5 @@
 <template>
-  <div class="what-else">
+  <div id="how-to-use" class="what-else">
     <div class="container">
       <div class="what-else__box">
         <h2 class="what-else__title">

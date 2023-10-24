@@ -1,5 +1,5 @@
 <template>
-  <div class="tarrifs">
+  <div id="tarifs" class="tarrifs">
     <div class="container">
       <div class="tarrifs__box">
         <h2 class="tarrifs__title">

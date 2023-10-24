@@ -33,6 +33,7 @@
       autocomplete="off"
       class="input__area"
       @input="$emit('update:modelValue', $event.target.value)"
+      @keyup.enter="$emit('enter')"
     >
 
     <span
