@@ -524,9 +524,8 @@ class Parser(object):
                 sales_fbo = 0
                 sales_fbs = 0
                 last_stat = product.productstat_set.first()
-                if last_stat is None or (last_stat.date.date() 
-                                         != datetime.now(timezone.utc).date()):
-                    # Если последняя цена вчерашняя то посчитать 
+                if last_stat is None or (last_stat.parsing_id != self.config.current_parsing_id):
+                    # Если последняя цена вчерашняя то посчитать
                     # разницу остатков и записать как количество продаж
                     # sales = product.quantity - quantity
                     if last_stat and last_stat.quantity_fbo is not None:
