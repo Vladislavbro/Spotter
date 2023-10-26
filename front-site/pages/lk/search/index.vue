@@ -200,7 +200,7 @@ const finalResults = computed(() => {
     if (view.value === 'products') {
       let link = ''
       if (type.value === 'name') {
-        link = `/lk/niche/${item.name}`
+        link = `/lk/niche/${item.name.toLowerCase()}?product_id=${item.id}`
       } else if (type.value === 'articul') {
         link = `/lk/item/${item.articul}`
       }

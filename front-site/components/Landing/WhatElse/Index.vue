@@ -46,7 +46,9 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { Swiper, SwiperSlide } from 'swiper/vue'
+</script>
 
 <style lang="scss" scoped>
 .what-else {

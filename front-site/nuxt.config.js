@@ -16,7 +16,6 @@ export default defineNuxtConfig({
   },
   modules: [
     '@pinia/nuxt',
-    'nuxt-swiper',
     'nuxt-lazy-load',
   ],
 
