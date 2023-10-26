@@ -1,4 +1,4 @@
-from api.models import Query, Product, Config, ProductStat
+from api.models import Config, ProductStat
 from django.db.models import Sum, Avg, Q, Count
 from datetime import datetime, timedelta
 
