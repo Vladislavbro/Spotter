@@ -549,6 +549,24 @@ def queries_top(request):
         if end:
             field = f'profit_{period}_{fb}__lte'
             items = items.filter(**{field: end})
+    if request.GET.get('products_solded'):
+        start = request.GET['products_solded'].split(';')[0]
+        if start:
+            field = f'products_solded_{period}_{fb}__gte'
+            items = items.filter(**{field: start})
+        end = request.GET['profit'].split(';')[1]
+        if end:
+            field = f'products_solded_{period}_{fb}__lte'
+            items = items.filter(**{field: end})
+    if request.GET.get('scoring'):
+        start = request.GET['scoring'].split(';')[0]
+        if start:
+            field = 'scoring__gte'
+            items = items.filter(**{field: start})
+        end = request.GET['scoring'].split(';')[1]
+        if end:
+            field = 'scoring__lte'
+            items = items.filter(**{field: end})
     for n in [1, 10]:
         if request.GET.get(f'product_{n}_profit'):
             start = request.GET[f'product_{n}_profit'].split(';')[0]
