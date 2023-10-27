@@ -25,6 +25,10 @@
 <script setup>
 </script>
 
+<style lang="scss">
+@import 'swiper/css';
+</style>
+
 <style scoped lang="scss">
 .main {
   display: flex;

@@ -467,7 +467,7 @@
   resolved "https://registry.npmjs.org/@nuxt/devalue/-/devalue-2.0.2.tgz"
   integrity sha512-GBzP8zOc7CGWyFQS6dv1lQz8VVpz5C2yRszbXufwG/9zhStTIH50EtD87NmWbTMwXDvZLNg8GIpb1UFdH93JCA==
 
-"@nuxt/kit@^3.1.2", "@nuxt/kit@^3.5.0", "@nuxt/kit@^3.6.5", "@nuxt/kit@^3.7.0", "@nuxt/kit@3.7.1":
+"@nuxt/kit@^3.1.2", "@nuxt/kit@^3.5.0", "@nuxt/kit@^3.6.5", "@nuxt/kit@3.7.1":
   version "3.7.1"
   resolved "https://registry.npmjs.org/@nuxt/kit/-/kit-3.7.1.tgz"
   integrity sha512-8k4q+92qLz5z7RdSOKrEJIjM63xXBg0z/WhTtZgXv1R5ULZ77usdTMjQYhQ+Kgd1NMkpIXeKaAO6903xrSt53Q==
@@ -4103,14 +4103,6 @@ nuxt-lazy-load@^3.0.4:
   dependencies:
     "@nuxt/kit" "^3.1.2"
 
-nuxt-swiper@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.npmjs.org/nuxt-swiper/-/nuxt-swiper-1.2.2.tgz"
-  integrity sha512-y4s/srISP4OuhXbYg9/W1/6EWnbcoHRGEKBKAvGP0I2h0b3enhqZNEk7854M3F89ys8waacBXektPzamgl5xwQ==
-  dependencies:
-    "@nuxt/kit" "^3.7.0"
-    swiper "^10.2.0"
-
 nuxt@^3.7.1:
   version "3.7.1"
   resolved "https://registry.npmjs.org/nuxt/-/nuxt-3.7.1.tgz"
@@ -5497,10 +5489,10 @@ svgo@^3.0.2:
     csso "^5.0.5"
     picocolors "^1.0.0"
 
-swiper@^10.2.0:
-  version "10.2.0"
-  resolved "https://registry.npmjs.org/swiper/-/swiper-10.2.0.tgz"
-  integrity sha512-nktQsOtBInJjr3f5DicxC8eHYGcLXDVIGPSon0QoXRaO6NjKnATCbQ8SZsD3dN1Ph1RH4EhVPwSYCcuDRFWHGQ==
+swiper@^11.0.2:
+  version "11.0.2"
+  resolved "https://registry.npmjs.org/swiper/-/swiper-11.0.2.tgz"
+  integrity sha512-JMHZYdUDG0V5ZdzWJkQicW4F7u4edmS4vlOhciTDhcZokDL2N8EE2uP4INxqIgpiJMoeHlwATqZk2yEAW7F6Dw==
 
 synckit@^0.8.4:
   version "0.8.5"

@@ -33,7 +33,7 @@
         </div>
 
         <Swiper
-          :modules="[SwiperNavigation]"
+          :modules="[Navigation]"
           :slides-per-view="'auto'"
           :space-between="12"
           :navigation="{
@@ -73,6 +73,9 @@
 </template>
 
 <script setup>
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Navigation } from 'swiper/modules'
+
 import imgUrl1 from '@/assets/images/landing/reviews/1.png'
 import imgUrl2 from '@/assets/images/landing/reviews/2.png'
 import imgUrl3 from '@/assets/images/landing/reviews/3.png'
