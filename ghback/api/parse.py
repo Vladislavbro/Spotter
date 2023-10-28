@@ -120,7 +120,7 @@ class Parser(object):
         # return self.update_products()
         if self.config.parsing_done is not True:
             self.notify('Парсинг категорий начался')
-            self.get_wirehouses()
+            # self.get_wirehouses()
             self.get_category()
         elif self.config.queries_done is not True:
             self.notify('Создаются поисковые запросы')
