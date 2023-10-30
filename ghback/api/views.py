@@ -833,7 +833,7 @@ def product(request, articul):
         parsing_id__lte=end.timestamp(),
     )
     if product:
-        supplier = Supplier.objects.get(wb_id=product.supplier_id)
+        supplier = Supplier.objects.filter(wb_id=product.supplier_id).first()
         out = {
             'name': product.name,
             'articul': product.articul,

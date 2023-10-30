@@ -132,8 +132,8 @@ class Product(models.Model):
     # is_new = models.BooleanField(blank=True, null=True)
     price = models.IntegerField(blank=True, null=True)
     priceU = models.IntegerField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
     
     class Meta():
         indexes = [

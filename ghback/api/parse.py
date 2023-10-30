@@ -518,7 +518,10 @@ class Parser(object):
                 product.brand_id = item['siteBrandId']
                 product.rating = item['rating']
                 product.feedbacks = item['feedbacks']
+                product.price = price
+                product.priceU = priceU
                 product.parsed_at = datetime.now(timezone.utc)
+                product.updated_at = datetime.now(timezone.utc)
                 if self.query is None and self.category.wb_id not in product.categories:
                     product.categories.append(self.category.wb_id)
                 sales_fbo = 0
@@ -567,6 +570,8 @@ class Parser(object):
                     priceU=priceU,
                     price=price,
                     parsed_at=datetime.now(timezone.utc),
+                    created_at=datetime.now(timezone.utc),
+                    updated_at=datetime.now(timezone.utc),
                 )
                 self.text_process(product)
                 product.save()
@@ -1054,7 +1059,7 @@ class Parser(object):
         query = Query.objects.get(pk=query_id)
         # date = datetime.now()
         # fb = 'fbo'
-        config = Config.objects.filter(parsing_done=True).first()
+        config = Config.objects.filter(parsing_done=True).first() 
         if query.first_product_id:
             product = Product.objects.get(pk=query.first_product_id)
             query_root, query_features = self.get_keys(product.name)
