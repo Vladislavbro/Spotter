@@ -4,9 +4,9 @@
       <p class="subscribe-card__title">
         {{ item.title }}
 
-        <span v-if="item.type === 'premium'" class="subscribe-card__status">
+        <!-- <span v-if="item.type === 'premium'" class="subscribe-card__status">
           + 5 дней бесплатно
-        </span>
+        </span> -->
       </p>
 
       <p class="subscribe-card__text">
