@@ -110,6 +110,8 @@ definePageMeta({
 
 const { user } = storeToRefs(useUserStore())
 
+console.log('user', user)
+
 const isShowCancelSubscribeModal = ref(false)
 
 const historyHead = ['#', 'Дата покупки', 'Тариф', 'Действует', 'Сумма']
