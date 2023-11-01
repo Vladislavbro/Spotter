@@ -561,10 +561,10 @@ def queries_top(request):
     if request.GET.get('scoring'):
         start = request.GET['scoring'].split(';')[0]
         if start:
-            items = items.filter(scoring__scoring__gte=start)
+            items = items.filter(scoring__scoring__gte=int(start))
         end = request.GET['scoring'].split(';')[1]
         if end:
-            items = items.filter(scoring__scoring__lte=end)
+            items = items.filter(scoring__scoring__lte=int(end))
     for n in [1, 10]:
         if request.GET.get(f'product_{n}_profit'):
             start = request.GET[f'product_{n}_profit'].split(';')[0]
