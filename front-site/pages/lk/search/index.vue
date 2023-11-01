@@ -43,6 +43,7 @@
             </span>
 
             <UIBaseInput
+              id="searchInput"
               v-model="search"
               placeholder="Поиск по товару, бренду, продавцу и нише"
               class="search-lk__input"
@@ -316,6 +317,12 @@ const getResults = async (query) => {
 }
 
 const debounced = debounce(getHints, 500)
+
+onMounted(() => {
+  setTimeout(() => {
+    document.getElementById('searchInput')?.focus()
+  }, 1000)
+})
 </script>
 
 <style lang="scss" scoped>

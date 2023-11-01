@@ -34,11 +34,19 @@ const route = useRoute()
   top: 0;
   right: 0;
   left: 0;
+
+  display: flex;
+  align-items: center;
+
+  height: 72px;
+
   color: var(--white);
   background: var(--white);
   z-index: 100;
 
   &__box {
+    width: 100%;
+
     display: flex;
     align-items: center;
     justify-content: space-between;

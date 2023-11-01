@@ -17,18 +17,14 @@
         <p class="contacts-block__label">
           Электронная почта
         </p>
-        <p class="contacts-block__value">
-          info@spotter.ru
-        </p>
-      </div>
-
-      <div class="contacts-block__card">
-        <p class="contacts-block__label">
-          Телеграмм
-        </p>
-        <p class="contacts-block__value">
-          @spotter_info
-        </p>
+        <a
+          href="mailto:support@spotter.fun"
+          target="_blank"
+          rel="nofollow"
+          class="contacts-block__value"
+        >
+          support@spotter.fun
+        </a>
       </div>
     </div>
   </div>
@@ -106,7 +102,7 @@ defineProps({
     @include mq($bp-small-medium) {
       width: auto;
       grid-gap: 12px;
-      grid-template-columns: repeat(2, minmax(220px, 260px));
+      grid-template-columns: repeat(1, minmax(220px, 260px));
     }
   }
 

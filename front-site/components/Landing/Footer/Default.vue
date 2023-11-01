@@ -72,9 +72,6 @@
             <NuxtLink to="/privacy" class="footer__text">
               Политика конфиденциальности
             </NuxtLink>
-            <NuxtLink to="/privacy" class="footer__text">
-              Пользовательское соглашение
-            </NuxtLink>
           </div>
         </div>
       </div>
@@ -302,6 +299,12 @@ const getContainerClass = computed(() => {
 
     @include mq($bp-small) {
       font-size: 14px;
+    }
+  }
+
+  a.footer__text {
+    &:hover {
+      color: var(--grayLight);
     }
   }
 }
