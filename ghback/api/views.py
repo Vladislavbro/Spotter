@@ -520,7 +520,7 @@ def queries_top(request):
         config = Config.objects.filter(calculated=True).first()
     items = Query.objects.prefetch_related('first_product').filter(
         parsing_id=config.current_parsing_id,
-        scoring__gt=0,
+        scoring__scoring__gt=0,
         # products_count__lte=2500,
         # products_count__gte=10,
     )
@@ -554,19 +554,17 @@ def queries_top(request):
         if start:
             field = f'products_solded_{period}_{fb}__gte'
             items = items.filter(**{field: start})
-        end = request.GET['profit'].split(';')[1]
+        end = request.GET['products_solded'].split(';')[1]
         if end:
             field = f'products_solded_{period}_{fb}__lte'
             items = items.filter(**{field: end})
     if request.GET.get('scoring'):
         start = request.GET['scoring'].split(';')[0]
         if start:
-            field = 'scoring__gte'
-            items = items.filter(**{field: start})
+            items = items.filter(scoring__scoring__gte=start)
         end = request.GET['scoring'].split(';')[1]
         if end:
-            field = 'scoring__lte'
-            items = items.filter(**{field: end})
+            items = items.filter(scoring__scoring__lte=end)
     for n in [1, 10]:
         if request.GET.get(f'product_{n}_profit'):
             start = request.GET[f'product_{n}_profit'].split(';')[0]
