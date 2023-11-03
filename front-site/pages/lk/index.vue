@@ -127,28 +127,28 @@ const sortDirection = ref('desc')
 
 const initialFilters = reactive({
   scoring: {
-    from: 0,
-    to: 15,
+    from: null,
+    to: null,
     minValue: 0,
     maxValue: 15,
   },
   price_avg: {
-    from: 0,
-    to: 999999,
+    from: null,
+    to: null,
     minValue: 0,
     maxValue: 999999,
   },
   profit: {
-    from: 0,
-    to: 9999999999,
+    from: null,
+    to: null,
     minValue: 0,
     maxValue: 9999999999,
   },
   products_solded: {
-    from: 0,
-    to: 999,
+    from: null,
+    to: null,
     minValue: 0,
-    maxValue: 999,
+    maxValue: 99,
   },
 })
 const filters = ref({})
@@ -219,8 +219,8 @@ const changeSort = (obj) => {
 
 const resetFilters = () => {
   for (const key in initialFilters) {
-    initialFilters[key].from = initialFilters[key].minValue
-    initialFilters[key].to = initialFilters[key].maxValue
+    initialFilters[key].from = null
+    initialFilters[key].to = null
   }
 
   filters.value = {}
@@ -232,10 +232,10 @@ const setFilters = () => {
   isShowBtn.value = true
 
   for (const key in initialFilters) {
-    if (initialFilters[key].from !== initialFilters[key].minValue || initialFilters[key].to !== initialFilters[key].maxValue) {
+    if ((initialFilters[key].from && initialFilters[key].from !== initialFilters[key].minValue) || (initialFilters[key].to && initialFilters[key].to !== initialFilters[key].maxValue)) {
       let query = ''
-      query += initialFilters[key].from !== initialFilters[key].minValue ? `${initialFilters[key].from};` : ';'
-      query += initialFilters[key].to !== initialFilters[key].maxValue ? `${initialFilters[key].to}` : ''
+      query += initialFilters[key].from !== initialFilters[key].minValue && initialFilters[key].from ? `${initialFilters[key].from};` : ';'
+      query += initialFilters[key].to !== initialFilters[key].maxValue && initialFilters[key].to ? `${initialFilters[key].to}` : ''
 
       filters.value[key] = query
     }
