@@ -11,7 +11,7 @@
       </div>
 
       <div class="header__side header__side--end">
-        <!-- <LkHeaderTarif class="header__tarif" /> -->
+        <LkHeaderTarif class="header__tarif" />
 
         <UILkButton
           to="/lk/profile"

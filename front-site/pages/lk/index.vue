@@ -148,7 +148,7 @@ const initialFilters = reactive({
     from: null,
     to: null,
     minValue: 0,
-    maxValue: 99,
+    maxValue: 100,
   },
 })
 const filters = ref({})
