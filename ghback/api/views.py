@@ -6,7 +6,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from django.db.models import Avg, Sum, Count, Q
-from api.models import Customer, Order, Config
 from datetime import datetime, timedelta
 from django.views.decorators.csrf import csrf_exempt
 # from dateutil.relativedelta import relativedelta
@@ -17,7 +16,8 @@ import requests
 from api.parse import Parser
 from api.basket import Basket
 from api.migrate import Migrate
-from api.models import (Category, Product, ProductStat,
+from api.models import (Category, Product, ProductStat, 
+                        Customer, Order, Config,
                         Config, Query, CategoryStat, Supplier)
 from api.parse import nlp
 from dotenv import load_dotenv
@@ -686,7 +686,7 @@ def queries_search(request):
     if dateTo:
         date = datetime.strptime(dateTo, '%Y-%m-%d')
         config = Config.objects.filter(
-            calculated=True,
+            parsed_done=True,
             current_parsing_id__gte=date.timestamp(),
         ).first()
         print('config', config.id, date)
@@ -696,7 +696,7 @@ def queries_search(request):
                 'message': 'За выбранную дату нет данных'
             })
     else:
-        config = Config.objects.filter(calculated=True).first()
+        config = Config.objects.filter(parsed_done=True).first()
         print('config', config.id, date)
     product_ids = Product.objects.filter(
         root=query_root,
