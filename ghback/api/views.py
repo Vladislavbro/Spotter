@@ -686,7 +686,7 @@ def queries_search(request):
     if dateTo:
         date = datetime.strptime(dateTo, '%Y-%m-%d')
         config = Config.objects.filter(
-            parsed_done=True,
+            parsing_done=True,
             current_parsing_id__gte=date.timestamp(),
         ).first()
         print('config', config.id, date)
