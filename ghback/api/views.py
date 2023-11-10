@@ -696,7 +696,7 @@ def queries_search(request):
                 'message': 'За выбранную дату нет данных'
             })
     else:
-        config = Config.objects.filter(parsed_done=True).first()
+        config = Config.objects.filter(parsing_done=True).first()
         print('config', config.id, date)
     product_ids = Product.objects.filter(
         root=query_root,
