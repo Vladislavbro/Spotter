@@ -16,12 +16,11 @@
       </a>
     </div>
 
-    <!-- <pre>
-      {{ user }}
-    </pre> -->
-
     <div class="user-profile__contacts">
-      <!-- <div class="user-profile__line">
+      <div
+        v-if="user && user.customer__phone"
+        class="user-profile__line"
+      >
         <div class="user-profile__box">
           <div class="user-profile__icon">
             <UIBaseIcon name="lk/icon-phone" />
@@ -31,11 +30,11 @@
               Телефон
             </p>
             <p class="user-profile__value">
-              +7 912 *** ** 45
+              {{ user.customer__phone }}
             </p>
           </div>
         </div>
-      </div> -->
+      </div>
 
       <!-- <div class="user-profile__line">
         <div class="user-profile__box">
@@ -53,7 +52,10 @@
         </div>
       </div> -->
 
-      <div class="user-profile__line">
+      <div
+        v-if="user && user.email"
+        class="user-profile__line"
+      >
         <div class="user-profile__box">
           <div class="user-profile__icon">
             <UIBaseIcon name="lk/icon-mail" />

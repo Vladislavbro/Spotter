@@ -15,9 +15,8 @@
             <a
               v-for="(item, i) in socials"
               :key="i"
-              href="#"
+              :href="item.link"
               class="auth__social"
-              @click.prevent="socialAuth()"
             >
               <UIBaseIcon :name="item.icon" />
             </a>
@@ -142,6 +141,7 @@
 import { useUserStore } from '@/store/user'
 
 const { $toast } = useNuxtApp()
+const config = useRuntimeConfig()
 
 const user = useUserStore()
 const { getUser } = user
@@ -149,7 +149,7 @@ const { getUser } = user
 const socials = [
   // { icon: 'auth/icon-yandex' },
   // { icon: 'auth/icon-google' },
-  { icon: 'auth/icon-vk' },
+  { icon: 'auth/icon-vk', link: `${config.public.baseURL}/login/vk-oauth2` },
 ]
 
 const isLoading = ref(false)

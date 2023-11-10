@@ -321,7 +321,7 @@ const debounced = debounce(getHints, 500)
 onMounted(() => {
   setTimeout(() => {
     document.getElementById('searchInput')?.focus()
-  }, 1000)
+  }, 400)
 })
 </script>
 

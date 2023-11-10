@@ -99,9 +99,9 @@ const menuList = [
 ]
 
 const contactsList = [
-  { label: '@spotter_info', link: 'http://t.me/spotter_info', icon: 'contacts/icon-tg' },
-  { label: 'info@spotter.ru', link: 'mailto:info@spotter.ru', icon: 'contacts/icon-mail' },
-  { label: '7 800 999-99-99', link: 'tel:+78009999999', icon: 'contacts/icon-phone' },
+  // { label: '@spotter_info', link: 'http://t.me/spotter_info', icon: 'contacts/icon-tg' },
+  { label: 'support@spotter.fun', link: 'mailto:support@spotter.fun', icon: 'contacts/icon-mail' },
+  // { label: '7 800 999-99-99', link: 'tel:+78009999999', icon: 'contacts/icon-phone' },
 ]
 
 const getContainerClass = computed(() => {

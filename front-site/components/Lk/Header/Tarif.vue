@@ -4,22 +4,45 @@
     to="/lk/subscribes"
     class="header-tarif"
   >
-    <span class="header-tarif__discount">
+    <!-- <span class="header-tarif__discount">
       скидка 20%
-    </span>
-    Тариф Продвинутый
+    </span> -->
+    Тариф
+    {{ subscribeName }}
     <span class="header-tarif__date">
-      до 02.03.2023
+      до {{ subscribeDate }}
     </span>
   </NuxtLink>
 </template>
 
 <script setup>
 import { storeToRefs } from 'pinia'
+import { format } from 'date-fns'
 
 import { useUserStore } from '@/store/user.js'
 
 const { user } = storeToRefs(useUserStore())
+
+const subscribeName = computed(() => {
+  switch (user.value.customer__subscribe_type) {
+    case 'demo':
+      return 'Демо'
+    case 'trial':
+      return 'Базовый'
+    case 'premium':
+      return 'Продвинутый'
+    default:
+      return ''
+  }
+})
+
+const subscribeDate = computed(() => {
+  if (user.value.customer__subscribe_until) {
+    return format(user.value.customer__subscribe_until * 1000, 'dd.MM.yyyy')
+  }
+
+  return '--'
+})
 </script>
 
 <style lang="scss" scoped>

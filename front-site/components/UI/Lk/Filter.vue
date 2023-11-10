@@ -14,9 +14,8 @@
             от
           </span>
           <input
-            :value="from"
-            type="number"
-            :placeholder="minValue"
+            :value="from && from.toLocaleString()"
+            :placeholder="minValue.toLocaleString()"
             :min="minValue"
             :max="maxValue - 1"
             autocomplete="off"
@@ -29,9 +28,8 @@
             до
           </span>
           <input
-            :value="to"
-            type="number"
-            :placeholder="maxValue"
+            :value="to && to.toLocaleString()"
+            :placeholder="maxValue.toLocaleString()"
             :min="minValue + 1"
             :max="maxValue"
             autocomplete="off"
@@ -63,7 +61,7 @@
         class="filter-lk__slider"
       >
         <input
-          :value="from"
+          :value="from || minValue"
           type="range"
           :min="minValue"
           :max="maxValue - 1"
@@ -71,7 +69,7 @@
           @input="$emit('update:from', parseInt($event.target.value) || 0)"
         >
         <input
-          :value="to"
+          :value="to || maxValue"
           type="range"
           :min="minValue + 1"
           :max="maxValue"
@@ -94,11 +92,11 @@
 const props = defineProps({
   from: {
     type: undefined,
-    default: 0,
+    default: null,
   },
   to: {
     type: undefined,
-    default: 1,
+    default: null,
   },
   label: {
     type: String,
@@ -157,15 +155,21 @@ const createslider = (firstPaint) => {
 const setStartValueCustomSlider = (sliderStart, sliderEnd, pseudoEl, range) => {
   const maximum = Math.min(parseInt(sliderStart.value), parseInt(sliderEnd.value) - 1)
   const percent = ((maximum - sliderStart.min) / (sliderStart.max - sliderStart.min)) * 100
-  pseudoEl.style.left = percent + '%'
-  range.style.left = percent + '%'
+
+  const left = percent + '%'
+
+  pseudoEl.style.left = left
+  range.style.left = left
 }
 
 const setEndValueCustomSlider = (sliderEnd, sliderStart, pseudoEl, range) => {
   const minimum = Math.max(parseInt(sliderEnd.value), parseInt(sliderStart.value) + 1)
   const percent = ((minimum - sliderEnd.min) / (sliderEnd.max - sliderEnd.min)) * 100
-  pseudoEl.style.right = 100 - percent + '%'
-  range.style.right = 100 - percent + '%'
+
+  const right = 100 - percent + '%'
+
+  pseudoEl.style.right = right
+  range.style.right = right
 }
 
 const setEvents = (

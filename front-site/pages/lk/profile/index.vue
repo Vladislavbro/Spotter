@@ -11,11 +11,10 @@
           >
             <div class="profile-tarif__info">
               <p class="profile-tarif__label">
-                Тариф: {{ user.customer__subscribe_type === 'premium' ? 'Продвинутый' : user.customer__subscribe_type === 'trial' ? 'Базовый' : '--' }}
+                Тариф: {{ subscribeName}}
               </p>
               <p class="profile-tarif__date">
-                Действует до {{ user.customer__subscribe_until || '--' }}
-                <!-- Действует до 16.07.2023 -->
+                Действует до {{ subscribeDate }}
               </p>
             </div>
 
@@ -114,6 +113,27 @@ const isShowCancelSubscribeModal = ref(false)
 
 const historyHead = ['#', 'Дата покупки', 'Тариф', 'Действует', 'Сумма']
 const history = ref([])
+
+const subscribeName = computed(() => {
+  switch (user.value.customer__subscribe_type) {
+    case 'demo':
+      return 'Демо'
+    case 'trial':
+      return 'Базовый'
+    case 'premium':
+      return 'Продвинутый'
+    default:
+      return ''
+  }
+})
+
+const subscribeDate = computed(() => {
+  if (user.value.customer__subscribe_until) {
+    return format(user.value.customer__subscribe_until * 1000, 'dd.MM.yyyy')
+  }
+
+  return '--'
+})
 
 const dateFormat = (date, days) => {
   let normalDate = date * 1000

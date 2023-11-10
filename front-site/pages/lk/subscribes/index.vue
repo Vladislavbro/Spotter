@@ -60,7 +60,7 @@ const cards = [
 ]
 
 const subscribe = async (obj) => {
-  console.log('data', obj)
+  // console.log('data', obj)
 
   const { data, error } = await useFetch('/api/order', {
     method: 'post',
@@ -71,8 +71,8 @@ const subscribe = async (obj) => {
     headers: useHeaderToken(),
   })
 
-  console.log('data', data)
-  console.log('error', error)
+  // console.log('data', data)
+  // console.log('error', error)
 }
 </script>
 

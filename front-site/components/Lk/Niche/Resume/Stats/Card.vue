@@ -20,15 +20,18 @@
       <p class="resume-stats-card__price">
         {{ item.price }}
         <span
-          v-if="item.price_percent"
+          v-if="+item.price_percent"
           class="resume-stats-card__price-percent"
         >
           ({{ item.price_percent }})%
         </span>
       </p>
-      <p class="resume-stats-card__percent">
-        {{ item.diff }} ({{ item.percent }}%)
-      </p>
+      <!-- <p
+        v-if="item.diff || item.percent"
+        class="resume-stats-card__percent"
+      >
+        {{ item.diff ? item.diff : '' }} {{ item.percent ? `(${item.percent}%)` : '' }}
+      </p> -->
     </div>
   </div>
 </template>
