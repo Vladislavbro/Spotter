@@ -995,22 +995,22 @@ class Parser(object):
         for period in [7, 14, 30]:
             start = (datetime.now() - timedelta(days=period)).replace(
                 hour=0, minute=0, second=0, microsecond=0)
-            period_parsing_ids = Config.objects.filter(
+            period_parsing_id = Config.objects.filter(
                 current_parsing_id__gte=start.timestamp()
-            ).values_list('current_parsing_id', flat=True)
-            if len(period_parsing_ids) == 0:
-                continue
-            productstats_period = [ps for ps in productstats if ps['parsing_id'] in period_parsing_ids]
+            ).last().current_parsing_id
+            # ).values_list('current_parsing_id', flat=True)
+            # if len(period_parsing_ids) == 0:
+            #     continue
+            productstats_period = [ps for ps in productstats if ps['parsing_id'] == period_parsing_id]
             update[f'price_avg_{period}'] = int(sum([ps['price'] for ps in productstats_period]) / len(productstats_period))
             update[f'profit_{period}_fbo'] = int(sum([ps['profit_fbo'] for ps in productstats_period]))
             update[f'profit_{period}_fbs'] = int(sum([ps['profit_fbs'] for ps in productstats_period]))
             
             start_prev = start - timedelta(days=period)
-            parsing_ids_prev = Config.objects.filter(
+            parsing_id_prev = Config.objects.filter(
                 current_parsing_id__gte=start_prev.timestamp(),
-                current_parsing_id__lt=start.timestamp(),
-            ).values_list('current_parsing_id', flat=True)
-            productstats_prev = [ps for ps in productstats if ps['parsing_id'] in parsing_ids_prev]
+            ).last().current_parsing_id
+            productstats_prev = [ps for ps in productstats if ps['parsing_id'] == parsing_id_prev]
             if len(productstats_prev) == 0:
                 continue
             productstats_prev_price_avg = int(sum([ps['price'] for ps in productstats_prev]) / len(productstats_prev))
