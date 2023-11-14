@@ -1002,6 +1002,8 @@ class Parser(object):
             # if len(period_parsing_ids) == 0:
             #     continue
             productstats_period = [ps for ps in productstats if ps['parsing_id'] == period_parsing_id]
+            if len(productstats_period) == 0:
+                continue
             update[f'price_avg_{period}'] = int(sum([ps['price'] for ps in productstats_period]) / len(productstats_period))
             update[f'profit_{period}_fbo'] = int(sum([ps['profit_fbo'] for ps in productstats_period]))
             update[f'profit_{period}_fbs'] = int(sum([ps['profit_fbs'] for ps in productstats_period]))
