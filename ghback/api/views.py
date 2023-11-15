@@ -686,7 +686,7 @@ def queries_search(request):
     if dateTo:
         date = datetime.strptime(dateTo, '%Y-%m-%d')
         config = Config.objects.filter(
-            parsing_done=True,
+            queries_calculated=True,
             current_parsing_id__gte=date.timestamp(),
         ).first()
         print('config', config.id, date)
@@ -696,7 +696,7 @@ def queries_search(request):
                 'message': 'За выбранную дату нет данных'
             })
     else:
-        config = Config.objects.filter(parsing_done=True).first()
+        config = Config.objects.filter(queries_calculated=True).first()
         print('config', config.id, date)
     product_ids = Product.objects.filter(
         root=query_root,

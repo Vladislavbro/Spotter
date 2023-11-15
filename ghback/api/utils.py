@@ -19,7 +19,7 @@ def get_scoring_productstats(product_ids, config):
     f_p_config = Config.objects.filter(
         calculated=True,
         current_parsing_id__gte=f_p_date,
-    ).exclude(pk=config.id).first()
+    ).exclude(pk=config.id).last()
     print('summary', f_p_date, f_p_config)
     if f_p_config is None:
         print('Нет данных по товарам')
@@ -52,8 +52,8 @@ def get_scoring_productstats(product_ids, config):
     start = (date - timedelta(days=30)).replace(
             hour=0, minute=0, second=0, microsecond=0)
     prev_parsing = Config.objects.filter(
-        current_parsing_id__lt=start.timestamp()
-    ).exclude(pk__in=[config.id, f_p_config.id]).first()
+        current_parsing_id__gt=start.timestamp()
+    ).exclude(pk__in=[config.id, f_p_config.id]).last()
     prev_stat = ProductStat.objects.filter(
         product_id__in=product_ids,
         parsing_id=prev_parsing.current_parsing_id

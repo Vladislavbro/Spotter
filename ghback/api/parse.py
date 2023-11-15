@@ -993,26 +993,26 @@ class Parser(object):
             return
         deleteQuery = True
         for period in [7, 14, 30]:
-            start = (datetime.now() - timedelta(days=period)).replace(
+            period_start = (datetime.now() - timedelta(days=period)).replace(
                 hour=0, minute=0, second=0, microsecond=0)
-            period_parsing_id = Config.objects.filter(
-                current_parsing_id__gte=start.timestamp()
-            ).last().current_parsing_id
-            # ).values_list('current_parsing_id', flat=True)
-            # if len(period_parsing_ids) == 0:
+            # period_parsing_id = Config.objects.filter(
+            #     current_parsing_id__gte=start.timestamp()
+            # ).last().current_parsing_id
+            # # ).values_list('current_parsing_id', flat=True)
+            # # if len(period_parsing_ids) == 0:
+            # #     continue
+            # productstats_period = [ps for ps in productstats if ps['parsing_id'] == period_parsing_id]
+            # if len(productstats_period) == 0:
             #     continue
-            productstats_period = [ps for ps in productstats if ps['parsing_id'] == period_parsing_id]
-            if len(productstats_period) == 0:
-                continue
-            update[f'price_avg_{period}'] = int(sum([ps['price'] for ps in productstats_period]) / len(productstats_period))
-            update[f'profit_{period}_fbo'] = int(sum([ps['profit_fbo'] for ps in productstats_period]))
-            update[f'profit_{period}_fbs'] = int(sum([ps['profit_fbs'] for ps in productstats_period]))
+            update[f'price_avg_{period}'] = int(sum([ps['price'] for ps in productstats_current]) / len(productstats_current))
+            update[f'profit_{period}_fbo'] = int(sum([ps[f'profit_{period}_fbo'] for ps in productstats_current]))
+            update[f'profit_{period}_fbs'] = int(sum([ps[f'profit_{period}_fbs'] for ps in productstats_current]))
             
-            start_prev = start - timedelta(days=period)
-            parsing_id_prev = Config.objects.filter(
-                current_parsing_id__gte=start_prev.timestamp(),
+            # prev_period_start = period_start - timedelta(days=period)
+            period_start_parsing_id = Config.objects.filter(
+                current_parsing_id__gte=period_start.timestamp(),
             ).last().current_parsing_id
-            productstats_prev = [ps for ps in productstats if ps['parsing_id'] == parsing_id_prev]
+            productstats_prev = [ps for ps in productstats if ps['parsing_id'] == period_start_parsing_id]
             if len(productstats_prev) == 0:
                 continue
             productstats_prev_price_avg = int(sum([ps['price'] for ps in productstats_prev]) / len(productstats_prev))
@@ -1040,7 +1040,7 @@ class Parser(object):
                     continue
                 # Оборот в категории месяц назад и сейчас отличается
                 # не более чем на +/- 10%
-                profit_sum = int(sum([ps[f'profit_{fb}'] for ps in productstats_prev]))
+                profit_sum = int(sum([ps[f'profit_{period}_{fb}'] for ps in productstats_prev]))
                 if update[field] < profit_sum * 0.9:
                     continue
                 if update[field] > profit_sum * 1.1:
