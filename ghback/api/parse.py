@@ -1061,10 +1061,11 @@ class Parser(object):
         query = Query.objects.get(pk=query_id)
         # date = datetime.now()
         # fb = 'fbo'
-        config = Config.objects.filter(calculated=True).first() 
+        config = self.config
         if query.first_product_id:
             product = Product.objects.get(pk=query.first_product_id)
-            query_root, query_features = self.get_keys(product.name)
+            query_root, query_features = product.root, product.features
+            # self.get_keys(product.name)
         else:
             query_root = query.root
             query_features = query.features
