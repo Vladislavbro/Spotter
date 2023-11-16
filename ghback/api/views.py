@@ -588,6 +588,8 @@ def queries_top(request):
             sort += f'_{period}'
         if 'profit' in sort:
             sort += f'_{period}_{fb}'
+        if sort == 'scoring':
+            sort = 'scoring__scoring'
         items = items.order_by(f'{direction}{sort}')
     if output == 'json':
         total = items.count()
