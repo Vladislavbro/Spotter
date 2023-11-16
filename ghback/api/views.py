@@ -210,7 +210,7 @@ def signup(request):
         subscribe_until=(datetime.now() + timedelta(days=5)).timestamp()
     )
     customer.save()
-    login(request, user)
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
     send_mail_v2(
         subject='Успешная регистрация на сайте SPOTTER.FUN!', 
         content='Email: ' + body['email'] + '<br>Пароль: ' + body['password'], 
