@@ -187,11 +187,12 @@ def get_scoring_productstats(product_ids, config):
         response['scoring'] -= 1
     return response
 
-
+ 
 def save_profile(backend, user, response, *args, **kwargs):
     print('backend, user, response', backend, user, response)
     if backend.name == 'vk-oauth2':
         user.email = response.get('email')
+        user.username = response.get('screen_name') + ':' + str(response.get('id'))
         user.save()
         customer = Customer.objects.filter(user=user).first()
         if customer is None:
