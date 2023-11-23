@@ -441,7 +441,7 @@ def categories_list(request):
         date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
         config = Config.objects.filter(
             calculated=True,
-            current_parsing_id__gte=date,
+            current_parsing_id__lte=date,
             # current_parsing_id__lt=date + 86400,
         ).first()
     out = []

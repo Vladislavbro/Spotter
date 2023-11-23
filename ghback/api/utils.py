@@ -186,3 +186,12 @@ def get_scoring_productstats(product_ids, config):
     elif response['supplier_sold_diff'] <= 0.2:
         response['scoring'] -= 1
     return response
+
+
+def save_profile(backend, user, response, *args, **kwargs):
+    print('backend, user, response', backend, user, response)
+    if backend.name == 'vk-oauth2':
+        profile = user.profile
+        profile.email = response.get('email')
+        profile.phone = response.get('phone')
+        profile.save()
