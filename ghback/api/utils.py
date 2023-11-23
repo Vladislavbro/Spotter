@@ -191,7 +191,8 @@ def get_scoring_productstats(product_ids, config):
 def save_profile(backend, user, response, *args, **kwargs):
     print('backend, user, response', backend, user, response)
     if backend.name == 'vk-oauth2':
-        profile = user.profile
-        profile.email = response.get('email')
-        profile.phone = response.get('phone')
-        profile.save()
+        user.email = response.get('email')
+        user.save()
+        customer = user.customer
+        customer.phone = response.get('phone')
+        customer.save()
