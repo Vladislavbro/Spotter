@@ -1,4 +1,4 @@
-from api.models import Config, ProductStat
+from api.models import Config, ProductStat, Customer
 from django.db.models import Sum, Avg, Q, Count
 from datetime import datetime, timedelta
 
@@ -193,6 +193,8 @@ def save_profile(backend, user, response, *args, **kwargs):
     if backend.name == 'vk-oauth2':
         user.email = response.get('email')
         user.save()
-        customer = user.customer
+        customer = Customer.objects.filter(user=user).first()
+        if customer is None:
+            customer = Customer.objects.create(user=user)
         customer.phone = response.get('phone')
         customer.save()
