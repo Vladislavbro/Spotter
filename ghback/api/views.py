@@ -6,7 +6,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from django.db.models import Avg, Sum, Count, Q
-from api.models import Customer, Order, Config
 from datetime import datetime, timedelta
 from django.views.decorators.csrf import csrf_exempt
 # from dateutil.relativedelta import relativedelta
@@ -17,7 +16,8 @@ import requests
 from api.parse import Parser
 from api.basket import Basket
 from api.migrate import Migrate
-from api.models import (Category, Product, ProductStat,
+from api.models import (Category, Product, ProductStat, 
+                        Customer, Order, Config,
                         Config, Query, CategoryStat, Supplier)
 from api.parse import nlp
 from dotenv import load_dotenv
@@ -210,7 +210,7 @@ def signup(request):
         subscribe_until=(datetime.now() + timedelta(days=5)).timestamp()
     )
     customer.save()
-    login(request, user)
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
     send_mail_v2(
         subject='Успешная регистрация на сайте SPOTTER.FUN!', 
         content='Email: ' + body['email'] + '<br>Пароль: ' + body['password'], 
@@ -441,7 +441,7 @@ def categories_list(request):
         date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
         config = Config.objects.filter(
             calculated=True,
-            current_parsing_id__gte=date,
+            current_parsing_id__lte=date,
             # current_parsing_id__lt=date + 86400,
         ).first()
     out = []
@@ -588,6 +588,8 @@ def queries_top(request):
             sort += f'_{period}'
         if 'profit' in sort:
             sort += f'_{period}_{fb}'
+        if sort == 'scoring':
+            sort = 'scoring__scoring'
         items = items.order_by(f'{direction}{sort}')
     if output == 'json':
         total = items.count()
@@ -686,7 +688,7 @@ def queries_search(request):
     if dateTo:
         date = datetime.strptime(dateTo, '%Y-%m-%d')
         config = Config.objects.filter(
-            calculated=True,
+            queries_calculated=True,
             current_parsing_id__gte=date.timestamp(),
         ).first()
         print('config', config.id, date)
@@ -696,7 +698,7 @@ def queries_search(request):
                 'message': 'За выбранную дату нет данных'
             })
     else:
-        config = Config.objects.filter(calculated=True).first()
+        config = Config.objects.filter(queries_calculated=True).first()
         print('config', config.id, date)
     product_ids = Product.objects.filter(
         root=query_root,
