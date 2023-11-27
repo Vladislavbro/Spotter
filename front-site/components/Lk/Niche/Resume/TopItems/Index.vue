@@ -24,9 +24,9 @@
     </div>
 
     <UILkButton
-      to="#items"
       text="Смотреть все товары"
       class="top-items__btn"
+      @click="navigateTo({ query: { product_id: productId }, hash: '#items' })"
     />
   </div>
 </template>
@@ -46,6 +46,7 @@ const props = defineProps({
 const route = useRoute()
 
 const { slug } = route.params
+const { product_id: productId } = route.query
 
 const items = ref([])
 const isLoading = ref(true)
@@ -65,6 +66,10 @@ const getItems = async () => {
   const params = {
     output: 'json',
     fb: props.fb,
+  }
+
+  if (productId) {
+    params.product_id = productId
   }
 
   if (props.day) {

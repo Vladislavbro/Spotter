@@ -70,6 +70,7 @@ const props = defineProps({
 const route = useRoute()
 
 const { slug } = route.params
+const { product_id: productId } = route.query
 
 const graphs = ref([])
 const isLoading = ref(true)
@@ -189,6 +190,10 @@ const getData = async () => {
 
   const params = {
     fb: props.fb,
+  }
+
+  if (productId) {
+    params.product_id = productId
   }
 
   if (props.day) {

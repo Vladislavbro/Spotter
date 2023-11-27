@@ -14,13 +14,15 @@
             от
           </span>
           <input
-            :value="from && from.toLocaleString()"
+            type="number"
+            :value="from"
             :placeholder="minValue.toLocaleString()"
             :min="minValue"
             :max="maxValue - 1"
             autocomplete="off"
             class="filter-lk__input-area"
-            @input="$emit('update:from', parseInt($event.target.value) || 0)"
+            @keypress="onKeypress($event)"
+            @input="onInput($event, 'from')"
           >
         </div>
         <div class="filter-lk__input">
@@ -28,13 +30,15 @@
             до
           </span>
           <input
-            :value="to && to.toLocaleString()"
+            type="number"
+            :value="to"
             :placeholder="maxValue.toLocaleString()"
             :min="minValue + 1"
             :max="maxValue"
             autocomplete="off"
             class="filter-lk__input-area filter-lk__input-area--to"
-            @input="$emit('update:to', parseInt($event.target.value) || 0)"
+            @keypress="onKeypress($event)"
+            @input="onInput($event, 'to')"
           >
         </div>
         <div
@@ -116,7 +120,7 @@ const props = defineProps({
   },
 })
 
-defineEmits(['update:from', 'update:to'])
+const emits = defineEmits(['update:from', 'update:to'])
 
 const type = ref('number')
 const inputsRef = ref(null)
@@ -186,6 +190,49 @@ const setEvents = (
   sliderEnd.addEventListener('input', () => {
     setEndValueCustomSlider(sliderEnd, sliderStart, thumbRight, rangeBetween)
   })
+}
+
+const onKeypress = (e) => {
+  const charCode = (e.which) ? e.which : e.keyCode
+  if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46) {
+    e.preventDefault()
+  } else {
+    return true
+  }
+}
+
+const onInput = (e, type) => {
+  const value = parseInt(e.target.value)
+
+  if (type === 'from') {
+    if (!isNaN(value) && value > props.maxValue - 1) {
+      emits('update:from', null)
+      nextTick(() => {
+        emits('update:from', props.maxValue - 1)
+      })
+    } else if (!isNaN(value) && value < props.minValue) {
+      emits('update:from', null)
+      nextTick(() => {
+        emits('update:from', props.minValue)
+      })
+    } else {
+      emits('update:from', value)
+    }
+  } else if (type === 'to') {
+    if (!isNaN(value) && value > props.maxValue) {
+      emits('update:to', null)
+      nextTick(() => {
+        emits('update:to', props.maxValue)
+      })
+    } else if (!isNaN(value) && value < props.minValue + 1) {
+      emits('update:to', null)
+      nextTick(() => {
+        emits('update:to', props.minValue + 1)
+      })
+    } else {
+      emits('update:to', value)
+    }
+  }
 }
 
 onMounted(() => {

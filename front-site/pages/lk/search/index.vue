@@ -227,14 +227,24 @@ const finalResults = computed(() => {
 })
 
 const fastSearch = computed(() => {
+  const isset = finalResults.value.find(item => item.name.toLowerCase() === search.value.toLowerCase())
+
+  if (isset) {
+    return isset
+  }
+
   if (view.value === 'products' && type.value === 'name') {
-    return {
-      name: search.value,
-      link: `/lk/niche/${search.value}`,
+    const firstItem = finalResults.value[0]
+
+    if (firstItem) {
+      return {
+        name: search.value,
+        link: firstItem.link,
+      }
     }
   }
 
-  return finalResults.value.find(item => item.name.toLowerCase() === search.value.toLowerCase())
+  return null
 })
 
 watch(() => search.value, (value) => {

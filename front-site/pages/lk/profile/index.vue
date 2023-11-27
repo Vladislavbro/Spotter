@@ -11,7 +11,7 @@
           >
             <div class="profile-tarif__info">
               <p class="profile-tarif__label">
-                Тариф: {{ subscribeName}}
+                Тариф: {{ subscribeName }}
               </p>
               <p class="profile-tarif__date">
                 Действует до {{ subscribeDate }}

@@ -107,7 +107,7 @@
                   </span>
                 </div>
               </td>
-              <td>
+              <td v-if="headColumns[2].show">
                 <NuxtLink
                   :to="`/lk/seller/${item.product__supplier_id}?name=${item?.supplier?.name || ''}`"
                   class="niche-items-table__link"
@@ -117,7 +117,7 @@
                   {{ item?.supplier?.inn ? `(${item.supplier.inn})` : '' }}
                 </NuxtLink>
               </td>
-              <td>
+              <td v-if="headColumns[3].show">
                 <NuxtLink
                   :to="`/lk/brand/${item.product__brand_id}?name=${item?.product__brand?.toLowerCase() || ''}`"
                   class="niche-items-table__link"
@@ -125,7 +125,7 @@
                   {{ item.product__brand }}
                 </NuxtLink>
               </td>
-              <td v-if="headColumns[2].show">
+              <td v-if="headColumns[4].show">
                 <p class="niche-items-table__stats">
                   {{ item[`profit_${day}_${fb}`].toLocaleString() || 0 }} ₽
                   <!-- <span class="niche-items-table__stats-percent niche-items-table__stats-percent--good">
@@ -133,7 +133,7 @@
                   </span> -->
                 </p>
               </td>
-              <td v-if="headColumns[3].show">
+              <td v-if="headColumns[5].show">
                 <p class="niche-items-table__stats">
                   {{ item[`sales_${day}_${fb}`].toLocaleString() || 0 }}
                   <!-- <span class="niche-items-table__stats-percent niche-items-table__stats-percent--good">
@@ -378,6 +378,8 @@ getData()
   &__newprice {
     font-size: 15px;
     line-height: 18px;
+
+    white-space: nowrap;
   }
 
   &__price-percent {
@@ -387,12 +389,16 @@ getData()
     color: #33976F;
     background: #F8F8F9;
     border-radius: 4px;
+
+    white-space: nowrap;
   }
 
   &__oldprice {
     font-size: 12px;
     text-decoration-line: line-through;
     color: #8B8B91;
+
+    white-space: nowrap;
   }
 
   &__link {
@@ -401,6 +407,8 @@ getData()
 
   &__stats {
     position: relative;
+
+    white-space: nowrap;
 
     &-percent {
       position: absolute;

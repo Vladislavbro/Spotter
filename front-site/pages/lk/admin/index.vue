@@ -38,6 +38,7 @@
 
           <div class="admin__list">
             <LkTable
+              v-if="!isLoading"
               :head-columns="headColumns"
               class="admin__table admin-table"
             >
@@ -67,14 +68,11 @@
                   >
                     {{ item.email || '--' }}
                   </td>
-                  <!-- <td class="admin-table__col">
-                    {{ item.phone }}
-                  </td>
                   <td class="admin-table__col">
-                    {{ item.password }}
-                  </td> -->
+                    {{ item.customer__phone || '--' }}
+                  </td>
                   <td
-                    v-if="headColumns[2].show"
+                    v-if="headColumns[3].show"
                     class="admin-table__col"
                   >
                     <a
@@ -83,19 +81,22 @@
                       @click.prevent="editableItem = item, isShowEditUserSubscribeModal = true"
                     >
                       <span :class="['admin-table-status__type', { 'admin-table-status__type--pro' : item.status === 'premium' }]" />
-                      {{ item.customer__subscribe_type === 'premium' ? 'Продвинутый' : item.customer__subscribe_type === 'trial' ? 'Базовый' : '--' }}
+                      {{ subscribeName(item.customer__subscribe_type) }}
                       <UIBaseIcon name="lk/icon-pencil" />
                     </a>
                   </td>
                   <td
-                    v-if="headColumns[3].show"
+                    v-if="headColumns[4].show"
                     class="admin-table__col"
                   >
                     <p class="admin-table-date">
-                      {{ item.customer__subscribe_until || '--' }}
-                      <!-- <span class="admin-table-date__time">
-                        {{ item.time }}
-                      </span> -->
+                      {{ subscribeDate(item.customer__subscribe_until) }}
+                      <span
+                        v-if="item.customer__subscribe_until"
+                        class="admin-table-date__time"
+                      >
+                        {{ subscribeTime(item.customer__subscribe_until) }}
+                      </span>
                     </p>
                   </td>
                   <td class="admin-table__col">
@@ -110,6 +111,12 @@
                 </tr>
               </tbody>
             </LkTable>
+            <div
+              v-else
+              class="admin-table__loader"
+            >
+              <UILoader />
+            </div>
           </div>
         </div>
       </div>
@@ -138,10 +145,13 @@
 </template>
 
 <script setup>
+import { format } from 'date-fns'
+
 definePageMeta({
   layout: 'lk',
 })
 
+const isLoading = ref(false)
 const search = ref('')
 const sortBy = ref('asc')
 
@@ -155,8 +165,7 @@ const editableItem = ref(null)
 const headColumns = ref([
   { label: 'Имя, фамилия', show: true },
   { label: 'E-mail', show: true },
-  // { label: 'Номер телефона', show: true },
-  // { label: 'Пароль', show: true },
+  { label: 'Номер телефона', show: true },
   { label: 'Статус подписки', show: true },
   { label: 'Подписка до', show: true },
   { label: '', show: true },
@@ -173,6 +182,35 @@ const filteredAccounts = computed(() => {
 
   return accounts.value
 })
+
+const subscribeName = (value) => {
+  switch (value) {
+    case 'demo':
+      return 'Демо'
+    case 'trial':
+      return 'Базовый'
+    case 'premium':
+      return 'Продвинутый'
+    default:
+      return '--'
+  }
+}
+
+const subscribeDate = (value) => {
+  if (value) {
+    return format(value * 1000, 'dd-MM-yyyy')
+  }
+
+  return 'бессрочно'
+}
+
+const subscribeTime = (value) => {
+  if (value) {
+    return format(value * 1000, 'HH:mm:ss')
+  }
+
+  return null
+}
 
 const addNewUser = async (form) => {
   const { data } = await useFetch('/api/account', {
@@ -238,12 +276,16 @@ const userFullname = (firstName, lastName) => {
 }
 
 const getUsers = async () => {
+  isLoading.value = true
+
   const { data } = await useFetch('/api/accounts')
+
+  isLoading.value = false
 
   accounts.value = data?.value?.accounts || []
 }
 
-await getUsers()
+getUsers()
 </script>
 
 <style lang="scss" scoped>
@@ -301,6 +343,14 @@ await getUsers()
     padding: 24px 24px 20px 20px;
     background: var(--white);
     border-radius: 12px;
+  }
+
+  &__loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 50px auto;
   }
 }
 
