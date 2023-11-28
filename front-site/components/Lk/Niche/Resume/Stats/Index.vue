@@ -23,27 +23,43 @@ const props = defineProps({
 })
 
 const cards = ref([
-  { title: 'Объём рынка', type: 'up', price: '0', price_percent: '0', diff: '0', percent: '0' },
-  { title: 'Объём рынка у ТОП-10', type: 'up', price: '0', price_percent: '0', diff: '0', percent: '0' },
-  { title: 'Количество товаров', type: 'up', price: '0', price_percent: '0', diff: '0', percent: '0' },
-  { title: 'Количество товаров с продажами', type: 'up', price: '0', price_percent: '0', diff: '', percent: '0' },
-  { title: 'Количество продавцов с продажами', type: 'up', price: '0', price_percent: '0', diff: '0', percent: '0' },
+  { title: 'Объём рынка', type: 'up', price: '0', price_percent: null, diff: '0', percent: '0' },
+  { title: 'Объём рынка у ТОП-10', type: 'up', price: '0', price_percent: null, diff: '0', percent: '0' },
+  { title: 'Количество товаров', type: 'up', price: '0', price_percent: null, diff: '0', percent: '0' },
+  { title: 'Количество товаров с продажами', type: 'up', price: '0', price_percent: null, diff: '', percent: '0' },
+  { title: 'Количество продавцов с продажами', type: 'up', price: '0', price_percent: null, diff: '0', percent: '0' },
 ])
 
 const setDefault = () => {
+  const volume = props.item?.volume || null
+  const profitTopSupDiff = props.item?.profit_top_sup_diff || null
+  const supplierSoldDiff = props.item?.supplier_sold_diff || null
+
   cards.value[0].price = `${props.item?.profit?.toLocaleString()} ₽`
-  cards.value[0].price_percent = `${parseInt((props.item?.volume || 0) * 100) / 100}`
+  if (volume) {
+    cards.value[0].price_percent = (volume > 1 ? '+' : '') + toFixed((volume - 1) * 100)
+  }
 
   cards.value[1].price = `${props.item?.profit_top_sup?.toLocaleString()} ₽`
-  cards.value[1].price_percent = `${parseInt((props.item?.profit_top_sup_diff || 0) * 100) / 100}`
+  if (profitTopSupDiff) {
+    cards.value[1].price_percent = (profitTopSupDiff > 1 ? '+' : '') + toFixed((profitTopSupDiff - 1) * 100)
+  }
 
   cards.value[2].price = `${props.item?.products_count?.toLocaleString()}`
 
   cards.value[3].price = `${props.item?.supplier_sold_count?.toLocaleString()}`
-  cards.value[3].price_percent = `${parseInt((props.item?.supplier_sold_diff || 0) * 100) / 100}`
+  if (supplierSoldDiff) {
+    cards.value[3].price_percent = (supplierSoldDiff > 1 ? '+' : '') + toFixed((supplierSoldDiff - 1) * 100)
+  }
 
   cards.value[4].price = `${props.item?.supplier_sold_count?.toLocaleString()}`
-  cards.value[4].price_percent = `${parseInt((props.item?.supplier_sold_diff || 0) * 100) / 100}`
+  if (supplierSoldDiff) {
+    cards.value[4].price_percent = (supplierSoldDiff > 1 ? '+' : '') + toFixed((supplierSoldDiff - 1) * 100)
+  }
+}
+
+const toFixed = (val) => {
+  return parseInt(val * 100) / 100
 }
 
 setDefault()

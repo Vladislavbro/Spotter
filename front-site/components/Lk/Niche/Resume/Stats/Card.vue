@@ -20,7 +20,7 @@
       <p class="resume-stats-card__price">
         {{ item.price }}
         <span
-          v-if="+item.price_percent"
+          v-if="item.price_percent"
           class="resume-stats-card__price-percent"
         >
           ({{ item.price_percent }})%

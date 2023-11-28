@@ -1,6 +1,6 @@
 <template>
   <div class="niche-resume">
-    <template v-if="!isLoadingPage">
+    <template v-if="!isLoadingPage && item">
       <div class="niche-resume__info">
         <LkTableTypes
           :value="fb"
@@ -47,7 +47,10 @@
       v-else
       class="niche-resume__loader"
     >
-      <UILoader />
+      <UILoader v-if="isLoadingPage" />
+      <span v-else>
+        Нет данных по товарам
+      </span>
     </div>
   </div>
 </template>
@@ -396,7 +399,13 @@ const getData = async () => {
   isLoading.value = false
   isLoadingPage.value = false
 
-  item.value = data?.value
+  const value = data?.value || null
+
+  if (value?.status === 'error') {
+    item.value = null
+    return false
+  }
+  item.value = value
 
   setPerspective()
 }
@@ -424,6 +433,8 @@ getData()
     align-items: center;
     justify-content: center;
     margin: 100px 0;
+    font-size: 32px;
+    font-weight: bold;
   }
 }
 </style>
