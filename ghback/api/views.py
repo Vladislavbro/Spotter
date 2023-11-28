@@ -679,6 +679,7 @@ def queries_search(request):
         product = Product.objects.get(pk=product_id)
         query_root, query_features = product.root, product.features
     else:
+        product_id = None
         query_root, query_features = get_keys(query)
     # query_root, query_features = 'рубашка', ['белый', 'офисный']
     period = int(request.GET.get('period', '30'))
@@ -786,7 +787,18 @@ def queries_search(request):
             brands=Count('product__brand_id', distinct=True)
         ))
     if 'summary' in view:
-        response.update(get_scoring_productstats(product_ids, config))
+        if product_id:
+            query = Query.objects.filter(
+                parsing_id=config.current_parsing_id,
+                first_product=product_id
+            ).first()
+            if query:
+                scoring = query.scoring
+            else:
+                scoring = get_scoring_productstats(product_ids, config)    
+        else:
+            scoring = get_scoring_productstats(product_ids, config)
+        response.update(scoring)
     return JsonResponse(response)
 
 
