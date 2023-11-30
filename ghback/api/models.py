@@ -245,3 +245,16 @@ class ProductStat(models.Model):
         indexes = [
             models.Index(fields=['parsing_id', 'product_id']),
         ]
+
+
+class FboProfit30(models.Model):
+    product_id = models.IntegerField()
+    supplier_id = models.IntegerField(null=True)
+    parsing_id = models.IntegerField()
+    profit_30_fbo = models.DecimalField(max_digits=10, decimal_places=2)
+    features = models.JSONField()
+    root = models.CharField(max_length=255)
+
+    class Meta:
+        managed = False
+        db_table = 'view_fbo_profit_30'

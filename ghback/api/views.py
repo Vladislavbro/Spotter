@@ -795,7 +795,7 @@ def queries_search(request):
             if query:
                 scoring = query.scoring
             else:
-                scoring = get_scoring_productstats(product_ids, config)    
+                scoring = get_scoring_productstats(product_ids, config)
         else:
             scoring = get_scoring_productstats(product_ids, config)
         response.update(scoring)
