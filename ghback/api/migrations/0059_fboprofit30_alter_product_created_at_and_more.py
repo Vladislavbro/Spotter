@@ -29,6 +29,7 @@ class Migration(migrations.Migration):
         migrations.RunSQL("""
             CREATE MATERIALIZED VIEW view_fbo_profit_30 AS
                 SELECT
+                    row_number() OVER () AS id,
                     api_productstat.product_id,
                     api_product.supplier_id,
                     api_productstat.parsing_id,
@@ -40,10 +41,7 @@ class Migration(migrations.Migration):
                     INNER JOIN api_product ON api_product.id = api_productstat.product_id
                 WHERE
                     api_product.supplier_id IS NOT NULL AND
-                    parsing_id >= CAST(extract(epoch from now()) AS INTEGER) - 60*60*24*30*2;
-            CREATE INDEX idx_view_fbo_profit_30 ON view_fbo_profit_30(parsing_id, profit_30_fbo, root);
-            REFRESH MATERIALIZED VIEW view_fbo_profit_30;
-        """),
+                    parsing_id >= CAST(extract(epoch from now()) AS INTEGER) - 60*60*24*30*2;"""),
         migrations.AlterField(
             model_name='product',
             name='created_at',

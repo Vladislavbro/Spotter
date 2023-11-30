@@ -248,6 +248,7 @@ class ProductStat(models.Model):
 
 
 class FboProfit30(models.Model):
+    id = models.IntegerField(primary_key=True)
     product_id = models.IntegerField()
     supplier_id = models.IntegerField(null=True)
     parsing_id = models.IntegerField()
