@@ -252,7 +252,8 @@ class FboProfit30(models.Model):
     supplier_id = models.IntegerField(null=True)
     parsing_id = models.IntegerField()
     profit_30_fbo = models.DecimalField(max_digits=10, decimal_places=2)
-    features = models.JSONField()
+    features = ArrayField(ArrayField(models.CharField(max_length=100,
+                                                      blank=True)), default=[])
     root = models.CharField(max_length=255)
 
     class Meta:
