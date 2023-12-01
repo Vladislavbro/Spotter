@@ -157,7 +157,7 @@ class Parser(object):
             for sort in ['-profit_30_fbo', '-profit_30_fbo_grow']:
                 pstats = ProductStat.objects.select_related('product').filter(
                     parsing_id=self.config.current_parsing_id,
-                    product_id__in=product_ids).order_by(sort)[0:50]
+                    product_id__in=product_ids).order_by(sort)[0:100]
                 for pstat in pstats:
                     product = pstat.product
                     features = product.features
