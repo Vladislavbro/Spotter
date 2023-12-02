@@ -444,6 +444,10 @@ def categories_list(request):
             current_parsing_id__lte=date,
             # current_parsing_id__lt=date + 86400,
         ).first()
+    else:
+        config = Config.objects.filter(
+            calculated=True,
+        ).first()
     out = []
     categories = Category.objects.all()
     sort = request.GET.get('sort')
