@@ -17,35 +17,23 @@
       </a>
     </td>
     <td>
-      {{ item.products_count }}
+      {{ productsCount.toLocaleString() }}
     </td>
     <td>
-      {{ item.sellers_count }}
-    </td>
-    <!-- <td>
-      {{ item.brands_count }}
-    </td> -->
-    <td>
-      {{ item.profit }}
+      {{ sellersCount.toLocaleString() }}
     </td>
     <td>
-      {{ item.price_avg }}
+      {{ profit.toLocaleString() }}
     </td>
     <td>
-      {{ item.products_solded }}
+      {{ priceAvg.toLocaleString() }}
     </td>
-    <!-- <td>
-      {{ item.brands }}
-    </td> -->
     <td>
-      {{ item.sellers_solded }}
+      {{ sellersSolded.toLocaleString() }}
     </td>
-    <!-- <td>
-      {{ item.average_sale_items }}
-    </td> -->
-    <!-- <td>
-      {{ item.average_sale_sellers }}
-    </td> -->
+    <td>
+      {{ productsSolded.toLocaleString() }}
+    </td>
   </tr>
 
   <template v-if="item.items.length && isShow">
@@ -59,7 +47,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   item: {
     type: Object,
     default: () => ({}),
@@ -71,6 +59,38 @@ defineProps({
 })
 
 const isShow = ref(false)
+
+const stat = computed(() => {
+  if (props?.item?.stat?.length) {
+    return props?.item?.stat[0]
+  }
+
+  return null
+})
+
+const productsCount = computed(() => {
+  return stat.value?.products_count || ''
+})
+
+const sellersCount = computed(() => {
+  return stat.value?.sellers_count || ''
+})
+
+const profit = computed(() => {
+  return stat.value?.profit || ''
+})
+
+const priceAvg = computed(() => {
+  return stat.value?.price_avg || ''
+})
+
+const sellersSolded = computed(() => {
+  return stat.value?.sellers_solded || ''
+})
+
+const productsSolded = computed(() => {
+  return stat.value?.products_solded || ''
+})
 </script>
 
 <style lang="scss" scoped>
