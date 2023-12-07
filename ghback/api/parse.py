@@ -412,11 +412,11 @@ class Parser(object):
         return []
 
     def update_products(self):
-        product = Product.objects.filter(lemma=None).first()
+        product = Product.objects.filter(lemmas=[]).first()
         while product:
             self.text_process(product)
             product.save()
-            product = Product.objects.filter(lemma=None).first()
+            product = Product.objects.filter(lemmas=[]).first()
 
     def get_keys(self, query):
         #     nsubj = [w for w in doc if w.dep_ == 'nsubj']
