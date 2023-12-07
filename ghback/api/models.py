@@ -118,6 +118,8 @@ class Product(models.Model):
     parsed_at = models.DateTimeField(blank=True, null=True)
     name = models.CharField(max_length=200)
     # desc = models.TextField()
+    lemmas = ArrayField(ArrayField(
+        models.CharField(max_length=100, blank=True)))
     root = models.CharField(max_length=200)
     entity = models.CharField(max_length=200, blank=True, null=True)
     features = ArrayField(ArrayField(models.CharField(max_length=100,
