@@ -415,6 +415,7 @@ class Parser(object):
         product = Product.objects.filter(lemmas=[]).first()
         while product:
             self.text_process(product)
+            print('product.lemmas', product.lemmas)
             product.save()
             product = Product.objects.filter(lemmas=[]).first()
 
