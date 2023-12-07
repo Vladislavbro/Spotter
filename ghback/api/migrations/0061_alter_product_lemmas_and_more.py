@@ -11,11 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='product',
-            name='lemmas',
-            field=django.contrib.postgres.fields.ArrayField(base_field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(blank=True, max_length=100), size=None), default=[], size=None),
-        ),
         migrations.AddIndex(
             model_name='product',
             index=models.Index(fields=['lemmas'], name='api_product_lemmas_e55b59_idx'),
