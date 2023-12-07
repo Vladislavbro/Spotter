@@ -424,7 +424,7 @@ class Parser(object):
         query = re.sub(r'\s+', ' ', query)
         doc = nlp(query.strip())
         lemmas = [w.lemma_ for w in doc if w.tag_ in 
-                  ['ADV', 'ADJ', 'NOUN', 'VERB', 'NUM', 'INFN', 'PROPN']]
+                  ['ADV', 'ADJ', 'NOUN', 'VERB', 'NUM', 'INFN', 'PROPN', 'X']]
         features = list(set([w for w in doc if morph.parse(w.lemma_)[0].tag.POS == 'ADJF' or w.tag_ == 'ADJ']))
         doc = [t for t in doc if t not in features]
         root = [
