@@ -23,6 +23,7 @@ import asyncio
 import pytz
 import pymorphy2
 from api.utils import get_scoring_productstats
+import threading
 
 
 morph = pymorphy2.MorphAnalyzer()
@@ -117,7 +118,8 @@ class Parser(object):
             return self.get_url(url)
 
     def processing(self):
-        return self.update_products()
+        thread = threading.Thread(target=self.update_products)
+        thread.start()
         if self.config.parsing_done is not True:
             self.notify('Парсинг категорий начался')
             # self.get_wirehouses()
