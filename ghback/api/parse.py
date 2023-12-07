@@ -117,7 +117,7 @@ class Parser(object):
             return self.get_url(url)
 
     def processing(self):
-        # return self.update_products()
+        return self.update_products()
         if self.config.parsing_done is not True:
             self.notify('Парсинг категорий начался')
             # self.get_wirehouses()
@@ -412,11 +412,11 @@ class Parser(object):
         return []
 
     def update_products(self):
-        product = Product.objects.filter(root='').first()
+        product = Product.objects.filter(lemma=None).first()
         while product:
             self.text_process(product)
             product.save()
-            product = Product.objects.filter(root='').first()
+            product = Product.objects.filter(lemma=None).first()
 
     def get_keys(self, query):
         #     nsubj = [w for w in doc if w.dep_ == 'nsubj']
@@ -426,6 +426,7 @@ class Parser(object):
         query = re.sub(r'[\W\d]', ' ', query)
         query = re.sub(r'\s+', ' ', query)
         doc = nlp(query.strip())
+        lemmas = [w.lemma_ for w in doc if w.tag_ in ['ADV', 'ADJ', 'NOUN', 'VERB', 'NUM', 'INFN']]
         features = list(set([w for w in doc if morph.parse(w.lemma_)[0].tag.POS == 'ADJF' or w.tag_ == 'ADJ']))
         doc = [t for t in doc if t not in features]
         root = [
@@ -437,12 +438,13 @@ class Parser(object):
                 ) and len(w.lemma_) > 2
             )
         ]
-        return root[0].lemma_ if len(root) else None, [f.lemma_ for f in features]
+        return root[0].lemma_ if len(root) else None, [f.lemma_ for f in features], lemmas
 
     def text_process(self, product):
-        root, features = self.get_keys(product.name)
+        root, features, lemmas = self.get_keys(product.name)
         product.root = root or '-'
         product.features = features
+        product.lemmas = lemmas
         # if len(doc.ents):
         #     product.entity = doc.ents[0].lemma_
 
