@@ -420,14 +420,11 @@ class Parser(object):
             product = Product.objects.filter(lemmas=[]).first()
 
     def get_keys(self, query):
-        #     nsubj = [w for w in doc if w.dep_ == 'nsubj']
-        #     if len(nsubj):
-        #         root = nsubj[0]
-        #         product.root = root.lemma_
         query = re.sub(r'[\W\d]', ' ', query)
         query = re.sub(r'\s+', ' ', query)
         doc = nlp(query.strip())
-        lemmas = [w.lemma_ for w in doc if w.tag_ in ['ADV', 'ADJ', 'NOUN', 'VERB', 'NUM', 'INFN']]
+        lemmas = [w.lemma_ for w in doc if w.tag_ in 
+                  ['ADV', 'ADJ', 'NOUN', 'VERB', 'NUM', 'INFN', 'PROPN']]
         features = list(set([w for w in doc if morph.parse(w.lemma_)[0].tag.POS == 'ADJF' or w.tag_ == 'ADJ']))
         doc = [t for t in doc if t not in features]
         root = [
