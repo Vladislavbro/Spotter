@@ -422,7 +422,7 @@ class Parser(object):
             product = Product.objects.filter(lemmas=[]).first()
 
     def get_keys(self, query):
-        query = re.sub(r'[\W\d]', ' ', query)
+        query = re.sub(r'[\W]', ' ', query)
         query = re.sub(r'\s+', ' ', query)
         doc = nlp(query.strip())
         lemmas = [w.lemma_ for w in doc if w.tag_ in 
