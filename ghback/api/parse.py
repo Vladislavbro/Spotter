@@ -1076,10 +1076,7 @@ class Parser(object):
             features__contains=query_features
         ).values_list('id', flat=True)
         query.scoring = get_scoring_productstats(product_ids, config)
-        if query.scoring['scoring'] < 9:
-            query.delete()
-        else:
-            query.save()
+        query.save()
 
     def calculate_products(self):
         # "Товары в этот раздел отбираются по следующему принципу:
