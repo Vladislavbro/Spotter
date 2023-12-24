@@ -73,8 +73,8 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.set_period_dates()
-        self.processing()
-        # self.get_categories()
+        # self.processing()
+        self.get_categories()
 
     def get_wirehouses(self):
         url = "https://seller.wildberries.ru/ns/distribution-offices/distribution-offices/api/v1/office/getAllMarketplace"
@@ -199,22 +199,28 @@ class Parser(object):
 
     def get_categories(self):
         self.upgrade_parsing()
-        f = open('catalog.txt', 'r')
-        content = f.read()
-        categoryUrlList = [line for line in content.strip().split('\n')]
+        # f = open('catalog.txt', 'r')
+        # content = f.read()
+        # categoryUrlList = [line for line in content.strip().split('\n')]
         # if '/catalog/' in line]
         # url = 'https://www.wildberries.ru/webapi/menu/main-menu-ru-ru.json'
         url = 'https://static-basket-01.wb.ru/vol0/data/main-menu-ru-ru-v2.json'
         response = self.get_url(url)
         data = response.json()
-        for item in [item for item in data if item['name'] in categoryUrlList]:
+        stopCategories = ['Цифровые товары', 'Акции', 'Народные промыслы', 
+                          'Путешествия']
+        # for item in [item for item in data if item['name'] in categoryUrlList]:
+        for item in data:
+            if item['name'] in stopCategories:
+                continue
             self.update_category(item)
             for child in item.get('childs', []):
-                if child['url'] in categoryUrlList:
-                    self.update_category(child)
-                    if child.get('shard') == 'blackhole':
-                        for subchild in child.get('childs', []):
-                            self.update_category(subchild)
+                # if child['url'] in categoryUrlList:
+                self.update_category(child)
+                if child.get('shard') == 'blackhole':
+                    for subchild in child.get('childs', []):
+                        self.update_category(subchild)
+        self.notify('Категории обновлены')
 
     def upgrade_parsing(self):
         Category.objects.update(
