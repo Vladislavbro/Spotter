@@ -402,6 +402,7 @@ def get_children(category, categories, stats, period, fb):
             'sellers_solded': s[f'sellers_solded_{period}_{fb}'],
             'profit': s[f'profit_{period}_{fb}'],
             'price_avg': s[f'price_avg_{period}'],
+            'top': s[f'top_{period}_{fb}'],
         } for s in stats if s['category_id'] == c['id']]
     } for c in categories if c.get('parent') == category['wb_id']]
 
