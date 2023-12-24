@@ -147,6 +147,7 @@ class Parser(object):
             )
             self.config.save()
             self.notify('Новый цикл начался')
+            self.get_categories()
             self.processing()
 
     def create_queries(self):
