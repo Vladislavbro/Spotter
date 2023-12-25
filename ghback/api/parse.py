@@ -124,12 +124,12 @@ class Parser(object):
             self.notify('Парсинг категорий начался')
             # self.get_wirehouses()
             self.get_category()
-        elif self.config.queries_done is not True:
-            self.notify('Создаются поисковые запросы')
-            self.create_queries()
-        elif self.config.queries_calculated is not True:
-            self.notify('Расчет запросов начался')
-            self.calculate_queries()
+        # elif self.config.queries_done is not True:
+        #     self.notify('Создаются поисковые запросы')
+        #     self.create_queries()
+        # elif self.config.queries_calculated is not True:
+        #     self.notify('Расчет запросов начался')
+        #     self.calculate_queries()
         elif self.config.categories_calculated is not True:
             self.notify('Расчет категорий начался')
             self.calculate_categories()
@@ -738,48 +738,64 @@ class Parser(object):
             update[f'sellers_count_{period}'] = agg['sellers']
             if update['products_count'] > 300:
                 continue
-            prev_parsing = Config.objects.filter(
-                current_parsing_id__lt=start.timestamp()).first()
-            prev_stat = CategoryStat.objects.filter(
-                category_id=category.id,
-                parsing_id=prev_parsing.current_parsing_id).first()
+            # prev_parsing = Config.objects.filter(
+            #     current_parsing_id__lt=start.timestamp()).first()
+            # prev_stat = CategoryStat.objects.filter(
+            #     category_id=category.id,
+            #     parsing_id=prev_parsing.current_parsing_id).first()
             for fb in ['fbo', 'fbs']:
                 field = f'profit_{period}_{fb}'
                 pstats = productstats_current.order_by(f'-{field}')[:10].values()
-                # update[field] = sum([pstat[field] for pstat in pstats])
-                # - Оборот первого товара не меньше 500к
-                if pstats.count() == 0:
+
+                # Средний чек от 750 рублей
+                if (update[f'price_avg_{period}'] or 0) < 750:
                     continue
-                if pstats[0][field] < self.profit_first_top / 30 * period:
+                # Количество товаров с продажами от 25%
+                if update[f'products_solded_{period}_{fb}'] < 25:
                     continue
-                # оборот десятого товара не меньше 100к
-                if pstats[9][field] < self.profit_ten_top / 30 * period:
+                # Оборот в категории от 20 млн
+                if update.get(field, 0) < 20000000:
                     continue
-                # - Количество товаров с продажами: не меньше 20%
-                if update[f'products_solded_{period}_{fb}'] < 20:
-                    continue
-                # - Оборот в категории месяц назад и сейчас отличается
-                # не более чем на +-10%
-                if prev_stat is None:
-                    continue
-                _prev_stat = model_to_dict(prev_stat)
-                if _prev_stat[field] is None or update[field] < _prev_stat[field] * 0.9:
-                    continue
-                if _prev_stat[field] is None or update[field] > _prev_stat[field] * 1.1:
-                    continue
-                # - Средний чек в категории месяц назад и сейчас отличается не более
-                # чем на +-10%
-                if _prev_stat[f'price_avg_{period}'] is None or update[f'price_avg_{period}'] < _prev_stat[f'price_avg_{period}'] * 0.9:
-                    continue
-                if _prev_stat[f'price_avg_{period}'] is None or update[f'price_avg_{period}'] > _prev_stat[f'price_avg_{period}'] * 1.1:
+                # Монополия: меньше 30%
+                top_10_profit = sum([stat.get(field, 0) for stat in pstats])
+                if top_10_profit / update.get(field, 1) > 0.3:
                     continue
                 update[f'top_{period}_{fb}'] = True
+                # # - Оборот первого товара не меньше 500к
+                # if pstats.count() == 0:
+                #     continue
+                # if pstats[0][field] < self.profit_first_top / 30 * period:
+                #     continue
+                # # оборот десятого товара не меньше 100к
+                # if pstats[9][field] < self.profit_ten_top / 30 * period:
+                #     continue
+                # # - Количество товаров с продажами: не меньше 20%
+                # if update[f'products_solded_{period}_{fb}'] < 20:
+                #     continue
+                # # - Оборот в категории месяц назад и сейчас отличается не более чем на +-10%
+                # if prev_stat is None:
+                #     continue
+                # _prev_stat = model_to_dict(prev_stat)
+                # if _prev_stat[field] is None or update[field] < _prev_stat[field] * 0.9:
+                #     continue
+                # if _prev_stat[field] is None or update[field] > _prev_stat[field] * 1.1:
+                #     continue
+                # # - Средний чек в категории месяц назад и сейчас отличается не более чем на +-10%
+                # if _prev_stat[f'price_avg_{period}'] is None or update[f'price_avg_{period}'] < _prev_stat[f'price_avg_{period}'] * 0.9:
+                #     continue
+                # if _prev_stat[f'price_avg_{period}'] is None or update[f'price_avg_{period}'] > _prev_stat[f'price_avg_{period}'] * 1.1:
+                #     continue
         stat = category.categorystat_set.filter(
             parsing_id=self.config.current_parsing_id).first()
         if stat is None:
             stat = category.categorystat_set.create(
                 parsing_id=self.config.current_parsing_id)
         CategoryStat.objects.filter(pk=stat.id).update(**update)
+        first_product = Product.objects.filter(
+            categories__overlap=[category.wb_id]).first()
+        if first_product:
+            category.first_product = first_product.id
+        category.scoring = get_scoring_productstats(product_ids, self.config)
         category.calculated = True
         category.save()
 

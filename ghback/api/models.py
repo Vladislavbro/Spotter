@@ -46,6 +46,9 @@ class Config(models.Model):
 class Category(models.Model):
     parsed_ids = ArrayField(ArrayField(models.IntegerField(blank=True)),
                             default=[])
+    first_product = models.ForeignKey(
+        'Product', on_delete=models.DO_NOTHING, blank=True, null=True, 
+        related_name='first_product_category')
     name = models.CharField(max_length=200)
     wb_id = models.IntegerField()
     parent = models.IntegerField(blank=True, null=True)
@@ -73,6 +76,7 @@ class CategoryStat(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now=True)
     parsing_id = models.IntegerField(blank=True, null=True)
+    scoring = models.JSONField(blank=True, null=True)
     products_count = models.IntegerField(blank=True, null=True)
     products_solded_7_fbo = models.IntegerField(blank=True, null=True)
     products_solded_7_fbs = models.IntegerField(blank=True, null=True)
@@ -136,7 +140,7 @@ class Product(models.Model):
     priceU = models.IntegerField(blank=True, null=True)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
-    
+
     class Meta():
         indexes = [
             models.Index(fields=['lemmas']),

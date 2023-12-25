@@ -347,6 +347,217 @@
                 }
             }
         },
+        "/categories/top": {
+            "get": {
+                "tags": [
+                    "Топ категории"
+                ],
+                "summary": "Топ категории",
+                "description": "",
+                "operationId": "topCategories",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Номер страницы для формата json",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Сортировка",
+                        "type": "string",
+                        "enum": [
+                            "products_count",
+                            "products_solded",
+                            "price_avg",
+                            "profit"
+                        ]
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Направление сортировки",
+                        "type": "string",
+                        "enum": [
+                            "desc",
+                            "asc"
+                        ]
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "fb",
+                        "in": "query",
+                        "description": "FBO / FBS",
+                        "type": "string",
+                        "enum": [
+                            "fbo", 
+                            "fbs"
+                        ]
+                    },
+                    {
+                        "name": "dateTo",
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    },
+                    {
+                        "name": "products_count",
+                        "in": "query",
+                        "description": "Фильтр количества товаров в формате 'от;до', например '100;200', ';100', '300;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "products_solded",
+                        "in": "query",
+                        "description": "Фильтр товаров c продажами в формате 'от;до', например '100;200', ';100', '300;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "scoring",
+                        "in": "query",
+                        "description": "Фильтр рейтинга в формате 'от;до', например '100;200', ';100', '300;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "price_avg",
+                        "in": "query",
+                        "description": "Фильтр средней цены товаров в формате 'от;до', например '1000;2000', ';1000', '3000;'",
+                        "type": "string"
+                    },
+                    {
+                        "name": "profit",
+                        "in": "query",
+                        "description": "Фильтр оборота товаров в формате 'от;до', например '10000;20000', ';10000', '30000;'",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/{id}": {
+            "get": {
+                "tags": [
+                    "Категория"
+                ],
+                "summary": "Перспективность категории, товары",
+                "description": "",
+                "operationId": "category",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id категории",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "view",
+                        "in": "query",
+                        "description": "Запрос статистики, списка товаров, графиков. Вместе или раздельно",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "summary",
+                            "products",
+                            "graphs",
+                            "'summary,products'",
+                            "'summary,products,graphs'",
+                            "..."
+                        ]
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Номер страницы, работает с view == 'products'",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Количество товаров в ответе, работает с view == 'products'",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Сортировка, работает с view == 'products'",
+                        "type": "string",
+                        "enum": [
+                            "sales",
+                            "price",
+                            "pricU",
+                            "profit",
+                            "product__feedbacks",
+                            "product__rating",
+                        ]
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Направление сортировки, работает с view == 'products'",
+                        "type": "string",
+                        "enum": [
+                            "desc",
+                            "asc"
+                        ]
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Период данных",
+                        "type": "number",
+                        "enum": [7, 14, 30]
+                    },
+                    {
+                        "name": "fb",
+                        "in": "query",
+                        "description": "FBO / FBS",
+                        "type": "string",
+                        "enum": [
+                            "fbo", 
+                            "fbs"
+                        ]
+                    },
+                    {
+                        "name": "dateTo",
+                        "in": "query",
+                        "description": "Дата до которой нужна статистика в формате 2023-05-01, если не указана то берется последний парсинг",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponseAny"
+                        }
+                    }
+                }
+            }
+        },
         "/products/{articul}": {
             "get": {
                 "tags": [

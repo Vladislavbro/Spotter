@@ -634,6 +634,124 @@ def queries_top(request):
         })
 
 
+def categories_top(request):
+    period = int(request.GET.get('period', '30'))
+    fb = request.GET.get('fb', 'fbo')
+    page = int(request.GET.get('page', '1'))
+    dateTo = request.GET.get('date')
+    if dateTo:
+        date = datetime.strptime(dateTo, '%Y-%m-%d').timestamp()
+        config = Config.objects.filter(
+            calculated=True,
+            current_parsing_id__gte=date,
+            current_parsing_id__lt=date + 86400,
+        ).first()
+        if config is None:
+            return JsonResponse({
+                'total': 0,
+                'items': []
+            })
+    else:
+        config = Config.objects.filter(calculated=True).first()
+    items = CategoryStat.objects.select_related('category', 'category__first_product').filter(
+        parsing_id=config.current_parsing_id,
+    )
+    top_field = f'top_{period}_{fb}'
+    # items = items.filter(**{top_field: True})
+
+    if request.GET.get('products_count'):
+        start = request.GET['products_count'].split(';')[0]
+        if start:
+            items = items.filter(products_count__gte=int(start))
+        end = request.GET['products_count'].split(';')[1]
+        if end:
+            items = items.filter(products_count__lte=int(end))
+    if request.GET.get('price_avg'):
+        start = request.GET['price_avg'].split(';')[0]
+        if start:
+            field = f'price_avg_{period}__gte'
+            items = items.filter(**{field: start})
+        end = request.GET['price_avg'].split(';')[1]
+        if end:
+            field = f'price_avg_{period}__lte'
+            items = items.filter(**{field: end})
+    if request.GET.get('profit'):
+        start = request.GET['profit'].split(';')[0]
+        if start:
+            field = f'profit_{period}_{fb}__gte'
+            items = items.filter(**{field: start})
+        end = request.GET['profit'].split(';')[1]
+        if end:
+            field = f'profit_{period}_{fb}__lte'
+            items = items.filter(**{field: end})
+    if request.GET.get('products_solded'):
+        start = request.GET['products_solded'].split(';')[0]
+        if start:
+            field = f'products_solded_{period}_{fb}__gte'
+            items = items.filter(**{field: start})
+        end = request.GET['products_solded'].split(';')[1]
+        if end:
+            field = f'products_solded_{period}_{fb}__lte'
+            items = items.filter(**{field: end})
+    if request.GET.get('scoring'):
+        start = request.GET['scoring'].split(';')[0]
+        if start:
+            items = items.filter(scoring__scoring__gte=int(start))
+        end = request.GET['scoring'].split(';')[1]
+        if end:
+            items = items.filter(scoring__scoring__lte=int(end))
+
+    sort = request.GET.get('sort')
+    direction = request.GET.get('direction')
+    if sort is not None:
+        if direction == 'desc':
+            direction = '-'
+        else:
+            direction = ''
+        if sort == 'price_avg':
+            sort += f'_{period}'
+        if 'profit' in sort:
+            sort += f'_{period}_{fb}'
+        if sort == 'scoring':
+            sort = 'scoring__scoring'
+        items = items.order_by(f'{direction}{sort}')
+    total = items.count()
+    items = items[((page - 1) * 100):page * 100]
+
+    def get_image(i):
+        basket = i['category__first_product__basket']
+        articul = i['category__first_product__articul']
+        if basket is None:
+            return None
+        image_url = f'https://basket-{basket}.wb.ru/'
+        image_url += f'vol{str(articul)[:4]}/part{str(articul)[:6]}/'
+        image_url += f'{articul}/images/big/1.webp'
+        return image_url
+
+    return JsonResponse({
+        'total': total,
+        'items': [{
+            'id': i['category__id'],
+            'product_id': i['category__first_product__id'],
+            'product_name': i['category__first_product__name'],
+            'product_image': get_image(i),
+            'product_articul': i['category__first_product__articul'],
+            'scoring': i['scoring'],
+            'products_count': i['products_count'],
+            'products_solded': i[f'products_solded_{period}_{fb}'],
+            'price_avg': i[f'price_avg_{period}'],
+            'profit': i[f'profit_{period}_{fb}'],
+        } for i in items.values(
+            'category__first_product__id', 'category__first_product__name', 
+            'category__first_product__articul', 
+            'category__first_product__basket',
+            'category__id', 'scoring'
+            'products_count', f'products_solded_{period}_{fb}', 
+            f'price_avg_{period}', f'profit_{period}_{fb}'
+        )]
+    })
+
+
 def get_product_image(product):
     basket = product['first_product__basket']
     articul = product['first_product__articul']
@@ -674,6 +792,95 @@ def get_keys(query):
         )
     ]
     return root[0].lemma_ if len(root) else None, [f.lemma_ for f in features]
+
+
+def category_item(request, category_id):
+    view = request.GET.get('view')
+    period = int(request.GET.get('period', '30'))
+    fb = request.GET.get('fb', 'fbo')
+    dateTo = request.GET.get('date')
+    date = datetime.now()
+    if dateTo:
+        date = datetime.strptime(dateTo, '%Y-%m-%d')
+        config = Config.objects.filter(
+            queries_calculated=True,
+            current_parsing_id__gte=date.timestamp(),
+        ).first()
+        print('config', config.id, date)
+        if config is None:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'За выбранную дату нет данных'
+            })
+    else:
+        config = Config.objects.filter(calculated=True).first()
+    category = Category.objects.get(pk=category_id)
+    if len(category.parsed_ids):
+        products = Product.objects.filter(
+            categories__overlap=category.parsed_ids)
+    else:
+        products = Product.objects.filter(
+            categories__contains=[category.wb_id])
+    product_ids = products.values_list('id', flat=True)
+    total = product_ids.count()
+    productstats = ProductStat.objects.prefetch_related('product').filter(
+        parsing_id=config.current_parsing_id,
+        product_id__in=product_ids
+    )
+    ps_count = productstats.count()
+    print(total, ps_count)
+    if ps_count == 0:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Нет данных по товарам'
+        })
+    response = {}
+    if 'products' in view:
+        page = int(request.GET.get('page', '1'))
+        per_page = int(request.GET.get('per_page', '100'))
+        sort = request.GET.get('sort')
+        direction = request.GET.get('direction')
+        if sort is not None:
+            if direction == 'desc':
+                direction = '-'
+            else:
+                direction = ''
+            productstats = productstats.order_by(f'{direction}{sort}')
+        
+        response['total'] = total
+        response['items'] = list(productstats[((page - 1) * per_page):page * per_page].values(
+            'id', 'price', 'priceU', f'profit_{period}_{fb}', 
+            f'sales_{period}_{fb}', 'product__name', 'product__articul', 
+            'product__rating', 'product__feedbacks', 'product__supplier_id',
+            'product__brand', 'product__brand_id', 'product__articul'
+        ))
+        supplier_ids = [p['product__supplier_id'] for p in response['items']]
+        suppliers = Supplier.objects.filter(wb_id__in=supplier_ids).values()
+        for item in response['items']:
+            supplier = [s for s in suppliers if s['wb_id'] == item['product__supplier_id']]
+            if len(supplier):
+                item['supplier'] = supplier[0]
+    if 'graphs' in view:
+        start = (datetime.now() - timedelta(days=30)).replace(
+                hour=0, minute=0, second=0, microsecond=0).timestamp()
+        end = datetime.now().timestamp()
+        productstats = ProductStat.objects.prefetch_related('product').filter(
+            parsing_id__gte=start,
+            parsing_id__lt=end,
+            product_id__in=product_ids
+        )
+        response['graphs'] = list(productstats.values('parsing_id').annotate(
+            price=Avg('price'),
+            profit=Sum(f'profit_{fb}'),
+            sales=Sum(f'sales_{fb}'),
+            products=Count('pk'),
+            sellers=Count('product__supplier_id', distinct=True),
+            brands=Count('product__brand_id', distinct=True)
+        ))
+    if 'summary' in view:
+        scoring = category.scoring
+        response.update(scoring)
+    return JsonResponse(response)
 
 
 def queries_search(request):
