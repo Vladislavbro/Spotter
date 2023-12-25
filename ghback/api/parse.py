@@ -73,7 +73,6 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.set_period_dates()
-        self.get_categories()
         self.processing()
 
     def get_wirehouses(self):
@@ -1148,26 +1147,4 @@ class Parser(object):
         # тут все расчёты
         category.products_calculated = True
         category.save()
-
-
-
-# categories = list()
-# def add_category(item, parent_id=None):
-#     category = {
-#         'wb_id': item.get('id'),
-#         'name': item.get('name'),
-#         'shard': item.get('shard'),
-#         'wb_query': item.get('query'),
-#         'parse': item.get('childs') is None
-#     }
-#     if parent_id:
-#         category['parent_wb_id'] = parent_id
-#     categories.append(category)
-#     for child in item.get('childs', []):
-#         add_category(child, item['id'])
-
-# for item in data:
-#     if item['name'] in stopCategories:
-#         continue
-#     add_category(item)
 
