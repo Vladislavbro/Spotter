@@ -655,13 +655,15 @@ class Parser(object):
         # не более чем на +-10%
         # Если все условия пройдены - то информация о нише и топ 50 товарах
         # отправляются в раздел ""топ категории""
+        def get_child_ids(category):
+            ids = [category.wb_id]
+            for child in Category.objects.filter(parent=category.wb_id):
+                ids.append(child.wb_id)
+                ids += get_child_ids(child)
+            return ids
         update = {}
-        if len(category.parsed_ids):
-            products = Product.objects.filter(
-                categories__overlap=category.parsed_ids)
-        else:
-            products = Product.objects.filter(
-                categories__contains=[category.wb_id])
+        wb_ids = get_child_ids(category)
+        products = Product.objects.filter(categories__overlap=wb_ids)
         product_ids = products.values_list('id', flat=True)
         update['products_count'] = product_ids.count()
         print('calculate_category', update)
@@ -829,23 +831,12 @@ class Parser(object):
                 self.update_parsed_parent(category, parent)
 
     def calculate_categories(self):
-        category = Category.objects.filter(parse=True).exclude(
+        category = Category.objects.exclude(
             calculated=True).first()
         while category:
             self.calculate_category(category)
-            category = Category.objects.filter(parse=True).exclude(
+            category = Category.objects.exclude(
                 calculated=True).first()
-        # categories = Category.objects.all().values()
-        # category_ids = [c['id'] for c in categories]
-        # stats = CategoryStat.objects.filter(
-        #     category_id__in=category_ids,
-        #     parsing_id=self.config.current_parsing_id)
-        category = Category.objects.filter(
-            parsed_ids__len__gt=0).exclude(calculated=True).first()
-        while category:
-            self.calculate_category(category)
-            category = Category.objects.filter(
-                parsed_ids__len__gt=0).exclude(calculated=True).first()
         self.config.categories_calculated = True
         self.config.save()
         self.processing()
@@ -1160,23 +1151,23 @@ class Parser(object):
 
 
 
-categories = list()
-def add_category(item, parent_id=None):
-    category = {
-        'wb_id': item.get('id'),
-        'name': item.get('name'),
-        'shard': item.get('shard'),
-        'wb_query': item.get('query'),
-        'parse': item.get('childs') is None
-    }
-    if parent_id:
-        category['parent_wb_id'] = parent_id
-    categories.append(category)
-    for child in item.get('childs', []):
-        add_category(child, item['id'])
+# categories = list()
+# def add_category(item, parent_id=None):
+#     category = {
+#         'wb_id': item.get('id'),
+#         'name': item.get('name'),
+#         'shard': item.get('shard'),
+#         'wb_query': item.get('query'),
+#         'parse': item.get('childs') is None
+#     }
+#     if parent_id:
+#         category['parent_wb_id'] = parent_id
+#     categories.append(category)
+#     for child in item.get('childs', []):
+#         add_category(child, item['id'])
 
-for item in data:
-    if item['name'] in stopCategories:
-        continue
-    add_category(item)
+# for item in data:
+#     if item['name'] in stopCategories:
+#         continue
+#     add_category(item)
 
