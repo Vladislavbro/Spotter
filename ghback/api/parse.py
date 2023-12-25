@@ -73,8 +73,8 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.set_period_dates()
+        self.get_categories()
         self.processing()
-        # self.get_categories()
 
     def get_wirehouses(self):
         url = "https://seller.wildberries.ru/ns/distribution-offices/distribution-offices/api/v1/office/getAllMarketplace"
@@ -189,7 +189,6 @@ class Parser(object):
         if category is None:
             category = Category(wb_id=child['id'])
         category.name = child.get('name')
-        category.shard = child.get('shard')
         category.wb_query = child.get('query')
         category.parent = child.get('parent')
         category.seo = child.get('seo')
@@ -197,6 +196,11 @@ class Parser(object):
         category.shard = child.get('shard')
         category.parse = child.get('childs') is None
         category.save()
+        for subchild in child.get('childs', []):
+            self.update_category(subchild)
+            # if subchild.get('shard') == 'blackhole':
+            #     for subchild in child.get('childs', []):
+            #         self.update_category(subchild)
 
     def get_categories(self):
         self.upgrade_parsing()
@@ -215,12 +219,6 @@ class Parser(object):
             if item['name'] in stopCategories:
                 continue
             self.update_category(item)
-            for child in item.get('childs', []):
-                # if child['url'] in categoryUrlList:
-                self.update_category(child)
-                if child.get('shard') == 'blackhole':
-                    for subchild in child.get('childs', []):
-                        self.update_category(subchild)
         self.notify('Категории обновлены')
 
     def upgrade_parsing(self):
@@ -1159,3 +1157,26 @@ class Parser(object):
         # тут все расчёты
         category.products_calculated = True
         category.save()
+
+
+
+categories = list()
+def add_category(item, parent_id=None):
+    category = {
+        'wb_id': item.get('id'),
+        'name': item.get('name'),
+        'shard': item.get('shard'),
+        'wb_query': item.get('query'),
+        'parse': item.get('childs') is None
+    }
+    if parent_id:
+        category['parent_wb_id'] = parent_id
+    categories.append(category)
+    for child in item.get('childs', []):
+        add_category(child, item['id'])
+
+for item in data:
+    if item['name'] in stopCategories:
+        continue
+    add_category(item)
+
