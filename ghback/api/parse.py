@@ -795,7 +795,7 @@ class Parser(object):
         first_product = Product.objects.filter(
             categories__overlap=[category.wb_id]).first()
         if first_product:
-            category.first_product = first_product.id
+            category.first_product = first_product
         category.scoring = get_scoring_productstats(product_ids, self.config)
         category.calculated = True
         category.save()
