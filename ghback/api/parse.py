@@ -791,12 +791,13 @@ class Parser(object):
         if stat is None:
             stat = category.categorystat_set.create(
                 parsing_id=self.config.current_parsing_id)
+        update['scoring'] = get_scoring_productstats(product_ids, self.config)
+        print('update scoring', update['scoring'])
         CategoryStat.objects.filter(pk=stat.id).update(**update)
         first_product = Product.objects.filter(
             categories__overlap=[category.wb_id]).first()
         if first_product:
             category.first_product = first_product
-        category.scoring = get_scoring_productstats(product_ids, self.config)
         category.calculated = True
         category.save()
 
