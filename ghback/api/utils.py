@@ -150,6 +150,8 @@ def get_scoring_productstats(product_ids, config):
     # как:  количество дней без продаж * среднее количество продаж 
     # товара в день. По нише считается как сумма упущенной выручки 
     # всех товаров в нише
+    if not curr_stat[f'profit_{fb}__sum']:
+        return
     response['profit_lost'] = curr_stat[f'profit_lost_{fb}__sum'] / curr_stat[f'profit_{fb}__sum']
     if response['profit_lost'] > 0.2:
         response['scoring'] += 1
