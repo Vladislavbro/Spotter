@@ -116,6 +116,8 @@ def get_scoring_productstats(product_ids, config):
         response['scoring'] -= 1
     # 6 Оценка тренда продаж - сравнение среднесуточного оборота
     # в начале и конца периода
+    if not f_p_stat_agg[f'profit_14_{fb}__sum']:
+        return
     response['sales_trend'] = (curr_stat[f'profit_14_{fb}__sum'] / f_p_stat_agg[f'profit_14_{fb}__sum'])
     if response['sales_trend'] <= 0.9:
         response['scoring'] -= 1
