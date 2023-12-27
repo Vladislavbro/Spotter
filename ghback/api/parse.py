@@ -421,7 +421,7 @@ class Parser(object):
         product = Product.objects.filter(lemmas=[]).first()
         while product:
             self.text_process(product)
-            print('product.lemmas', product.lemmas)
+            # print('product.lemmas', product.lemmas)
             if len(product.lemmas) == 0:
                 product.lemmas = ['-']
             product.save()
