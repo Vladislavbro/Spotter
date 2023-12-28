@@ -724,6 +724,8 @@ def categories_top(request):
         articul = i['category__first_product__articul']
         if basket is None:
             return None
+        if basket < 10:
+            basket = '0' + str(basket)
         image_url = f'https://basket-{basket}.wb.ru/'
         image_url += f'vol{str(articul)[:4]}/part{str(articul)[:6]}/'
         image_url += f'{articul}/images/big/1.webp'
