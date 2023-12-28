@@ -745,7 +745,7 @@ def categories_top(request):
             'category__first_product__id', 'category__first_product__name', 
             'category__first_product__articul', 
             'category__first_product__basket',
-            'category__id', 'scoring'
+            'category__id', 'scoring',
             'products_count', f'products_solded_{period}_{fb}', 
             f'price_avg_{period}', f'profit_{period}_{fb}'
         )]
