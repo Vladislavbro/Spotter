@@ -656,8 +656,6 @@ def categories_top(request):
     items = CategoryStat.objects.select_related('category', 'category__first_product').filter(
         parsing_id=config.current_parsing_id,
     ).exclude(scoring=None)
-    top_field = f'top_{period}_{fb}'
-    # items = items.filter(**{top_field: True})
 
     if request.GET.get('products_count'):
         start = request.GET['products_count'].split(';')[0]
@@ -700,6 +698,9 @@ def categories_top(request):
         end = request.GET['scoring'].split(';')[1]
         if end:
             items = items.filter(scoring__scoring__lte=int(end))
+    if request.GET.get('top'):
+        top_field = f'top_{period}_{fb}'
+        items = items.filter(**{top_field: True})
 
     sort = request.GET.get('sort')
     direction = request.GET.get('direction')
@@ -741,13 +742,14 @@ def categories_top(request):
             'products_solded': i[f'products_solded_{period}_{fb}'],
             'price_avg': i[f'price_avg_{period}'],
             'profit': i[f'profit_{period}_{fb}'],
+            'top': i[f'top_{period}_{fb}'],
         } for i in items.values(
             'category__first_product__id', 'category__first_product__name', 
             'category__first_product__articul', 
             'category__first_product__basket',
             'category__id', 'scoring',
             'products_count', f'products_solded_{period}_{fb}', 
-            f'price_avg_{period}', f'profit_{period}_{fb}'
+            f'price_avg_{period}', f'profit_{period}_{fb}', f'top_{period}_{fb}'
         )]
     })
 
