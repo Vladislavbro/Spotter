@@ -655,7 +655,7 @@ def categories_top(request):
         config = Config.objects.filter(calculated=True).first()
     items = CategoryStat.objects.select_related('category', 'category__first_product').filter(
         parsing_id=config.current_parsing_id,
-    )
+    ).exclude(scoring=None)
     top_field = f'top_{period}_{fb}'
     # items = items.filter(**{top_field: True})
 
