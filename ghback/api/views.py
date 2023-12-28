@@ -814,7 +814,11 @@ def category_item(request, category_id):
             })
     else:
         config = Config.objects.filter(calculated=True).first()
-    category = Category.objects.get(pk=category_id)
+    category_stat = CategoryStat.objects.prefetch_related('category').filter(
+        parsing_id=config.current_parsing_id,
+        category_id=category_id
+    ).first()
+    category = category_stat.category  # Category.objects.get(pk=category_id)
     if len(category.parsed_ids):
         products = Product.objects.filter(
             categories__overlap=category.parsed_ids)
@@ -878,7 +882,7 @@ def category_item(request, category_id):
             brands=Count('product__brand_id', distinct=True)
         ))
     if 'summary' in view:
-        scoring = category.scoring
+        scoring = category_stat.scoring
         response.update(scoring)
     return JsonResponse(response)
 
