@@ -727,7 +727,8 @@ def categories_top(request):
         if basket < 10:
             basket = '0' + str(basket)
         image_url = f'https://basket-{basket}.wb.ru/'
-        image_url += f'vol{str(articul)[:4]}/part{str(articul)[:6]}/'
+        image_url += f'vol{str(articul)[:len(str(articul)) - 5]}/'
+        image_url += f'part{str(articul)[:len(str(articul)) - 3]}/'
         image_url += f'{articul}/images/big/1.webp'
         return image_url
 
@@ -762,7 +763,8 @@ def get_product_image(product):
     if basket is None:
         return None
     image_url = f'https://basket-{basket}.wb.ru/'
-    image_url += f'vol{str(articul)[:4]}/part{str(articul)[:6]}/'
+    image_url += f'vol{str(articul)[:len(str(articul)) - 5]}/'
+    image_url += f'part{str(articul)[:len(str(articul)) - 3]}/'
     image_url += f'{articul}/images/big/1.webp'
     return image_url
 
