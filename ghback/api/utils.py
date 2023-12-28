@@ -159,6 +159,8 @@ def get_scoring_productstats(product_ids, config):
         response['scoring'] -= 1
     # 11 Объем рынка у топ 10 (динамика)
     response['profit_top_sup'] = top_supplier_agg[f'profit_30_{fb}__sum']
+    if not f_p_top_supplier_agg[f'profit_30_{fb}__sum']:
+        return
     response['profit_top_sup_diff'] = top_supplier_agg[f'profit_30_{fb}__sum'] / f_p_top_supplier_agg[f'profit_30_{fb}__sum']
     if response['profit_top_sup_diff'] >= 1.1:
         response['scoring'] -= 1
