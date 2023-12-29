@@ -350,7 +350,7 @@ class Parser(object):
         url = (
             f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog'
             f'?appType=1&curr=rub&dest=-1257786&page={self.page}&'
-            f'regions={self.regions}&sort=popular&spp=0&{self.category.wb_query}'
+            f'TestGroup=mmr_14&TestID=388&sort=popular&spp=0&{self.category.wb_query}'
         )
         # url = (
         #     f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog?'
