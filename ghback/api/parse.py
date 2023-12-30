@@ -73,7 +73,7 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.set_period_dates()
-        self.get_categories()
+        # self.get_categories()
         self.processing()
 
     def get_wirehouses(self):
@@ -148,6 +148,9 @@ class Parser(object):
             self.config.save()
             self.notify('Новый цикл начался')
             self.get_categories()
+            Category.objects.update(
+                calculated=False,
+            )
             self.processing()
 
     def create_queries(self):
@@ -739,8 +742,8 @@ class Parser(object):
             update[f'profit_{period}_fbo'] = agg['profit_fbo__sum']
             update[f'profit_{period}_fbs'] = agg['profit_fbs__sum']
             update[f'sellers_count_{period}'] = agg['sellers']
-            if update['products_count'] > 300:
-                continue
+            # if update['products_count'] > 300:
+            #     continue
             # prev_parsing = Config.objects.filter(
             #     current_parsing_id__lt=start.timestamp()).first()
             # prev_stat = CategoryStat.objects.filter(
@@ -793,6 +796,7 @@ class Parser(object):
         if stat is None:
             stat = category.categorystat_set.create(
                 parsing_id=self.config.current_parsing_id)
+        CategoryStat.objects.filter(pk=stat.id).update(**update)
         update['scoring'] = get_scoring_productstats(product_ids, self.config)
         print('update scoring', stat.id, update['scoring'])
         CategoryStat.objects.filter(pk=stat.id).update(**update)
