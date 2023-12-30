@@ -73,6 +73,7 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.set_period_dates()
+        self.get_categories()
         self.processing()
 
     def get_wirehouses(self):
@@ -183,11 +184,12 @@ class Parser(object):
         self.config.save()
         self.processing()
 
-    def update_category(self, child):
+    def update_category(self, child, i):
         category = Category.objects.filter(wb_id=child['id']).first()
         if category is None:
             category = Category(wb_id=child['id'])
         category.name = child.get('name')
+        category.idx = i
         category.wb_query = child.get('query')
         category.parent = child.get('parent')
         category.seo = child.get('seo')
@@ -195,8 +197,8 @@ class Parser(object):
         category.shard = child.get('shard')
         category.parse = child.get('childs') is None
         category.save()
-        for subchild in child.get('childs', []):
-            self.update_category(subchild)
+        for j, subchild in enumerate(child.get('childs', [])):
+            self.update_category(subchild, j)
             # if subchild.get('shard') == 'blackhole':
             #     for subchild in child.get('childs', []):
             #         self.update_category(subchild)
@@ -214,10 +216,10 @@ class Parser(object):
         stopCategories = ['Цифровые товары', 'Акции', 'Народные промыслы', 
                           'Путешествия']
         # for item in [item for item in data if item['name'] in categoryUrlList]:
-        for item in data:
+        for i, item in enumerate(data):
             if item['name'] in stopCategories:
                 continue
-            self.update_category(item)
+            self.update_category(item, i)
         self.notify('Категории обновлены')
 
     def upgrade_parsing(self):
