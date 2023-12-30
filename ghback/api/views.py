@@ -464,7 +464,7 @@ def categories_list(request):
             categories = categories.order_by(f'{direction}{sort}_{period}')
         elif sort in ['products_solded', 'sellers_solded', 'profit']:
             categories = categories.order_by(f'{direction}{sort}_{period}_{fb}')
-    categories = categories.values('id', 'name', 'parent', 'wb_id').order_by('idx')
+    categories = categories.order_by('idx').values('id', 'name', 'parent', 'wb_id', 'idx')
     category_ids = [c['id'] for c in categories]
     if config is None:
         # config = Config.objects.filter(calculated=True).first()
