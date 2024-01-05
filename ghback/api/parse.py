@@ -23,6 +23,7 @@ import asyncio
 import pytz
 import pymorphy2
 from api.utils import get_scoring_productstats
+import threading
 
 
 morph = pymorphy2.MorphAnalyzer()
@@ -72,8 +73,8 @@ class Parser(object):
         super(Parser, self).__init__()
         self.config = Config.objects.first()
         # self.set_period_dates()
-        self.processing()
         # self.get_categories()
+        self.processing()
 
     def get_wirehouses(self):
         url = "https://seller.wildberries.ru/ns/distribution-offices/distribution-offices/api/v1/office/getAllMarketplace"
@@ -117,17 +118,18 @@ class Parser(object):
             return self.get_url(url)
 
     def processing(self):
-        # return self.update_products()
+        thread = threading.Thread(target=self.update_products)
+        thread.start()
         if self.config.parsing_done is not True:
             self.notify('Парсинг категорий начался')
             # self.get_wirehouses()
             self.get_category()
-        elif self.config.queries_done is not True:
-            self.notify('Создаются поисковые запросы')
-            self.create_queries()
-        elif self.config.queries_calculated is not True:
-            self.notify('Расчет запросов начался')
-            self.calculate_queries()
+        # elif self.config.queries_done is not True:
+        #     self.notify('Создаются поисковые запросы')
+        #     self.create_queries()
+        # elif self.config.queries_calculated is not True:
+        #     self.notify('Расчет запросов начался')
+        #     self.calculate_queries()
         elif self.config.categories_calculated is not True:
             self.notify('Расчет категорий начался')
             self.calculate_categories()
@@ -145,6 +147,10 @@ class Parser(object):
             )
             self.config.save()
             self.notify('Новый цикл начался')
+            self.get_categories()
+            Category.objects.update(
+                calculated=False,
+            )
             self.processing()
 
     def create_queries(self):
@@ -181,12 +187,12 @@ class Parser(object):
         self.config.save()
         self.processing()
 
-    def update_category(self, child):
+    def update_category(self, child, i):
         category = Category.objects.filter(wb_id=child['id']).first()
         if category is None:
             category = Category(wb_id=child['id'])
         category.name = child.get('name')
-        category.shard = child.get('shard')
+        category.idx = i
         category.wb_query = child.get('query')
         category.parent = child.get('parent')
         category.seo = child.get('seo')
@@ -194,25 +200,30 @@ class Parser(object):
         category.shard = child.get('shard')
         category.parse = child.get('childs') is None
         category.save()
+        for j, subchild in enumerate(child.get('childs', [])):
+            self.update_category(subchild, j)
+            # if subchild.get('shard') == 'blackhole':
+            #     for subchild in child.get('childs', []):
+            #         self.update_category(subchild)
 
     def get_categories(self):
         self.upgrade_parsing()
-        f = open('catalog.txt', 'r')
-        content = f.read()
-        categoryUrlList = [line for line in content.strip().split('\n')]
+        # f = open('catalog.txt', 'r')
+        # content = f.read()
+        # categoryUrlList = [line for line in content.strip().split('\n')]
         # if '/catalog/' in line]
         # url = 'https://www.wildberries.ru/webapi/menu/main-menu-ru-ru.json'
         url = 'https://static-basket-01.wb.ru/vol0/data/main-menu-ru-ru-v2.json'
         response = self.get_url(url)
         data = response.json()
-        for item in [item for item in data if item['name'] in categoryUrlList]:
-            self.update_category(item)
-            for child in item.get('childs', []):
-                if child['url'] in categoryUrlList:
-                    self.update_category(child)
-                    if child.get('shard') == 'blackhole':
-                        for subchild in child.get('childs', []):
-                            self.update_category(subchild)
+        stopCategories = ['Цифровые товары', 'Акции', 'Народные промыслы', 
+                          'Путешествия']
+        # for item in [item for item in data if item['name'] in categoryUrlList]:
+        for i, item in enumerate(data):
+            if item['name'] in stopCategories:
+                continue
+            self.update_category(item, i)
+        self.notify('Категории обновлены')
 
     def upgrade_parsing(self):
         Category.objects.update(
@@ -344,7 +355,7 @@ class Parser(object):
         url = (
             f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog'
             f'?appType=1&curr=rub&dest=-1257786&page={self.page}&'
-            f'regions={self.regions}&sort=popular&spp=0&{self.category.wb_query}'
+            f'TestGroup=mmr_14&TestID=388&sort=popular&spp=0&{self.category.wb_query}'
         )
         # url = (
         #     f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog?'
@@ -412,20 +423,21 @@ class Parser(object):
         return []
 
     def update_products(self):
-        product = Product.objects.filter(root='').first()
+        product = Product.objects.filter(lemmas=[]).first()
         while product:
             self.text_process(product)
+            # print('product.lemmas', product.lemmas)
+            if len(product.lemmas) == 0:
+                product.lemmas = ['-']
             product.save()
-            product = Product.objects.filter(root='').first()
+            product = Product.objects.filter(lemmas=[]).first()
 
     def get_keys(self, query):
-        #     nsubj = [w for w in doc if w.dep_ == 'nsubj']
-        #     if len(nsubj):
-        #         root = nsubj[0]
-        #         product.root = root.lemma_
-        query = re.sub(r'[\W\d]', ' ', query)
+        query = re.sub(r'[\W]', ' ', query)
         query = re.sub(r'\s+', ' ', query)
         doc = nlp(query.strip())
+        lemmas = [w.lemma_ for w in doc if w.tag_ in 
+                  ['ADV', 'ADJ', 'NOUN', 'VERB', 'NUM', 'INFN', 'PROPN', 'X', 'NUM']]
         features = list(set([w for w in doc if morph.parse(w.lemma_)[0].tag.POS == 'ADJF' or w.tag_ == 'ADJ']))
         doc = [t for t in doc if t not in features]
         root = [
@@ -437,12 +449,13 @@ class Parser(object):
                 ) and len(w.lemma_) > 2
             )
         ]
-        return root[0].lemma_ if len(root) else None, [f.lemma_ for f in features]
+        return root[0].lemma_ if len(root) else None, [f.lemma_ for f in features], lemmas
 
     def text_process(self, product):
-        root, features = self.get_keys(product.name)
+        root, features, lemmas = self.get_keys(product.name)
         product.root = root or '-'
         product.features = features
+        product.lemmas = lemmas
         # if len(doc.ents):
         #     product.entity = doc.ents[0].lemma_
 
@@ -646,13 +659,15 @@ class Parser(object):
         # не более чем на +-10%
         # Если все условия пройдены - то информация о нише и топ 50 товарах
         # отправляются в раздел ""топ категории""
+        def get_child_ids(category):
+            ids = [category.wb_id]
+            for child in Category.objects.filter(parent=category.wb_id):
+                ids.append(child.wb_id)
+                ids += get_child_ids(child)
+            return ids
         update = {}
-        if len(category.parsed_ids):
-            products = Product.objects.filter(
-                categories__overlap=category.parsed_ids)
-        else:
-            products = Product.objects.filter(
-                categories__contains=[category.wb_id])
+        wb_ids = get_child_ids(category)
+        products = Product.objects.filter(categories__overlap=wb_ids)
         product_ids = products.values_list('id', flat=True)
         update['products_count'] = product_ids.count()
         print('calculate_category', update)
@@ -727,50 +742,68 @@ class Parser(object):
             update[f'profit_{period}_fbo'] = agg['profit_fbo__sum']
             update[f'profit_{period}_fbs'] = agg['profit_fbs__sum']
             update[f'sellers_count_{period}'] = agg['sellers']
-            if update['products_count'] > 300:
-                continue
-            prev_parsing = Config.objects.filter(
-                current_parsing_id__lt=start.timestamp()).first()
-            prev_stat = CategoryStat.objects.filter(
-                category_id=category.id,
-                parsing_id=prev_parsing.current_parsing_id).first()
+            # if update['products_count'] > 300:
+            #     continue
+            # prev_parsing = Config.objects.filter(
+            #     current_parsing_id__lt=start.timestamp()).first()
+            # prev_stat = CategoryStat.objects.filter(
+            #     category_id=category.id,
+            #     parsing_id=prev_parsing.current_parsing_id).first()
             for fb in ['fbo', 'fbs']:
                 field = f'profit_{period}_{fb}'
                 pstats = productstats_current.order_by(f'-{field}')[:10].values()
-                # update[field] = sum([pstat[field] for pstat in pstats])
-                # - Оборот первого товара не меньше 500к
-                if pstats.count() == 0:
+
+                # Средний чек от 750 рублей
+                if (update[f'price_avg_{period}'] or 0) < 750:
                     continue
-                if pstats[0][field] < self.profit_first_top / 30 * period:
+                # Количество товаров с продажами от 25%
+                if update[f'products_solded_{period}_{fb}'] < 25:
                     continue
-                # оборот десятого товара не меньше 100к
-                if pstats[9][field] < self.profit_ten_top / 30 * period:
+                # Оборот в категории от 20 млн
+                if update.get(field, 0) < 20000000:
                     continue
-                # - Количество товаров с продажами: не меньше 20%
-                if update[f'products_solded_{period}_{fb}'] < 20:
-                    continue
-                # - Оборот в категории месяц назад и сейчас отличается
-                # не более чем на +-10%
-                if prev_stat is None:
-                    continue
-                _prev_stat = model_to_dict(prev_stat)
-                if _prev_stat[field] is None or update[field] < _prev_stat[field] * 0.9:
-                    continue
-                if _prev_stat[field] is None or update[field] > _prev_stat[field] * 1.1:
-                    continue
-                # - Средний чек в категории месяц назад и сейчас отличается не более
-                # чем на +-10%
-                if _prev_stat[f'price_avg_{period}'] is None or update[f'price_avg_{period}'] < _prev_stat[f'price_avg_{period}'] * 0.9:
-                    continue
-                if _prev_stat[f'price_avg_{period}'] is None or update[f'price_avg_{period}'] > _prev_stat[f'price_avg_{period}'] * 1.1:
+                # Монополия: меньше 30%
+                top_10_profit = sum([stat.get(field, 0) for stat in pstats])
+                if top_10_profit / update.get(field, 1) > 0.3:
                     continue
                 update[f'top_{period}_{fb}'] = True
+                # # - Оборот первого товара не меньше 500к
+                # if pstats.count() == 0:
+                #     continue
+                # if pstats[0][field] < self.profit_first_top / 30 * period:
+                #     continue
+                # # оборот десятого товара не меньше 100к
+                # if pstats[9][field] < self.profit_ten_top / 30 * period:
+                #     continue
+                # # - Количество товаров с продажами: не меньше 20%
+                # if update[f'products_solded_{period}_{fb}'] < 20:
+                #     continue
+                # # - Оборот в категории месяц назад и сейчас отличается не более чем на +-10%
+                # if prev_stat is None:
+                #     continue
+                # _prev_stat = model_to_dict(prev_stat)
+                # if _prev_stat[field] is None or update[field] < _prev_stat[field] * 0.9:
+                #     continue
+                # if _prev_stat[field] is None or update[field] > _prev_stat[field] * 1.1:
+                #     continue
+                # # - Средний чек в категории месяц назад и сейчас отличается не более чем на +-10%
+                # if _prev_stat[f'price_avg_{period}'] is None or update[f'price_avg_{period}'] < _prev_stat[f'price_avg_{period}'] * 0.9:
+                #     continue
+                # if _prev_stat[f'price_avg_{period}'] is None or update[f'price_avg_{period}'] > _prev_stat[f'price_avg_{period}'] * 1.1:
+                #     continue
         stat = category.categorystat_set.filter(
             parsing_id=self.config.current_parsing_id).first()
         if stat is None:
             stat = category.categorystat_set.create(
                 parsing_id=self.config.current_parsing_id)
         CategoryStat.objects.filter(pk=stat.id).update(**update)
+        update['scoring'] = get_scoring_productstats(product_ids, self.config)
+        print('update scoring', stat.id, update['scoring'])
+        CategoryStat.objects.filter(pk=stat.id).update(**update)
+        first_product = Product.objects.filter(
+            categories__overlap=[category.wb_id]).first()
+        if first_product:
+            category.first_product = first_product
         category.calculated = True
         category.save()
 
@@ -804,23 +837,12 @@ class Parser(object):
                 self.update_parsed_parent(category, parent)
 
     def calculate_categories(self):
-        category = Category.objects.filter(parse=True).exclude(
+        category = Category.objects.exclude(
             calculated=True).first()
         while category:
             self.calculate_category(category)
-            category = Category.objects.filter(parse=True).exclude(
+            category = Category.objects.exclude(
                 calculated=True).first()
-        # categories = Category.objects.all().values()
-        # category_ids = [c['id'] for c in categories]
-        # stats = CategoryStat.objects.filter(
-        #     category_id__in=category_ids,
-        #     parsing_id=self.config.current_parsing_id)
-        category = Category.objects.filter(
-            parsed_ids__len__gt=0).exclude(calculated=True).first()
-        while category:
-            self.calculate_category(category)
-            category = Category.objects.filter(
-                parsed_ids__len__gt=0).exclude(calculated=True).first()
         self.config.categories_calculated = True
         self.config.save()
         self.processing()
@@ -1074,10 +1096,7 @@ class Parser(object):
             features__contains=query_features
         ).values_list('id', flat=True)
         query.scoring = get_scoring_productstats(product_ids, config)
-        if query.scoring['scoring'] < 9:
-            query.delete()
-        else:
-            query.save()
+        query.save()
 
     def calculate_products(self):
         # "Товары в этот раздел отбираются по следующему принципу:
@@ -1135,3 +1154,4 @@ class Parser(object):
         # тут все расчёты
         category.products_calculated = True
         category.save()
+

@@ -1,390 +1,429 @@
 Женщинам
-/catalog/zhenshchinam/odezhda/bluzki-i-rubashki
-/catalog/zhenshchinam/odezhda/bryuki-i-shorty
-/catalog/zhenshchinam/odezhda/verhnyaya-odezhda
-/catalog/zhenshchinam/odezhda/dzhempery-i-kardigany
-/catalog/zhenshchinam/odezhda/dzhinsy-dzhegginsy
-/catalog/zhenshchinam/odezhda/kombinezony-polukombinezony
-/catalog/zhenshchinam/odezhda/kostyumy
-/catalog/zhenshchinam/odezhda/longslivy
-/catalog/zhenshchinam/odezhda/pidzhaki-i-zhakety
-/catalog/zhenshchinam/odezhda/platya
-/catalog/zhenshchinam/odezhda/tolstovki
-/catalog/zhenshchinam/odezhda/tuniki
-/catalog/zhenshchinam/odezhda/futbolki-i-topy
-/catalog/zhenshchinam/odezhda-dlya-doma/halaty
-/catalog/zhenshchinam/odezhda/bryuki-i-shorty/shorty
-/catalog/zhenshchinam/odezhda/yubki
-/catalog/zhenshchinam/bele
-/catalog/zhenshchinam/bolshie-razmery
-/catalog/budushchie-mamy
-/catalog/zhenshchinam/dlya-vysokih
-/catalog/zhenshchinam/dlya-nevysokih
-/catalog/zhenshchinam/odezhda/odezhda-dlya-doma
-/catalog/zhenshchinam/ofis
-/catalog/zhenshchinam/plyazhnaya-moda
-/catalog/zhenshchinam/religioznaya
-/catalog/svadba
-/catalog/zhenshchinam/spetsodezhda
-/catalog/podarki/zhenshchinam
+Блузки и рубашки
+Брюки
+Верхняя одежда
+Джемперы, водолазки и кардиганы
+Джинсы
+Комбинезоны
+Костюмы
+Лонгсливы
+Пиджаки, жилеты и жакеты
+Платья и сарафаны
+Толстовки, свитшоты и худи
+Туники
+Футболки и топы
+Халаты
+Шорты
+Юбки
+Белье
+Большие размеры
+Будущие мамы
+Для высоких
+Для невысоких
+Одежда для дома
+Офис
+Пляжная мода
+Религиозная
+Свадьба
+Спецодежда и СИЗы
+Подарки женщинам
 Обувь
-/catalog/obuv/detskaya
-/catalog/obuv/dlya-novorozhdennyh
-/catalog/obuv/zhenskaya
-/catalog/obuv/muzhskaya
-/catalog/obuv/ortopedicheskaya-obuv
-/catalog/obuv/aksessuary-dlya-obuvi
+Детская
+Для новорожденных
+Женская
+Мужская
+Ортопедическая обувь
+Аксессуары для обуви
 Детям
-/catalog/detyam/dlya-devochek
-/catalog/detyam/odezhda/dlya-malchikov
-/catalog/detyam/odezhda/dlya-novorozhdennyh
-/catalog/elektronika/detskaya-elektronika
-/catalog/detyam/konstruktory
-/catalog/sport/dlya-detey/detskiy-transport
-/catalog/detyam/detskoe-pitanie
-/catalog/detyam/religioznaya
-/catalog/detyam/tovary-dlya-malysha
-/catalog/detyam/tovary-dlya-malysha/podguzniki/podguzniki-detskie
-/catalog/podarki/detyam
+Для девочек
+Для мальчиков
+Для новорожденных
+Детская электроника
+Конструкторы
+Детский транспорт
+Детское питание
+Религиозная одежда
+Товары для малыша
+Подгузники
+Подарки детям
 Мужчинам
-/catalog/muzhchinam/odezhda/bryuki-i-shorty
-/catalog/muzhchinam/odezhda/verhnyaya-odezhda
-/catalog/muzhchinam/odezhda/dzhempery-i-kardigany
-/catalog/muzhchinam/odezhda/dzhinsy
-/catalog/muzhchinam/odezhda/kombinezony
-/catalog/muzhchinam/odezhda/kostyumy
-/catalog/muzhchinam/odezhda/longslivy
-/catalog/muzhchinam/mayki
-/catalog/muzhchinam/odezhda/pidzhaki-i-zhakety
-/catalog/muzhchinam/pizhamy
-/catalog/muzhchinam/odezhda/rubashki
-/catalog/muzhchinam/odezhda/tolstovki
-/catalog/muzhchinam/odezhda/futbolki-i-mayki
-/catalog/muzhchinam/futbolki-polo
-/catalog/muzhchinam/halaty
-/catalog/muzhchinam/odezhda/bryuki-i-shorty/shorty
-/catalog/muzhchinam/bele
-/catalog/muzhchinam/bolshie-razmery
-/catalog/muzhchinam/dlya-vysokih
-/catalog/muzhchinam/dlya-nevysokih
-/catalog/muzhchinam/odezhda/odezhda-dlya-doma
-/catalog/muzhchinam/ofis
-/catalog/muzhchinam/plyazhnay-odezhda
-/catalog/muzhchinam/religioznaya
-/catalog/muzhchinam/svadba
-/catalog/muzhchinam/spetsodezhda
-/catalog/podarki/muzhchinam
+Брюки
+Верхняя одежда
+Джемперы, водолазки и кардиганы
+Джинсы
+Комбинезоны и полукомбинезоны
+Костюмы
+Лонгсливы
+Майки
+Пиджаки, жилеты и жакеты
+Пижамы
+Рубашки
+Толстовки, свитшоты и худи
+Футболки
+Футболки-поло
+Халаты
+Шорты
+Белье
+Большие размеры
+Для высоких
+Для невысоких
+Одежда для дома
+Офис
+Пляжная одежда
+Религиозная
+Свадьба
+Спецодежда и СИЗы
+Подарки мужчинам
 Дом
-/catalog/dom-i-dacha/vannaya
-/catalog/dom-i-dacha/kuhnya
-/catalog/dlya-doma/predmety-interera
-/catalog/dom/spalnya
-/catalog/dom/gostinnaya
-/catalog/dom/detskaya
-/catalog/dom/dosug-i-tvorchestvo
-/catalog/dom/zerkala
-/catalog/dlya-doma/predmety-interera/kovriki
-/catalog/dlya-doma/mebel/kronshteiny
-/catalog/dom/osveshchenie
-/catalog/dom/dlya-kureniya
-/catalog/dom-i-dacha/otdyh-na-prirode
-/catalog/dlya-doma/predmety-interera/parfyumeriya
-/catalog/dom/prihozhaya
-/catalog/dlya-doma/predmety-religii
-/catalog/dom-i-dacha/predmety-interera/suvenirnaya-produktsiya
-/catalog/dlya-doma/bytovaya-himiya/bytovaya-himiya
-/catalog/dom/hranenie-veshchey
-/catalog/dlya-doma/predmety-interera/tsvety-vazy-kashpo
-/catalog/dom/shtory
-Красота
-/catalog/krasota/aksessuary
-/catalog/krasota/volosy
-/catalog/krasota/aptechnaya-kosmetika
-/catalog/krasota/detskaya-dekorativnaya-kosmetika
-/catalog/krasota/zashchita-ot-solntsa
-/catalog/krasota/dlya-mam-i-malyshey
-/catalog/krasota/izrailskaya-kosmetika
-/catalog/krasota/instrumenty-dlya-parikmaherov
-/catalog/krasota/koreyskie-brendy
-/catalog/elektronika/kosmeticheskie-apparaty
-/catalog/krasota/makiyazh
-/catalog/krasota/muzhskaya-liniya
-/catalog/krasota/nabory-dlya-ukxoda
-/catalog/krasota/nogti
-/catalog/krasota/organicheskaya-kosmetika
-/catalog/krasota/parfyumeriya
-/catalog/krasota/podarochnye-nabory
-/catalog/krasota/professionalnaya-kosmetika/krasota
-/catalog/krasota/sredstva-lichnoy-gigieny
-/catalog/krasota/uhod-za-zubami
-/catalog/krasota/uhod-za-kozhey
-Аксессуары
-/catalog/aksessuary/aksessuary-dlya-volos
-/catalog/aksessuary/dekor-dlya-odezhdy
-/catalog/aksessuary/bizhuteriya
-/catalog/aksessuary/veera
-/catalog/aksessuary/galstuki-i-babochki
-/catalog/aksessuary/golovnye-ubory
-/catalog/aksessuary/zerkaltsa
-/catalog/aksessuary/zonty
-/catalog/aksessuary/koshelki-i-kreditnitsy
-/catalog/aksessuary/maski-dlya-sna
-/catalog/aksessuary/nosovye-platki
-/catalog/aksessuary/ochki-i-futlyary
-/catalog/aksessuary/perchatki-i-varezhki
-/catalog/aksessuary/platki-i-sharfy
-/catalog/aksessuary/religioznye
-/catalog/aksessuary/remni-i-poyasa
-/catalog/aksessuary/sumki-i-ryukzaki
-/catalog/aksessuary/chasy-i-remeshki
-/catalog/muzhchinam/aksessuary/chemodany-i-dorozhnye-sumki
-Электроника
-/catalog/elektronika/avtoelektronika
-/catalog/elektronika/igry-i-razvlecheniya/aksessuary/garnitury
-/catalog/elektronika/detskaya-elektronika
-/catalog/elektronika/razvlecheniya-i-gadzhety/igrovye-konsoli
-/catalog/elektronika/kabeli-i-zaryadnye-ustroystva
-/catalog/elektronika/muzyka-i-video
-/catalog/elektronika/noutbuki-periferiya
-/catalog/elektronika/ofisnaya-tehnika
-/catalog/elektronika/razvlecheniya-i-gadzhety
-/catalog/elektronika/setevoe-oborudovanie
-/catalog/elektronika/bezopasnost-doma
-/catalog/elektronika/smartfony-i-telefony
-/catalog/elektronika/smart-chasy
-/catalog/elektronika/tv-audio-foto-video-tehnika
-/catalog/elektronika/torgovoe-oborudovanie
-/catalog/elektronika/umnyy-dom
-/catalog/sport/elektrotransport-i-aksessuary
-Игрушки
-/catalog/igrushki/antistress
-/catalog/igrushki/dlya-malyshey
-/catalog/igrushki/dlya-pesochnitsy
-/catalog/igrushki/igrovye-kompleksy
-/catalog/igrushki/igrovye-nabory
-/catalog/igrushki/igrushechnoe-oruzhie
-/catalog/igrushki/igrushechniy-transport
-/catalog/igrushki/igrushki-dlya-vannoy
-/catalog/igrushki/interaktivnye
-/catalog/igrushki/kineticheskiy-pesok
-/catalog/igrushki/konstruktory
-/catalog/igrushki/konstruktory-lego
-/catalog/igrushki/kukly-i-aksessuary
-/catalog/igrushki/muzykalnye-instrumenty
-/catalog/igrushki/mylnye-puzyri
-/catalog/igrushki/myagkie-igrushki
-/catalog/igrushki/opyty
-/catalog/igrushki/nastolnye-igry
-/catalog/igrushki/radioupravlyaemye-igrushki/radioupravlyaemye-igrushki
-/catalog/igrushki/razvivayushchie-igrushki
-/catalog/igrushki/sbornye-modeli
-/catalog/igrushki/sportivnye-igry
-/catalog/igrushki/syuzhetno-rolevye-igry
-/catalog/igrushki/tvorchestvo-i-rukodelie
-/catalog/igrushki/figurki-i-roboty
-Мебель
-/catalog/dom/mebel/beskarkasnaya-mebel
-/catalog/dom/mebel/detskaya-mebel
-/catalog/dom/mebel/divany-i-kresla
-/catalog/mebel/stoly-i-stulya
-/catalog/dom/mebel/mebel-dlya-gostinoy
-/catalog/dom/mebel/mebel-dlya-kuhni
-/catalog/dom/mebel/mebel-dlya-prihozhey
-/catalog/dom/mebel/mebel-dlya-spalni
-/catalog/dom/mebel/ofisnaya-mebel
-/catalog/dlya-remonta/krepezh/mebelnaya-furnitura
-Товары для взрослых
-/catalog/zhenshchinam/bele-i-kupalniki/erotik
-/catalog/aksessuary/tovary-dlya-vzroslyh/igrushki-dlya-vzroslyh
-/catalog/krasota/intimnaya-kosmetika
-/catalog/tovary-dlya-vzroslyh/intimnaya-sedobnaya-kosmetika
-/catalog/krasota/intimnaya-kosmetika/kontratseptivy/prezervativy
-/catalog/aksessuary/tovary-dlya-vzroslyh/seks-igrushki
-/catalog/aksessuary/tovary-dlya-vzroslyh/fetish-i-bdsm
+Ванная
+Кухня
+Предметы интерьера
+Спальня
+Гостиная
+Детская
+Досуг и творчество
+Все для праздника
+Зеркала
+Коврики
+Кронштейны
+Освещение
+Для курения
+Отдых на природе
+Парфюмерия для дома
+Прихожая
+Религия, эзотерика
+Сувенирная продукция
+Хозяйственные товары
+Хранение вещей
+Цветы, вазы и кашпо
+Шторы
+Новый год
+Вечерний образ
+Праздничная обувь
+Наряды для детей
+Карнавальные товары
+Елки
+Новогодний декор
+Новогодние книги
+Открытки
+Подарки
+Подарочная упаковка
+Праздничный стол
 Продукты
-/catalog/produkty/vkusnye-podarki
-/catalog/produkty-pitaniya/chay-kofe
-/catalog/pitanie/sladosti
-/catalog/pitanie/bakaleya
-/catalog/pitanie/detskoe-pitanie
-/catalog/produkty/dobavki-pishchevye
-/catalog/pitanie/zdorovoe-pitanie
-/catalog/produkty/myasnaya-produktsiya
-/catalog/pitanie/chay-kofe/moloko-i-slivki
-/catalog/pitanie/napitki
-/catalog/pitanie/sneki
-/catalog/produkty/zamorozhennaya-produktsiya
-/catalog/produkty/frukty
-/catalog/produkty/ovoshchi
+Свечи и подсвечники
+Символ года
+Красота
+Аксессуары
+Волосы
+Аптечная косметика
+Детская декоративная косметика
+Для загара
+Для мам и малышей
+Израильская косметика
+Инструменты для парикмахеров
+Корейские бренды
+Косметические аппараты и аксессуары
+Крымская косметика
+Макияж
+Мужская линия
+Наборы для ухода
+Ногти
+Органическая косметика
+Парфюмерия
+Подарочные наборы
+Профессиональная косметика
+Средства личной гигиены
+Гигиена полости рта
+Уход за кожей
+Аксессуары
+Аксессуары для волос
+Аксессуары для одежды
+Бижутерия
+Веера
+Галстуки и бабочки
+Головные уборы
+Зеркальца
+Зонты
+Кошельки и кредитницы
+Маски для сна
+Носовые платки
+Очки и футляры
+Перчатки и варежки
+Платки и шарфы
+Религиозные
+Ремни и пояса
+Сумки и рюкзаки
+Часы и ремешки
+Чемоданы и защита багажа
+Электроника
+Автоэлектроника и навигация
+Гарнитуры и наушники
+Детская электроника
+Игровые консоли и игры
+Кабели и зарядные устройства
+Музыка и видео
+Ноутбуки и компьютеры
+Офисная техника
+Развлечения и гаджеты
+Сетевое оборудование
+Системы безопасности
+Смартфоны и телефоны
+Смарт-часы и браслеты
+Солнечные электростанции и комплектующие
+ТВ, Аудио, Фото, Видео техника
+Торговое оборудование
+Умный дом
+Электротранспорт и аксессуары
+Игрушки
+Антистресс
+Для малышей
+Для песочницы
+Игровые комплексы
+Игровые наборы
+Игрушечное оружие и аксессуары
+Игрушечный транспорт
+Игрушки для ванной
+Интерактивные
+Кинетический песок
+Конструкторы
+Конструкторы LEGO
+Куклы и аксессуары
+Музыкальные
+Мыльные пузыри
+Мягкие игрушки
+Наборы для опытов
+Настольные игры
+Радиоуправляемые
+Развивающие игрушки
+Сборные модели
+Спортивные игры
+Сюжетно-ролевые игры
+Творчество и рукоделие
+Фигурки и роботы
+Мебель
+Бескаркасная мебель
+Детская мебель
+Диваны и кресла
+Столы и стулья
+Компьютерная и геймерская мебель
+Мебель для гостиной
+Мебель для кухни
+Мебель для прихожей
+Мебель для спальни
+Гардеробная мебель
+Офисная мебель
+Торговая мебель
+Зеркала
+Мебельная фурнитура
+Товары для взрослых
+Белье и аксессуары
+Игры и сувениры
+Интимная косметика
+Интимная съедобная косметика
+Презервативы и лубриканты
+Секс игрушки
+Фетиш и БДСМ
+Продукты
+Вкусные подарки
+Подарочные наборы продуктов
+Чай и кофе
+Сладости и хлебобулочные изделия
+Бакалея
+Детское питание
+Добавки пищевые
+Здоровое питание
+Мясная продукция
+Молочные продукты
+Напитки
+Снеки
+Смеси для десертов
+Фрукты и ягоды
+Овощи
 Бытовая техника
-/catalog/elektronika/tehnika-dlya-doma/uvlazhniteli-i-vozduhootchistiteli
-/catalog/elektronika/krasota-i-zdorove
-/catalog/bytovaya-tehnika/sadovaya-tehnika
-/catalog/elektronika/tehnika-dlya-doma
-/catalog/elektronika/tehnika-dlya-kuhni
-/catalog/bytovaya-tehnika/krupnaya-bytovaya-tehnika
+Климатическая техника
+Красота и здоровье
+Садовая техника
+Техника для дома
+Техника для кухни
+Крупная бытовая техника
 Зоотовары
-/catalog/tovary-dlya-zhivotnyh/dlya-koshek
-/catalog/tovary-dlya-zhivotnyh/dlya-sobak
-/catalog/tovary-dlya-zhivotnyh/dlya-ptits
-/catalog/tovary-dlya-zhivotnyh/dlya-gruzunov-i-horkov
-/catalog/zootovary/dlya-loshadey
-/catalog/aksessuary/tovary-dlya-zhivotnyh/akvariumistika
-/catalog/zootovary/terrariumistika
-/catalog/zootovary/fermerstvo
+Для кошек
+Для собак
+Для птиц
+Для грызунов и хорьков
+Для лошадей
+Аквариумистика
+Террариумистика
+Фермерство
+Корм и лакомства
+Аксессуары для кормления
+Лотки и наполнители
+Когтеточки и домики
+Транспортировка
+Амуниция и дрессировка
+Игрушки
+Груминг и уход
+Одежда
+Ветаптека
 Спорт
-/catalog/sport/vidy-sporta/fitnes/yoga
-/catalog/sport/vidy-sporta/velosport
-/catalog/sport/vidy-sporta/yoga
-/catalog/sport/vidy-sporta/ohota-i-rybolovstvo
-/catalog/sport/vidy-sporta/roliki-samokaty
-/catalog/sport/vidy-sporta/turizm-kemping
-/catalog/sport/vidy-sporta/beg/hodba
-/catalog/sport/vidy-sporta/komandnye-vidy-sporta
-/catalog/sport/vidy-sporta/plavanie
-/catalog/sport/vidy-sporta/zimnie-vidy-sporta
-/catalog/sport/podderzhka-i-vosstanovlenie
-/catalog/sport/sportivnoe-pitanie
-/catalog/sport/vidy-sporta/badminton/tennis
-/catalog/sport/bilyard/darts
-/catalog/sport/vidy-sporta/edinoborstva
-/catalog/sport/konniy-sport
-/catalog/sport/vidy-sporta/motosport
-/catalog/sport/vidy-sporta/parusnyisport
-/catalog/sport/vidy-sporta/skalolazanie/alpinizm
-/catalog/sport/vidy-sporta/straykbol
-/catalog/sport/vidy-sporta/tantsy/gimnastika
-/catalog/sport/dlya-detey
-/catalog/sport/dlya-zhenshchin
-/catalog/sport/dlya-muzhchin
-/catalog/sport/sportivnaya-obuv
-/catalog/sport/elektronika
+Фитнес и тренажеры
+Велоспорт
+Йога/Пилатес
+Охота и рыбалка
+Самокаты/Ролики/Скейтборды
+Туризм/Походы
+Бег/Ходьба
+Командные виды спорта
+Водные виды спорта
+Зимние виды спорта
+Поддержка и восстановление
+Спортивное питание и косметика
+Бадминтон/Теннис
+Бильярд/Гольф/Дартс/Метание ножей
+Единоборства
+Конный спорт
+Мотоспорт
+Оборудование для сдачи нормативов
+Парусный спорт
+Скалолазание/Альпинизм
+Страйкбол и пейнтбол
+Танцы/Гимнастика
+Для детей
+Для женщин
+Для мужчин
+Спортивная обувь
+Товары для самообороны
+Электроника
 Автотовары
-/catalog/avtotovary/zapchasti-na-legkovye-avtomobili
-/catalog/avtotovary/masla-i-zhidkosti
-/catalog/aksessuary/avtotovary/uhod-za-avtomobilem
-/catalog/avtotovary/kraski
-/catalog/elektronika/avtoelektronika
-/catalog/avtotovary/avtoaksessuary-i-dopolnitelnoe-oborudovanie/aksessuary-v-salon-i-bagazhnik
-/catalog/avtotovary/kovriki
-/catalog/aksessuary/avtotovary/avtoaksessuary-i-dopolnitelnoe-oborudovanie/vneshniy-tyuning
-/catalog/aksessuary/avtotovary/avtoaksessuary-i-dopolnitelnoe-oborudovanie
-/catalog/avtotovary/shiny-i-diski
-/catalog/avtotovary/instrumenty
-/catalog/dom/dachniy-sezon/moyki-vysokogo-davleniya-i-aksessuary
-/catalog/avtotovary/mototovary
-/catalog/avtotovary/zapchasti-na-silovuyu-tehniku
-/catalog/avtotovary/zapchasti-dlya-lodok-i-katerov
-Школа
-/catalog/detyam/shkola/odezhda-dlya-devochek
-/catalog/detyam/shkola/odezhda-dlya-malchikov
-/catalog/detyam/shkola/banty
-/catalog/detyam/shkola/galstuki-i-babochki
-/catalog/aksessuary/sumki-i-ryukzaki/ryukzaki-i-rantsy/doshkolnye-ryukzaki
-/catalog/shkola/lenty-vypusknika
-/catalog/detyam/shkola/obuv-dlya-devochek
-/catalog/detyam/shkola/obuv-dlya-malchikov
-/catalog/detyam/shkola/rantsy
-/catalog/detyam/shkola/sport
-/catalog/aksessuary/sumki-i-ryukzaki/ryukzaki/telezhki-dlya-rantsev
-/catalog/detyam/shkola/uchebnaya-literatura
-/catalog/detyam/shkola/shkolnye-prinadlezhnosti
-/catalog/detyam/shkola/shkolnye-ryukzaki
+Запчасти на легковые автомобили
+Масла и жидкости
+Автокосметика и автохимия
+Краски и грунтовки
+Автоэлектроника и навигация
+Аксессуары в салон и багажник
+Коврики
+Внешний тюнинг
+Другие аксессуары и доп. оборудование
+Шины и диски колесные
+Инструменты
+Мойки высокого давления и аксессуары
+Мототовары
+OFFroad
+Запчасти на силовую технику
+Запчасти для лодок и катеров
 Книги
-/catalog/knigi/hudozhestvennaya-literatura
-/catalog/knigi/hudozhestvennaya-literatura/komiksy-i-manga
-/catalog/knigi/detyam-i-roditelyam
-/catalog/knigi/vospitanie-i-razvitie-rebenka
-/catalog/knigi/uchebnaya-literatura
-/catalog/knigi/samoobrazovanie-i-razvitie
-/catalog/knigi/nehudozhestvennaya-literatura/biznes-i-menedzhment
-/catalog/knigi/hobbi-i-dosug
-/catalog/knigi/nehudozhestvennaya-literatura/astrologiya-i-ezoterika
-/catalog/knigi/dom-sad-i-ogorod
-/catalog/knigi/krasota-zdorove-i-sport
-/catalog/knigi/nehudozhestvennaya-literatura/nauka-i-tehnika
-/catalog/knigi/nehudozhestvennaya-literatura/internet-i-tehnologii
-/catalog/knigi/literaturovedenie-i-publitsistika
-/catalog/knigi/nehudozhestvennaya-literatura/istoricheskaya-i-voennaya-literatura
-/catalog/knigi/nehudozhestvennaya-literatura/filosofiya
-/catalog/knigi/nehudozhestvennaya-literatura/religiya
-/catalog/knigi/politika-i-pravo
-/catalog/knigi/bukinistika
-/catalog/knigi/inostrannye-knigi
-/catalog/knigi/plakaty
-/catalog/knigi/kollektsionnye-izdaniya
-/catalog/knigi/reprintnye-izdaniya
-/catalog/knigi-i-diski/multimedia
-/catalog/knigi/audioknigi
-Premium
-/catalog/premium/zhenshchinam
-/catalog/premium/muzhchinam
-/catalog/premium/detyam
-/catalog/premium/obuv-i-aksessuary
+Художественная литература
+Комиксы и манга
+Книги для детей
+Воспитание и развитие ребенка
+Образование
+Самообразование и развитие
+Бизнес и менеджмент
+Хобби и досуг
+Астрология и эзотерика
+Дом, сад и огород
+Красота, здоровье и спорт
+Научно-популярная литература
+Интернет и технологии
+Литературоведение и публицистика
+Историческая и военная литература
+Философия
+Религия
+Политика и право
+Букинистика
+Книги на иностранных языках
+Плакаты
+Календари
+Коллекционные издания
+Репринтные издания
+Мультимедиа
+Аудиокниги
+Цифровые книги
+Цифровые аудиокниги
 Ювелирные изделия
-/catalog/yuvelirnye-ukrasheniya/koltsa
-/catalog/yuvelirnye-ukrasheniya/sergi
-/catalog/yuvelirnye-ukrasheniya/braslety
-/catalog/yuvelirnye-izdeliya/podveski-i-sharmy
-/catalog/yuvelirnye-izdeliya/komplekty
-/catalog/yuvelirnye-izdeliya/tsepi-i-shnurki
-/catalog/yuvelirnye-ukrasheniya/broshi
-/catalog/yuvelirnye-ukrasheniya/pirsing
-/catalog/yuvelirnye-ukrasheniya/chasy
-/catalog/yuvelirnye-izdeliya/zazhimy-i-zaponki
-/catalog/yuvelirnye-ukrasheniya/chetki
-/catalog/yuvelirnye-izdeliya/suveniry-i-stolovoe-serebro
-/catalog/yuvelirnye-ukrasheniya/zoloto
-/catalog/yuvelirnye-ukrasheniya/serebro
-/catalog/yuvelirnye-ukrasheniya/ukrasheniya-iz-keramiki
-/catalog/yuvelirnye-izdeliya/aksessuary-dlya-ukrasheniy
+Кольца
+Серьги
+Браслеты
+Подвески и шармы
+Комплекты
+Колье, цепи, шнурки
+Броши
+Пирсинг
+Часы
+Зажимы, запонки, ремни
+Четки
+Сувениры и столовое серебро
+Украшения из золота
+Украшения из серебра
+Украшения из керамики
+Аксессуары для украшений
 Для ремонта
-/catalog/dlya-remonta/dveri-okna-i-furnitura
-/catalog/dom-i-dacha/instrumenty/instrumenty
-/catalog/dom-i-dacha/tovary-dlya-remonta/otdelochnye-materialy
-/catalog/bytovaya-tehnika/stroitelstvo-i-remont/elektrika
-/catalog/dlya-remonta/lakokrasochnye-materialy
-/catalog/dlya-remonta/santehnika-otoplenie-i-gazosnabzhenie
-/catalog/dlya-remonta/ventilyatsiya
-/catalog/dlya-remonta/krepezh
-/catalog/dlya-remonta/stroymaterialy
-/catalog/dlya-remonta/sbornye-konstruktsii
+Двери, окна и фурнитура
+Инструменты и оснастка
+Отделочные материалы
+Электрика
+Лакокрасочные материалы
+Сантехника, отопление и газоснабжение
+Вентиляция
+Крепеж
+Стройматериалы
 Сад и дача
-/catalog/dachniy-sezon/basseyny
-/catalog/dom/sad-i-dacha/gorshki-opory-i-vse-dlya-rassady
-/catalog/dom/sad-i-dacha/grili-mangaly-i-barbekyu
-/catalog/dom/dachniy-sezon/dachnye-umyvalniki-dushi-i-tualety
-/catalog/dom/dachniy-sezon/moyki-vysokogo-davleniya-i-aksessuary
-/catalog/dom/dachniy-sezon/poliv-i-vodosnabzhenie
-/catalog/dom/dachniy-sezon/rasteniya-semena-i-grunty
-/catalog/dom/dachniy-sezon/sadovaya-mebel
-/catalog/dom/sad-i-dacha/sadovaya-tehnika
-/catalog/dom/dachniy-sezon/sadoviy-dekor
-/catalog/dom/dachniy-sezon/sadoviy-instrument
-/catalog/dom/dachniy-sezon/teplitsy-parniki-ukryvnoy-material
-/catalog/dom-i-dacha/tovary-dlya-bani
-/catalog/dom/dachniy-sezon/tovary-dlya-kempinga-piknika-i-otdyha
-/catalog/dom/dachniy-sezon/udobreniya-himikaty-i-sredstva-zashchity
+Растения, семена и грунты
+Горшки, опоры и все для рассады
+Удобрения, химикаты и средства защиты
+Товары для бани и сауны
+Грили, мангалы и барбекю
+Теплицы, парники, укрывной материал
+Мойки высокого давления и аксессуары
+Садовая техника
+Садовый инструмент
+Полив и водоснабжение
+Товары для кемпинга, пикника и отдыха
+Садовый декор
+Садовая мебель
+Надувная мебель
+Дачные умывальники, души и туалеты
+Бассейны
 Здоровье
-/catalog/dom-i-dacha/zdorove/vitaminy-i-bady
-/catalog/dom-i-dacha/zdorove/lekarstvennye-preparaty/antibakterialnye-i-antisepticheskie-preparaty
-/catalog/dom-i-dacha/zdorove/kontratseptivy-i-lubrikanty
-/catalog/zdorove/lechebnoe-pitanie-
-/catalog/aksessuary/golovnye-ubory/maski-vetrozashchitnye
-/catalog/dom-i-dacha/zdorove/meditsinskie-izdeliya-i-pribory
-/catalog/dom-i-dacha/zdorove/meditsinskie-izdeliya-i-pribory/meditsinskie-pribory
-/catalog/zdorove/ozdorovlenie
-/catalog/dom-i-dacha/zdorove/optika
-/catalog/dom-i-dacha/zdorove/ortopediya
-/catalog/zdorove/meditsinskie-izdeliya-i-pribory/sredstva-reabilitatsii
-/catalog/dom-i-dacha/zdorove/siropy-i-balzamy
-/catalog/zdorove/uhod-za-polostyu-rta
-/catalog/farmatsevtika
+БАДы
+Грибы сушеные и капсулированные
+Дезинфекция, стерилизация и утилизация
+Ухо, горло, нос
+Контрацептивы и лубриканты
+Лечебное питание 
+Маски защитные
+Медицинские изделия
+Медицинские приборы
+Оздоровление
+Оптика
+Ортопедия
+Реабилитация
+Сиропы и бальзамы
+Уход за полостью рта
 Канцтовары
-/catalog/knigi-i-kantstovary/kantstovary/bumazhnaya-produktsiya
-/catalog/knigi-i-kantstovary/kantstovary/karty-i-globusy
-/catalog/knigi-i-kantstovary/kantstovary/ofisnye-prinadlezhnosti
-/catalog/knigi-i-kantstovary/kantstovary/pismennye-prinadlezhnosti
-/catalog/knigi-i-diski/kantstovary/schetniy-material
-/catalog/kantstovary/torgovye-prinadlezhnosti
-/catalog/knigi-i-kantstovary/kantstovary/chertezhnye-prinadlezhnosti
+Бумажная продукция
+Карты и глобусы
+Офисные принадлежности
+Письменные принадлежности
+Рисование и лепка
+Счетный материал
+Торговые принадлежности
+Чертежные принадлежности
+Народные Промыслы
+Акции
+Цифровые товары
+Электронные Книги
+Аудиокниги
+Ключи и сертификаты
+Фильмы и видео
+Музыка и аудио
+Журналы
+Цифровые товары
+Услуги
+Путешествия
+Регионы
+Авиабилеты
+Ж/д билеты
+Автобусы
+Маршруты
+Отели

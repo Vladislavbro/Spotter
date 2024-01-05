@@ -116,6 +116,8 @@ def get_scoring_productstats(product_ids, config):
         response['scoring'] -= 1
     # 6 Оценка тренда продаж - сравнение среднесуточного оборота
     # в начале и конца периода
+    if not f_p_stat_agg[f'profit_14_{fb}__sum']:
+        return
     response['sales_trend'] = (curr_stat[f'profit_14_{fb}__sum'] / f_p_stat_agg[f'profit_14_{fb}__sum'])
     if response['sales_trend'] <= 0.9:
         response['scoring'] -= 1
@@ -148,6 +150,8 @@ def get_scoring_productstats(product_ids, config):
     # как:  количество дней без продаж * среднее количество продаж 
     # товара в день. По нише считается как сумма упущенной выручки 
     # всех товаров в нише
+    if not curr_stat[f'profit_{fb}__sum']:
+        return
     response['profit_lost'] = curr_stat[f'profit_lost_{fb}__sum'] / curr_stat[f'profit_{fb}__sum']
     if response['profit_lost'] > 0.2:
         response['scoring'] += 1
@@ -155,6 +159,8 @@ def get_scoring_productstats(product_ids, config):
         response['scoring'] -= 1
     # 11 Объем рынка у топ 10 (динамика)
     response['profit_top_sup'] = top_supplier_agg[f'profit_30_{fb}__sum']
+    if not f_p_top_supplier_agg[f'profit_30_{fb}__sum']:
+        return
     response['profit_top_sup_diff'] = top_supplier_agg[f'profit_30_{fb}__sum'] / f_p_top_supplier_agg[f'profit_30_{fb}__sum']
     if response['profit_top_sup_diff'] >= 1.1:
         response['scoring'] -= 1

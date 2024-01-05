@@ -46,10 +46,14 @@ class Config(models.Model):
 class Category(models.Model):
     parsed_ids = ArrayField(ArrayField(models.IntegerField(blank=True)),
                             default=[])
+    first_product = models.ForeignKey(
+        'Product', on_delete=models.DO_NOTHING, blank=True, null=True, 
+        related_name='first_product_category')
     name = models.CharField(max_length=200)
     wb_id = models.IntegerField()
     parent = models.IntegerField(blank=True, null=True)
     wb_query = models.TextField(max_length=4000, blank=True, null=True)
+    idx = models.IntegerField(blank=True, null=True)
     seo = models.CharField(max_length=200, blank=True, null=True)
     shard = models.CharField(max_length=200, blank=True, null=True)
     url = models.CharField(max_length=200, blank=True, null=True)
@@ -73,6 +77,7 @@ class CategoryStat(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now=True)
     parsing_id = models.IntegerField(blank=True, null=True)
+    scoring = models.JSONField(blank=True, null=True)
     products_count = models.IntegerField(blank=True, null=True)
     products_solded_7_fbo = models.IntegerField(blank=True, null=True)
     products_solded_7_fbs = models.IntegerField(blank=True, null=True)
@@ -118,6 +123,8 @@ class Product(models.Model):
     parsed_at = models.DateTimeField(blank=True, null=True)
     name = models.CharField(max_length=200)
     # desc = models.TextField()
+    lemmas = ArrayField(ArrayField(
+        models.CharField(max_length=100, blank=True)), default=[])
     root = models.CharField(max_length=200)
     entity = models.CharField(max_length=200, blank=True, null=True)
     features = ArrayField(ArrayField(models.CharField(max_length=100,
@@ -134,9 +141,10 @@ class Product(models.Model):
     priceU = models.IntegerField(blank=True, null=True)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
-    
+
     class Meta():
         indexes = [
+            models.Index(fields=['lemmas']),
             models.Index(fields=['articul']),
             models.Index(fields=['categories']),
             models.Index(fields=['parsed_at']),
