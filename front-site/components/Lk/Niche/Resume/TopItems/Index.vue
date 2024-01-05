@@ -26,7 +26,7 @@
     <UILkButton
       text="Смотреть все товары"
       class="top-items__btn"
-      @click="navigateTo({ query: { product_id: productId }, hash: '#items' })"
+      @click="navigateTo({ query: { id }, hash: '#items' })"
     />
   </div>
 </template>
@@ -45,8 +45,7 @@ const props = defineProps({
 
 const route = useRoute()
 
-const { slug } = route.params
-const { product_id: productId } = route.query
+const { id } = route.query
 
 const items = ref([])
 const isLoading = ref(true)
@@ -68,15 +67,11 @@ const getItems = async () => {
     fb: props.fb,
   }
 
-  if (productId) {
-    params.product_id = productId
-  }
-
   if (props.day) {
     params.period = props.day
   }
 
-  const { data } = await useFetch(`/api/queries/search?query=${slug}&view=products`, {
+  const { data } = await useFetch(`/api/categories/${id}?view=products`, {
     watch: false,
     params: {
       ...params,

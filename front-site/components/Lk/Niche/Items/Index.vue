@@ -178,7 +178,7 @@ import declOfNum from '@/utils/declOfNum.js'
 const route = useRoute()
 const { $toast } = useNuxtApp()
 
-const { slug } = route.params
+const { id } = route.query
 
 const headColumns = ref([
   { label: 'Название товара', show: true },
@@ -283,7 +283,7 @@ const getData = async () => {
   //   params.dateTo = date.value
   // }
 
-  const { data } = await useFetch(`/api/queries/search?query=${slug}&view=products`, {
+  const { data } = await useFetch(`/api/categories/${id}?view=products`, {
     watch: false,
     params,
   })

@@ -69,8 +69,7 @@ const props = defineProps({
 
 const route = useRoute()
 
-const { slug } = route.params
-const { product_id: productId } = route.query
+const { id } = route.query
 
 const graphs = ref([])
 const isLoading = ref(true)
@@ -192,15 +191,11 @@ const getData = async () => {
     fb: props.fb,
   }
 
-  if (productId) {
-    params.product_id = productId
-  }
-
   if (props.day) {
     params.period = props.day
   }
 
-  const { data } = await useFetch(`/api/queries/search?query=${slug}&view=graphs`, {
+  const { data } = await useFetch(`/api/categories/${id}?view=graphs`, {
     watch: false,
     params,
   })
