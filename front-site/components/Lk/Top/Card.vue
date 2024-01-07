@@ -18,7 +18,7 @@
           :to="link"
           class="top-card__name"
         >
-          {{ item.product_name }}
+          {{ item.name }}
         </NuxtLink>
 
         <div class="top-card__bottom">
@@ -60,7 +60,7 @@
           Объем рынка:
         </p>
         <p class="top-card__value">
-          {{ item?.profit?.toLocaleString() || 0 }} ₽
+          {{ item?.scoring?.profit?.toLocaleString() || 0 }} ₽
         </p>
       </div>
       <!-- <div class="top-card__line">
@@ -84,7 +84,7 @@
           Товаров с продажами:
         </p>
         <p class="top-card__value">
-          {{ item.products_solded || 0 }} %
+          {{ item?.products_solded?.toLocaleString() || 0 }}
         </p>
       </div>
     </div>
@@ -102,7 +102,7 @@ const props = defineProps({
 })
 
 const link = computed(() => {
-  return `/lk/niche/${props.item?.product_name?.toLowerCase()}?id=${props.item?.id}`
+  return `/lk/niche/${props.item?.name?.toLowerCase()}?id=${props.item?.id}`
 })
 
 const scoring = computed(() => {
