@@ -477,6 +477,15 @@ def categories_list(request):
     if output == 'json':
         for root in roots:
             root['items'] = get_children(root, categories, stats, period, fb)
+            root['stat'] = [{
+                'products_count': s['products_count'],
+                'products_solded': s[f'products_solded_{period}_{fb}'],
+                'sellers_count': s[f'sellers_count_{period}'],
+                'sellers_solded': s[f'sellers_solded_{period}_{fb}'],
+                'profit': s[f'profit_{period}_{fb}'],
+                'price_avg': s[f'price_avg_{period}'],
+                'top': s[f'top_{period}_{fb}'],
+            } for s in stats if s['category_id'] == root['id']]
             # calc_stat(root)
             out.append(root)
         return JsonResponse({
@@ -736,6 +745,7 @@ def categories_top(request):
         'total': total,
         'items': [{
             'id': i['category__id'],
+            'name': i['category__name'],
             'product_id': i['category__first_product__id'],
             'product_name': i['category__first_product__name'],
             'product_image': get_image(i),
@@ -750,7 +760,7 @@ def categories_top(request):
             'category__first_product__id', 'category__first_product__name', 
             'category__first_product__articul', 
             'category__first_product__basket',
-            'category__id', 'scoring',
+            'category__id', 'category__name', 'scoring',
             'products_count', f'products_solded_{period}_{fb}', 
             f'price_avg_{period}', f'profit_{period}_{fb}', f'top_{period}_{fb}'
         )]
