@@ -18,7 +18,7 @@
             :key="item.slug"
             :href="`#${item.slug}`"
             :class="['niche-lk__tab niche-lk-tab', { 'niche-lk-tab--active' : item.slug === tabActive }]"
-            @click.prevent="navigateTo({ query: { product_id: productId }, hash: `#${item.slug}` })"
+            @click.prevent="navigateTo({ query: { id }, hash: `#${item.slug}` })"
           >
             {{ item.label }}
             <!-- <span
@@ -58,7 +58,7 @@ definePageMeta({
 const route = useRoute()
 
 const { slug } = route.params
-const { product_id: productId } = route.query
+const { id } = route.query
 
 const tabActive = ref(null)
 const tabs = ref([

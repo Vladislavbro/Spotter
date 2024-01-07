@@ -102,7 +102,7 @@ const props = defineProps({
 })
 
 const link = computed(() => {
-  return `/lk/niche/${props.item?.product_name?.toLowerCase()}?product_id=${props.item?.product_id}`
+  return `/lk/niche/${props.item?.product_name?.toLowerCase()}?id=${props.item?.id}`
 })
 
 const scoring = computed(() => {

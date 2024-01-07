@@ -111,7 +111,6 @@ const sortSlug = ref('products_count')
 const sortDirection = ref('asc')
 
 const isShowBtn = ref(false)
-const isLoadingPage = ref(true)
 const isLoading = ref(false)
 
 const changeType = (value) => {
@@ -166,20 +165,19 @@ const getData = async (isPreloading = true) => {
     watch: false,
   })
 
+  isLoading.value = false
+
   const total = data?.value?.total || 0
   const array = data?.value?.items || []
 
   items.value.push(...array)
-
-  isLoadingPage.value = false
-  isLoading.value = false
 
   if (items.value.length >= total) {
     isShowBtn.value = false
   }
 }
 
-await getData()
+getData()
 </script>
 
 <style lang="scss" scoped>

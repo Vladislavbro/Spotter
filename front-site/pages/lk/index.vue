@@ -6,95 +6,86 @@
           Топ ниши
         </h1>
 
+        <div class="top__header">
+          <div class="top__header-side">
+            <LkTableTypes
+              :value="fb"
+              @change="changeType"
+            />
+
+            <LkTableDate
+              @change="changeDate"
+            />
+          </div>
+
+          <LkTableSort
+            is-white
+            :array="headColumns"
+            :sort-slug="sortSlug"
+            :sort-direction="sortDirection"
+            @change="changeSort"
+          />
+        </div>
+
+        <LkTableFilter
+          class="top__filter"
+          @reset="resetFilters()"
+          @submit="setFilters()"
+        >
+          <UILkFilter
+            v-model:from="initialFilters.products_solded.from"
+            v-model:to="initialFilters.products_solded.to"
+            label="Товары с продажами, %"
+            :max-value="initialFilters.products_solded.maxValue"
+          />
+          <UILkFilter
+            v-model:from="initialFilters.profit.from"
+            v-model:to="initialFilters.profit.to"
+            label="Объём рынка, ₽"
+            :max-value="initialFilters.profit.maxValue"
+          />
+          <!-- <UILkFilter
+            label="Ценовой сегмент, ₽"
+            :max-value="999999"
+          /> -->
+          <UILkFilter
+            v-model:from="initialFilters.price_avg.from"
+            v-model:to="initialFilters.price_avg.to"
+            label="Средний чек, ₽"
+            :max-value="initialFilters.price_avg.maxValue"
+          />
+          <UILkFilter
+            v-model:from="initialFilters.scoring.from"
+            v-model:to="initialFilters.scoring.to"
+            label="Оценка"
+            :max-value="initialFilters.scoring.maxValue"
+          />
+        </LkTableFilter>
+
         <div
-          v-if="isLoadingPage"
+          v-if="!isLoading"
+          class="top__list"
+        >
+          <LkTopCard
+            v-for="item in items"
+            :key="item.id"
+            :item="item"
+          />
+        </div>
+        <div
+          v-else
           class="top__loader"
         >
           <UILoader />
         </div>
 
-        <template v-else>
-          <div class="top__header">
-            <div class="top__header-side">
-              <LkTableTypes
-                :value="fb"
-                @change="changeType"
-              />
-
-              <LkTableDate
-                @change="changeDate"
-              />
-            </div>
-
-            <LkTableSort
-              is-white
-              :array="headColumns"
-              :sort-slug="sortSlug"
-              :sort-direction="sortDirection"
-              @change="changeSort"
-            />
-          </div>
-
-          <LkTableFilter
-            class="top__filter"
-            @reset="resetFilters()"
-            @submit="setFilters()"
-          >
-            <UILkFilter
-              v-model:from="initialFilters.products_solded.from"
-              v-model:to="initialFilters.products_solded.to"
-              label="Товары с продажами, %"
-              :max-value="initialFilters.products_solded.maxValue"
-            />
-            <UILkFilter
-              v-model:from="initialFilters.profit.from"
-              v-model:to="initialFilters.profit.to"
-              label="Объём рынка, ₽"
-              :max-value="initialFilters.profit.maxValue"
-            />
-            <!-- <UILkFilter
-              label="Ценовой сегмент, ₽"
-              :max-value="999999"
-            /> -->
-            <UILkFilter
-              v-model:from="initialFilters.price_avg.from"
-              v-model:to="initialFilters.price_avg.to"
-              label="Средний чек, ₽"
-              :max-value="initialFilters.price_avg.maxValue"
-            />
-            <UILkFilter
-              v-model:from="initialFilters.scoring.from"
-              v-model:to="initialFilters.scoring.to"
-              label="Оценка"
-              :max-value="initialFilters.scoring.maxValue"
-            />
-          </LkTableFilter>
-
-          <div
-            v-if="!isLoading"
-            class="top__list"
-          >
-            <LkTopCard
-              v-for="item in itemsSort"
-              :key="item.id"
-              :item="item"
-            />
-          </div>
-          <div
-            v-else
-            class="top__loader"
-          >
-            <UILoader />
-          </div>
-
-          <UILkButton
-            v-if="isShowBtn"
-            text="Показать ещё"
-            full-width
-            class="top__show-more"
-            @click.prevent="page += 1, getData(false)"
-          />
-        </template>
+        <UILkButton
+          v-if="isShowBtn"
+          text="Показать ещё"
+          full-width
+          class="top__show-more"
+          @click.prevent="page += 1, getData(false)"
+        />
       </div>
     </div>
   </div>
@@ -154,22 +145,7 @@ const initialFilters = reactive({
 const filters = ref({})
 
 const isShowBtn = ref(true)
-const isLoadingPage = ref(true)
 const isLoading = ref(false)
-
-const itemsSort = computed(() => {
-  if (sortSlug.value === 'scoring') {
-    return items.value.sort((a, b) => {
-      if (sortDirection.value === 'desc') {
-        return b.scoring.scoring - a.scoring.scoring
-      } else {
-        return a.scoring.scoring - b.scoring.scoring
-      }
-    })
-  }
-
-  return items.value
-})
 
 const changeType = (value) => {
   items.value = []
@@ -272,25 +248,24 @@ const getData = async (isPreloading = true) => {
     }
   }
 
-  const { data } = await useFetch('/api/queries/top', {
+  const { data } = await useFetch('/api/categories/top', {
     params,
     watch: false,
   })
+
+  isLoading.value = false
 
   const total = data?.value?.total || 0
   const array = data?.value?.items || []
 
   items.value.push(...array)
 
-  isLoadingPage.value = false
-  isLoading.value = false
-
   if (items.value.length >= total) {
     isShowBtn.value = false
   }
 }
 
-await getData()
+getData()
 </script>
 
 <style lang="scss" scoped>

@@ -1,6 +1,6 @@
 <template>
   <div class="niche-resume">
-    <template v-if="!isLoadingPage && item">
+    <template v-if="!!item">
       <div class="niche-resume__info">
         <LkTableTypes
           :value="fb"
@@ -47,7 +47,7 @@
       v-else
       class="niche-resume__loader"
     >
-      <UILoader v-if="isLoadingPage" />
+      <UILoader v-if="isLoading" />
       <span v-else>
         Нет данных по товарам
       </span>
@@ -58,10 +58,8 @@
 <script setup>
 const route = useRoute()
 
-const { slug } = route.params
-const { product_id: productId } = route.query
+const { id } = route.query
 
-const isLoadingPage = ref(true)
 const isLoading = ref(false)
 
 const item = ref(null)
@@ -379,10 +377,6 @@ const getData = async () => {
     fb: fb.value,
   }
 
-  if (productId) {
-    params.product_id = productId
-  }
-
   if (day.value) {
     params.period = day.value
   }
@@ -391,13 +385,12 @@ const getData = async () => {
   //   params.dateTo = date.value
   // }
 
-  const { data } = await useFetch(`/api/queries/search?query=${slug}&view=summary`, {
+  const { data } = await useFetch(`/api/categories/${id}?view=summary`, {
     watch: false,
     params,
   })
 
   isLoading.value = false
-  isLoadingPage.value = false
 
   const value = data?.value || null
 
