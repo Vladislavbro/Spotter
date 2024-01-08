@@ -231,6 +231,7 @@ const getData = async (isPreloading = true) => {
     sort: sortSlug.value,
     direction: sortDirection.value,
     fb: fb.value,
+    top: 1,
   }
 
   if (day.value) {
