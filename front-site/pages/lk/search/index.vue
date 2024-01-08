@@ -24,7 +24,7 @@
           </p>
           <div class="search-lk-card__list">
             <button
-              v-for="(item, i) in types"
+              v-for="(item, i) in filteredTypes"
               :key="i"
               :class="['search-lk-card__btn', { 'search-lk-card__btn--active' : item.value === type}]"
               @click.prevent="type = item.value"
@@ -117,9 +117,6 @@
                 >
                   <div class="search-lk-results-category__name">
                     {{ item.name }}
-                    <!-- <span class="search-lk-results-category__category">
-                      Красота / ногти
-                    </span> -->
                   </div>
                   <div
                     v-if="item.articul"
@@ -135,29 +132,6 @@
               </template>
             </div>
           </div>
-
-          <!-- <div
-            v-if="!search"
-            class="search-lk__helper search-lk-helper"
-          >
-            <p class="search-lk-helper__title">
-              Часто ищут:
-            </p>
-            <div class="search-lk-helper__list">
-              <div class="search-lk-helper__item">
-                Масло для волос
-              </div>
-              <div class="search-lk-helper__item">
-                Рубашка женская
-              </div>
-              <div class="search-lk-helper__item">
-                Кроссовки для детей
-              </div>
-              <div class="search-lk-helper__item">
-                Протеиновое печенье
-              </div>
-            </div>
-          </div> -->
         </div>
       </div>
     </div>
@@ -173,21 +147,19 @@ definePageMeta({
 })
 
 const views = [
-  { label: 'Товары', value: 'products' },
-  // { label: 'Категории', value: 'categories' },
-  { label: 'Бренды', value: 'brands' },
-  { label: 'Продавцы', value: 'suppliers' },
-  // { label: 'Ключевые слова', value: 'keys' },
+  { label: 'Товары', value: 'products', types: ['articul'] },
+  { label: 'Категории', value: 'categories', types: ['name'] },
+  { label: 'Бренды', value: 'brands', types: ['name'] },
+  { label: 'Продавцы', value: 'suppliers', types: ['name'] },
 ]
 const view = ref('products')
 
 const types = [
   { label: 'По названию товара', value: 'name' },
   { label: 'По артикулу товара', value: 'articul' },
-  // { label: 'По типу товара', value: 'type' },
 ]
 
-const type = ref('name')
+const type = ref(views[0].types[0])
 
 const search = ref('')
 
@@ -196,19 +168,24 @@ const isLoadResults = ref(false)
 const hints = ref([])
 const results = ref([])
 
+const filteredTypes = computed(() => {
+  const typesArray = views.find(item => item.value === view.value).types
+
+  return types.filter(item => typesArray.includes(item.value))
+})
+
 const finalResults = computed(() => {
   return results.value.map((item) => {
     if (view.value === 'products') {
-      let link = ''
-      if (type.value === 'name') {
-        link = `/lk/niche/${item.name.toLowerCase()}?id=${item.id}`
-      } else if (type.value === 'articul') {
-        link = `/lk/item/${item.articul}`
-      }
       return {
         name: item.name,
-        link,
+        link: `/lk/item/${item.articul}`,
         articul: item.articul,
+      }
+    } else if (view.value === 'categories') {
+      return {
+        name: item.name,
+        link: `/lk/niche/${item.name.toLowerCase()}?id=${item.id}`,
       }
     } else if (view.value === 'brands') {
       return {
@@ -281,6 +258,7 @@ const searchResults = (query) => {
 
 const changeView = (value) => {
   view.value = value
+  type.value = views.find(item => item.value === value).types[0]
 
   if (search.value) {
     isLoadHints.value = true
@@ -301,11 +279,7 @@ const getHints = async () => {
   })
   isLoadHints.value = false
 
-  if (view.value === 'keys') {
-    hints.value = data?.value?.variants || []
-  } else {
-    results.value = data?.value?.items || []
-  }
+  results.value = data?.value?.items || []
 }
 
 const getResults = async (query) => {
@@ -319,11 +293,11 @@ const getResults = async (query) => {
     },
   })
 
+  isLoadResults.value = false
+
   const array = data?.value?.items || []
 
   results.value.push(...array)
-
-  isLoadResults.value = false
 }
 
 const debounced = debounce(getHints, 500)

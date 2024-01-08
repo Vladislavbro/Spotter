@@ -5,13 +5,7 @@
     <LkAsideDefault />
 
     <div class="layout-lk__box">
-      <Suspense>
-        <slot />
-
-        <template #fallback>
-          Loading...
-        </template>
-      </Suspense>
+      <slot />
 
       <LandingFooterDefault
         theme-light
