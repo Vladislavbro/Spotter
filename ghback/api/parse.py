@@ -186,9 +186,6 @@ class Parser(object):
             try:
                 data = json.loads(r"{}".format(response.text))
                 self.parse_catalog(data)
-                self.page += 1
-                self.category_saler[0].page = self.page
-                self.category_saler[0].save()
             except JSONDecodeError as e:
                 print('JSONDecodeError', e, url)
             except Exception as e:
@@ -207,6 +204,9 @@ class Parser(object):
             self.category.last_parsed_page = self.page
             self.category.last_parsed_page_at = datetime.now(timezone.utc)
             self.category.save()
+            self.page += 1
+            self.category_saler[0].page = self.page
+            self.category_saler[0].save()
         else:
             for saler in self.category_saler:
                 saler.delete()
