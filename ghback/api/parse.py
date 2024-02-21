@@ -110,6 +110,7 @@ class Parser(object):
         response = self.get_url(url)
         print('response', response.status_code)
         data = response.json()
+        print('get_salers', self.category.name, len(data['data']['filters'][0]['items']))
         for saler in data['data']['filters'][0]['items']:
             # {'id': 228459, 'name': ' ИП ГРАБЧУК АНЖЕЛИКА НИКОЛАЕВНА', 'count': 7}
             CategorySaler.objects.create(
@@ -167,6 +168,7 @@ class Parser(object):
     def crawl(self):
         fsupplier = ';'.join([str(saler.wb_id) for saler in self.category_saler])
         page = self.category_saler[0].page
+        print('crawl fsupplier, page', fsupplier, page)
         url = (
             f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog'
             f'?appType=1&curr=rub&dest=-1257786&page={page}&'
