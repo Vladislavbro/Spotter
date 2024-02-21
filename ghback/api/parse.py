@@ -173,7 +173,7 @@ class Parser(object):
             f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog'
             f'?appType=1&curr=rub&dest=-1257786&page={page}&'
             f'fsupplier={fsupplier}&'
-            f'&sort=popular&spp=0&'
+            f'&sort=popular&spp=30&'
             f'{self.category.wb_query}'
         )
         response = self.get_url(url)
@@ -191,8 +191,8 @@ class Parser(object):
             except Exception as e:
                 print('except', str(e))
         elif response.status_code == 429:
-            print('get_category')
-            sleep(10)
+            self.category_saler[0].delete()
+            # sleep(10)
             return self.get_category_salers()
         else:
             return self.get_category_salers()
