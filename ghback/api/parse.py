@@ -182,7 +182,7 @@ class Parser(object):
             if response.text == '':
                 print('get_category')
                 self.category_saler[0].delete()
-                return self.get_category()
+                return self.get_category_salers()
             try:
                 data = json.loads(r"{}".format(response.text))
                 self.parse_catalog(data)
@@ -196,9 +196,9 @@ class Parser(object):
         elif response.status_code == 429:
             print('get_category')
             sleep(10)
-            return self.get_category()
+            return self.get_category_salers()
         else:
-            return self.get_category()
+            return self.get_category_salers()
 
     def parse_catalog(self, data):
         print('parse_catalog', self.category.name, self.page)
