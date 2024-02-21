@@ -114,6 +114,14 @@ class CategoryStat(models.Model):
         ordering = ['-parsing_id']
 
 
+class CategorySaler(models.Model):
+    category = models.ForeignKey('Category', on_delete=models.CASCADE)
+    wb_id = models.IntegerField()
+    name = models.CharField(max_length=255)
+    count = models.IntegerField()
+    page = models.IntegerField(default=1)
+
+
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING,
                                  blank=True, null=True)

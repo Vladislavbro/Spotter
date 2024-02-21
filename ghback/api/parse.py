@@ -3,7 +3,7 @@ import requests
 from django.forms.models import model_to_dict
 from django.db.models import Sum, Avg, Q, Count
 from api.models import (Category, Product, Config, Query, ProductStat, 
-                        CategoryStat)
+                        CategoryStat, CategorySaler)
 from time import sleep
 from datetime import datetime, timedelta, timezone
 import time
@@ -75,6 +75,139 @@ class Parser(object):
         # self.set_period_dates()
         # self.get_categories()
         self.processing()
+
+    def get_category(self):
+        self.category = Category.objects.filter(
+            parsed_at=None, parse=True).first()
+        if self.category is None:
+            self.notify('Парсинг категорий закончился')
+            Category.objects.filter(parse=True).update(
+                calculated=False,
+                products_calculated=False,
+                parsed_at=None,
+                last_parsed_page=None,
+                last_parsed_page_at=None,
+                start_parsing_at=None,
+            )
+            Category.objects.exclude(parse=True).update(calculated=False)
+            self.config.parsing_done = True
+            self.config.save()
+            return self.processing()
+        else:
+            if (self.category.categorysaler_set.count() == 0 and 
+                    self.category.start_parsing_at is None):
+                self.category.start_parsing_at = datetime.now(timezone.utc)
+                self.category.save()
+                self.get_salers()
+            return self.get_category_salers()
+
+    def get_salers(self):
+        url = (
+            f'https://catalog.wb.ru/catalog/{self.category.shard}/v4/filters'
+            f'?appType=1&curr=rub&dest=-1257786&filters=fsupplier&'
+            f'spp=30&{self.category.wb_query}'
+        )
+        response = self.get_url(url)
+        print('response', response.status_code)
+        data = response.json()
+        for saler in data['data']['filters'][0]['items']:
+            # {'id': 228459, 'name': ' ИП ГРАБЧУК АНЖЕЛИКА НИКОЛАЕВНА', 'count': 7}
+            CategorySaler.objects.create(
+                category=self.category,
+                wb_id=saler['id'],
+                name=saler['name'],
+                count=saler['count'],
+            )
+
+    def get_category_salers(self):
+        # Получаем продавцов, отсортированных по 'count' в порядке убывания
+        salers = list(CategorySaler.objects.order_by('-count'))
+
+        # Если нет продавцов, обновляем 'parsed_at' для категории и переходим к следующей категории
+        if not salers:
+            self.category.parsed_at = datetime.now(timezone.utc)
+            self.category.save()
+            return self.get_category()
+
+        # Обрабатываем продавцов с большим количеством товаров
+        for saler in salers:
+            if saler.count > 100:
+                self.category_saler = [saler]
+                self.page = saler.page
+                return self.crawl()
+
+        # Обрабатываем продавцов с малым количеством товаров
+        small_salers = [saler for saler in salers if saler.count <= 100]
+        grouped_salers = []
+        current_group = []
+        current_count = 0
+
+        for saler in small_salers:
+            if current_count + saler.count > 100:
+                # Если добавление текущего продавца приведет к превышению 100 товаров, сохраняем текущую группу и начинаем новую
+                grouped_salers.append(current_group)
+                current_group = [saler]
+                current_count = saler.count
+            else:
+                # Иначе добавляем текущего продавца в текущую группу
+                current_group.append(saler)
+                current_count += saler.count
+
+        # Добавляем последнюю группу, если она не пуста
+        if current_group:
+            grouped_salers.append(current_group)
+
+        # Теперь у нас есть группы продавцов, каждая из которых содержит до 100 товаров
+        # Можно обработать каждую группу (например, вызвать 'self.crawl()' для каждой группы)
+        for group in grouped_salers:
+            self.category_saler = group
+            self.page = 1
+            return self.crawl()
+
+    def crawl(self):
+        fsupplier = ';'.join([str(saler.wb_id) for saler in self.category_saler])
+        page = self.category_saler[0].page
+        url = (
+            f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog'
+            f'?appType=1&curr=rub&dest=-1257786&page={page}&'
+            f'fsupplier={fsupplier}&'
+            f'&sort=popular&spp=0&'
+            f'{self.category.wb_query}'
+        )
+        response = self.get_url(url)
+        print('crawl response.status_code', response.status_code)
+        if response.status_code == 200:
+            if response.text == '':
+                print('get_category')
+                self.category_saler[0].delete()
+                return self.get_category()
+            try:
+                data = json.loads(r"{}".format(response.text))
+                self.parse_catalog(data)
+                self.page += 1
+                self.category_saler[0].page = self.page
+                self.category_saler[0].save()
+            except JSONDecodeError as e:
+                print('JSONDecodeError', e, url)
+            except Exception as e:
+                print('except', str(e))
+        elif response.status_code == 429:
+            print('get_category')
+            sleep(10)
+            return self.get_category()
+        else:
+            return self.get_category()
+
+    def parse_catalog(self, data):
+        print('parse_catalog', self.category.name, self.page)
+        if len(data.get('data', {}).get('products', [])) > 0:
+            self.parse_products(data['data']['products'])
+            self.category.last_parsed_page = self.page
+            self.category.last_parsed_page_at = datetime.now(timezone.utc)
+            self.category.save()
+        else:
+            for saler in self.category_saler:
+                saler.delete()
 
     def get_wirehouses(self):
         url = "https://seller.wildberries.ru/ns/distribution-offices/distribution-offices/api/v1/office/getAllMarketplace"
@@ -263,7 +396,7 @@ class Parser(object):
                 self.page = 1
             return self.query_crawl()
 
-    def get_category(self):
+    def get_category_old(self):
         self.category = Category.objects.filter(parsed_at=None,
                                                 parse=True).first()
         if self.category is None:
@@ -351,7 +484,7 @@ class Parser(object):
             # self.notify('404 ' + query)
             return self.change_query()
 
-    def crawl(self):
+    def crawl_old(self):
         url = (
             f'https://catalog.wb.ru/catalog/{self.category.shard}/catalog'
             f'?appType=1&curr=rub&dest=-1257786&page={self.page}&'
@@ -615,7 +748,7 @@ class Parser(object):
         else:
             self.change_query()
 
-    def parse_catalog(self, data):
+    def parse_catalog_old(self, data):
         print('parse_catalog', self.category.name, self.page)
         if len(data.get('data', {}).get('products', [])) > 0:
             self.parse_products(data['data']['products'])
