@@ -1,6 +1,7 @@
 <template>
   <div class="body">
     <LandingHeaderDefault />
+
     <slot />
 
     <LandingFooterDefault />
