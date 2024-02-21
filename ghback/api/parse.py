@@ -210,6 +210,7 @@ class Parser(object):
         else:
             for saler in self.category_saler:
                 saler.delete()
+        return self.get_category_salers()
 
     def get_wirehouses(self):
         url = "https://seller.wildberries.ru/ns/distribution-offices/distribution-offices/api/v1/office/getAllMarketplace"
