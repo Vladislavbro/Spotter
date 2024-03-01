@@ -6,8 +6,8 @@ from django.db import models
 class Category(models.Model):
     wb_id = models.IntegerField(null=True, blank=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
-    name = models.CharField(max_length=255)
-    path = models.CharField(max_length=255)
+    name = models.CharField(max_length=1020)
+    path = models.CharField(max_length=1020)
     url = models.URLField()
     sales = models.IntegerField(null=True, blank=True)
     revenue = models.IntegerField(null=True, blank=True)
