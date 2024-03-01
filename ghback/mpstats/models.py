@@ -6,9 +6,9 @@ from django.db import models
 class Category(models.Model):
     wb_id = models.IntegerField(null=True, blank=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
-    name = models.CharField(max_length=1020)
-    path = models.CharField(max_length=1020)
-    url = models.URLField()
+    name = models.CharField(max_length=2048)
+    path = models.CharField(max_length=2048)
+    url = models.URLField(max_length=2048)
     sales = models.IntegerField(null=True, blank=True)
     revenue = models.IntegerField(null=True, blank=True)
     items = models.IntegerField(null=True, blank=True)
