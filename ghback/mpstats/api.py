@@ -17,6 +17,10 @@ class Mpstats:
 
         for child in children:
             # Создаем новую категорию в базе данных
+            print(child['name'])
+            print(child['path'])
+            print(child['url'])
+            print('=== || ===')
             new_cat = Category.objects.create(
                 name=child['name'],
                 path=child['path'],
