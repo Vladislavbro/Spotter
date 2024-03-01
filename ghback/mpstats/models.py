@@ -4,7 +4,7 @@ from django.db import models
 
 
 class Category(models.Model):
-    wb_id = models.IntegerField()
+    wb_id = models.IntegerField(null=True, blank=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=255)
     path = models.CharField(max_length=255)
