@@ -1290,4 +1290,3 @@ class Parser(object):
         # тут все расчёты
         category.products_calculated = True
         category.save()
-

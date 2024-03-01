@@ -97,7 +97,7 @@ def get_scoring_productstats(product_ids, config):
         response['scoring'] += 1
     elif response['monopoly'] > 0.5:
         response['scoring'] -= 1
-    # 3 Оценка потенциала органических продаж - процент товаров 
+    # 3 Оценка потенциала органических продаж - процент товаров
     # с продажами от общего количества товаров
     response['sales_org'] = curr_stat['sales_org'] / total
     if response['sales_org'] > 0.5:
