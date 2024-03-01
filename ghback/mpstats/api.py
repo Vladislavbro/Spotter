@@ -13,7 +13,7 @@ class Mpstats:
 
     def process_categories(self, categories, parent=None):
         # Ищем категории, которые являются дочерними для данного родителя
-        children = [cat for cat in categories if (parent is None and '/' not in cat['path']) or (parent is not None and cat['path'].startswith(parent['path'] + '/'))]
+        children = [cat for cat in categories if (parent is None and '/' not in cat['path']) or (parent is not None and cat['path'].startswith(parent.path + '/'))]
 
         for child in children:
             # Создаем новую категорию в базе данных
