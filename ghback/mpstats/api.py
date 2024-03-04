@@ -11,6 +11,48 @@ class Mpstats:
     def __init__(self):
         pass
 
+    def get_categories_stat(self):
+        for root in Category.objects.filter(parent=None):
+            print(root.name)
+            url = f"https://mpstats.io/api/wb/get/category/items?path={root.path}"
+            response = requests.get(url, headers=self.headers)
+            data = response.json()
+            for item in data:
+                category = Category.objects.get(name=item['name'])
+                if category is None:
+                    continue
+                category.sales = item['sales']
+                category.revenue = item['revenue']
+                category.items = item['items']
+                category.items_with_sells = item['items_with_sells']
+                category.items_with_sells_percent = item['items_with_sells_percent']
+                category.sellers = item['sellers']
+                category.sellers_with_sells = item['sellers_with_sells']
+                category.brands = item['brands']
+                category.brands_with_sells = item['brands_with_sells']
+                category.sellers_with_sells_percent = item['sellers_with_sells_percent']
+                category.sales_per_items_average = item['sales_per_items_average']
+                category.revenue_per_items_average = item['revenue_per_items_average']
+                category.avg_price = item['avg_price']
+                category.median_price = item['median_price']
+                category.rating = item['rating']
+                category.comments = item['comments']
+                category.balance = item['balance']
+                category.live_items = item['live_items']
+                category.revenue_potential = item['revenue_potential']
+                category.lost_profit = item['lost_profit']
+                category.lost_profit_percent = item['lost_profit_percent']
+                category.graph = item['graph']
+                category.commision_fbo = item['commision_fbo']
+                category.commision_fbs = item['commision_fbs']
+                category.basic_logistics = item['basic_logistics']
+                category.storage_price = item['storage_price']
+                category.acceptance_price = item['acceptance_price']
+                category.delivery_by_volume = item['delivery_by_volume']
+                category.purchase = item['purchase']
+                category.purchase_after_return = item['purchase_after_return']
+                category.save()
+
     def process_categories(self, categories, parent=None):
         # Ищем категории, которые являются дочерними для данного родителя
         # children = [cat for cat in categories if (parent is None and '/' not in cat['path']) or (parent is not None and cat['path'].startswith(parent.path + '/'))]
