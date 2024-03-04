@@ -8,7 +8,7 @@ class Category(models.Model):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=2048)
     path = models.CharField(max_length=2048)
-    url = models.URLField(max_length=2048)
+    url = models.CharField(max_length=2048)
     sales = models.IntegerField(null=True, blank=True)
     revenue = models.IntegerField(null=True, blank=True)
     items = models.IntegerField(null=True, blank=True)
