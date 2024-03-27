@@ -11,6 +11,20 @@ class Mpstats:
     def __init__(self):
         pass
 
+    def get_subjects(self):
+        url = f"https://mpstats.io/api/wb/get/subjects/select"
+        response = requests.get(url, headers=self.headers)
+        data = response.json()
+        for item in data:
+            print(item['name'])
+
+    def get_subcategories(self, path):
+        url = f"https://mpstats.io/api/wb/get/category/items?path={path}"
+        response = requests.get(url, headers=self.headers)
+        data = response.json()
+        for item in data:
+            print(item['name'])
+
     def get_categories_stat(self):
         for root in Category.objects.filter(parent=None):
             print(root.name)
