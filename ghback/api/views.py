@@ -26,6 +26,7 @@ import random
 import string
 import pymorphy2
 from api.utils import get_scoring_productstats
+from mpstats.models import Subject
 
 
 morph = pymorphy2.MorphAnalyzer()
@@ -641,6 +642,14 @@ def queries_top(request):
             'status': 'error',
             'message': 'Не задан формат вывода'
         })
+
+
+def get_subjects(request):
+    subjects = Subject.objects.values()
+    return JsonResponse({
+        'total': subjects.count(),
+        'items': list(subjects)
+    })
 
 
 def categories_top(request):

@@ -3,6 +3,15 @@ from django.db import models
 # Create your models here.
 
 
+class Subject(models.Model):
+    mpstats_id = models.IntegerField(null=True, blank=True)
+    scoring = models.IntegerField(null=True, blank=True)
+    data = models.JSONField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-scoring']
+
+
 class Category(models.Model):
     wb_id = models.IntegerField(null=True, blank=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)

@@ -105,7 +105,8 @@ DATABASES = {
         "NAME": "gh",
         "USER": "ghuser",
         "PASSWORD": "ghpassworde23f8852aa92",
-        "HOST": "db",  # set in docker-compose.yml
+        # "HOST": "db",  # set in docker-compose.yml
+        "HOST": "localhost",
         "PORT": 5432,  # default postgres port
     }
 }

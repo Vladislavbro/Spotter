@@ -23,6 +23,7 @@ urlpatterns = [
     path('baskets', views.baskets, name='baskets'),
     path('categories', views.categories_list, name='categories_list'),
     path('queries/top', views.queries_top, name='queries_top'),
+    path('subjects', views.get_subjects, name='get_subjects'),
     path('categories/top', views.categories_top, name='categories_top'),
     path('categories/<int:category_id>', views.category_item,
          name='category_item'),

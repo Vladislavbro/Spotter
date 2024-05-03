@@ -1,10 +1,10 @@
 import requests
-from .models import Category
+from .models import Category, Subject
 
 
 class Mpstats:
     headers = {
-        'X-Mpstats-TOKEN': '65d78fba6d7824.982500042ed2ade776ce4f181ede657c3afab330',
+        'X-Mpstats-TOKEN': '661013e49bcf55.065063530218f7c2a8454fe95db3e56c776587c6',
         'Content-Type': 'application/json',
     }
 
@@ -12,14 +12,70 @@ class Mpstats:
         pass
 
     def get_subjects(self):
-        url = f"https://mpstats.io/api/wb/get/subjects/select"
+        url = "https://mpstats.io/api/wb/get/subjects/select"
         response = requests.get(url, headers=self.headers)
         data = response.json()
-        for item in data:
-            print(item['name'])
+        return data
+    
+    def calculate_subjects(self):
+        subjects = self.get_subjects()
+        for subject in subjects:
+            try:
+                subject_db = Subject.objects.get(mpstats_id=subject['id'])
+            except Subject.DoesNotExist:
+                subject_db = Subject(mpstats_id=subject['id'])
+            subject_db.data = subject
+            scoring = 0
+            # Выручка
+            if subject['revenue'] >= 80000000:
+                scoring += 1
+            elif subject['revenue'] <= 10000000:
+                scoring -= 1
+            # Медианная сумма продаж на одного продавца
+            if subject['revenue'] / subject['suppliers'] >= 20000:
+                scoring += 1
+            elif subject['revenue'] / subject['suppliers'] <= 10000:
+                scoring -= 1
+            # Количество товаров
+            if subject['items'] < 1000:
+                scoring += 1
+            elif subject['items'] > 2000:
+                scoring -= 1
+            # Выручка на товар
+            if subject['revenue'] / subject['items'] >= 20000:
+                scoring += 1
+            elif subject['revenue'] / subject['items'] <= 10000:
+                scoring -= 1
+            # Оборачиваемость в днях
+            if subject['turnover_days'] < 20:
+                scoring += 1
+            elif subject['turnover_days'] > 50:
+                scoring -= 1
+            # Количество продавцов
+            if subject['suppliers'] < 1000:
+                scoring -= 1
+            elif subject['suppliers'] < 5000:
+                scoring += 1
+            # Количество продавцов с продажами
+            if subject['suppliers_with_sells'] / subject['suppliers'] > 0.5:
+                scoring += 1
+            elif subject['suppliers_with_sells'] / subject['suppliers'] < 0.2:
+                scoring -= 1
+            # Средний процент выкупа с учетом возвратов
+            if subject['purchase_after_return'] >= 90:
+                scoring += 1
+            elif subject['purchase_after_return'] < 40:
+                scoring -= 1
+            # Средняя цена по товарам с продажами
+            if (subject['final_price_average_with_sells'] or 0) >= 1500:
+                scoring += 1
+            elif (subject['final_price_average_with_sells'] or 0) < 750:
+                scoring -= 1
+            subject_db.scoring = scoring
+            subject_db.save()
 
     def get_subcategories(self, path):
-        url = f"https://mpstats.io/api/wb/get/category/items?path={path}"
+        url = f"https://mpstats.io/api/wb/get/category/subcategories?path={path}"
         response = requests.get(url, headers=self.headers)
         data = response.json()
         for item in data:
@@ -133,49 +189,43 @@ class Mpstats:
 # --header 'X-Mpstats-TOKEN: 65d78fba6d7824.982500042ed2ade776ce4f181ede657c3afab330' \
 # --header 'Content-Type: application/json' \    
 
+# Выручка (revenue) +
+# Упущенная выручка +
+# Количество товаров (items) +
+# Выручка на товар (revenue / items) +
+# Количество продавцов (suppliers) +
+# Количество продавцов с продажами +
+# Средний процент выкупа с учетом возвратов (purchase_after_return среднее?)
+# Средняя цена по товарам с продажами (final_price_average_with_sells) +
+# Сезонность (sales / sales среднее)
 
-# 1 + 
-# Стабильность среднего чека - изменение среднего чека 
+# 1
+# subjects select
+# {"id":8640,"days":30,"items":19,"live_items":4,"items_with_sells":4,"live_items_percent":21.05,"items_with_sells_percent":21.05,"brands":9,"brands_with_sells":2,"brands_with_sells_percent":22.22,"suppliers":9,"suppliers_with_sells":2,"suppliers_with_sells_percent":22.22,"sales":11,"revenue":29165,"final_price_min":1803,"final_price_max":26524,"final_price_average":8835.58,"final_price_median":5904,"final_price_min_with_sells":1803,"final_price_max_with_sells":4920,"final_price_average_with_sells":3297.75,"final_price_median_with_sells":3234,"rating_average":4.83,"card_rating_average":44.21,"comment_valuation_average":4.6427,"rating_with_sells":5,"card_rating_with_sells":62.75,"comment_valuation_with_sells":4.7975,"count_total":1,"items_with_stocks":1,"turnover_days":3,"turnover_once":11,"new_items":7,"revenue_potential":76932,"lost_profit":47767,"lost_profit_percent":62.09,"open_card_count":0,"add_to_cart_percent":0,"cart_to_order_percent":0,"category":"Мототовары","name":"Мотокофры","commision_fbo":16.5,"commision_fbs":16.5,"basic_logistics":0,"cost_pallet":0,"storage_price":0,"acceptance_price":0,"delivery_by_volume":0,"purchase":0,"purchase_after_return":0,"orders_count":0,"warehouses":[]}
+# 2
+# curl --location --request GET 'https://mpstats.io/api/wb/get/subject/price_segmentation?path=8640' \
+# --header 'X-Mpstats-TOKEN: 661013e49bcf55.065063530218f7c2a8454fe95db3e56c776587c6' \
+# --header 'Content-Type: application/json'
 
-# 2 -
-# Монополия - объем продаж у топ 10 продавцов по обороту в 
-
-# 3 +
-# Оценка потенциала органических продаж - процент товаров 
-
-# 4 +
-# Среднее количество продаж у товаров
-
-# 5 +
-# Конкурентный ассортимент - количество товаров в нише
-# items
-
-# 6 +
-# Оценка тренда продаж - сравнение среднесуточного оборота в начале и конца периода
-
-# 7 +
-# Объем рынка - оборот в нише в месяц. При изменении периода на 14 или 7 дней показатели делятся на 2 и 4 соответственно
-    
-# 8 +
-# Востребованность ниши - изменение количества продавцов с начала периода
-    
-# 9 +
-# Объем рынка (динамика)
-
-# 10 +
-# LP - Упущенная выручка в нише - для каждого товара считается как:  количество дней без продаж * среднее количество продаж товара в день. По нише считается как сумма упущенной выручки всех товаров в нише
-
-# 11 -
-# Объем рынка у топ 10 (динамика)
-    
-# 12 +
-# SPP - Процент товаров с продажами (динамика)
-
-# 13 +
-# Средняя скорость продаж - среднее количество продаж в день по всем товарам, считается как: общее количество продаж ÷ общее количество товаров ÷ 30 (дней)
-
-# 14 +
-# Средний оборот на продавца
-
-# 15 +
-# SPS - процент продавцов с продажами
+# [
+#     {
+#         "range":"1803-3567",
+#         "items":6,
+#         "items_with_sells":3,
+#         "brands":4,
+#         "brands_with_sells":2,
+#         "sellers":4,
+#         "sellers_with_sells":2,
+#         "revenue":24125,
+#         "sales":10,
+#         "product_revenue":8041,
+#         "min_range_price":1803,
+#         "max_range_price":3567,
+#         "revenue_potential":323655,
+#         "lost_profit":299530,
+#         "lost_profit_percent":92
+#     },
+#     {"range":"3640-6314","items":6,"items_with_sells":1,"brands":4,"brands_with_sells":1,"sellers":4,"sellers_with_sells":1,"revenue":5040,"sales":1,"product_revenue":5040,"min_range_price":3640,"max_range_price":6314,"revenue_potential":151200,"lost_profit":146160,"lost_profit_percent":96},
+#     {"range":"7062-24587","items":6,"items_with_sells":0,"brands":3,"brands_with_sells":0,"sellers":3,"sellers_with_sells":0,"revenue":0,"sales":0,"product_revenue":0,"min_range_price":7062,"max_range_price":24587,"revenue_potential":0,"lost_profit":0,"lost_profit_percent":0},
+#     {"range":"24587-26524","items":1,"items_with_sells":0,"brands":1,"brands_with_sells":0,"sellers":1,"sellers_with_sells":0,"revenue":0,"sales":0,"product_revenue":0,"min_range_price":26524,"max_range_price":26524,"revenue_potential":0,"lost_profit":0,"lost_profit_percent":0}
+# ]
