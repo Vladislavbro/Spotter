@@ -1,5 +1,9 @@
 import requests
 from .models import Category, Subject
+import numpy as np
+import pandas as pd
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 
 class Mpstats:
@@ -11,68 +15,150 @@ class Mpstats:
     def __init__(self):
         pass
 
-    def get_subjects(self):
+    def get_subjects(self, date=None):
         url = "https://mpstats.io/api/wb/get/subjects/select"
+        if date:
+            # YYYY-MM-DD
+            url += f"?date={date}"
         response = requests.get(url, headers=self.headers)
         data = response.json()
         return data
     
+    def get_yearly_data(self):
+        data = []
+        for i in range(12):
+            date = (datetime.now() - relativedelta(months=i)).strftime('%Y-%m-01')
+            subjects = self.get_subjects(date)
+            data.extend(subjects)
+        return data
+    
+    def get_trend(self, sales):
+        sales = np.array(sales)
+        months = np.array(range(1, len(sales) + 1))
+        # Шаг 1: Рассчитаем тренд с использованием линейной регрессии
+        A = np.vstack([months, np.ones(len(months))]).T
+        trend_coeff, intercept = np.linalg.lstsq(A, sales, rcond=None)[0]
+        trend = trend_coeff * months + intercept
+        # Шаг 2: Рассчитаем коэффициент как отношение продаж к тренду
+        coefficients = sales / trend
+        # result = np.vstack([months, sales, trend, coefficients]).T
+        return coefficients
+
+    def process_yearly_data(self):
+        data = self.get_yearly_data()
+        df = pd.DataFrame(data)
+        trends = {}
+        for id in df['id'].unique():
+            id_data = df[df['id'] == id]
+            revenue = list(id_data['revenue'])
+            revenue.reverse()
+            print('revenue', revenue)
+            trend = self.get_trend(revenue)
+            trends[id] = trend
+        return trends
+    
     def calculate_subjects(self):
         subjects = self.get_subjects()
+        trends = self.process_yearly_data()
         for subject in subjects:
             try:
                 subject_db = Subject.objects.get(mpstats_id=subject['id'])
             except Subject.DoesNotExist:
                 subject_db = Subject(mpstats_id=subject['id'])
-            subject_db.data = subject
             scoring = 0
             # Выручка
+            subject['calculate'] = {}
             if subject['revenue'] >= 80000000:
                 scoring += 1
+                subject['calculate']['revenue'] = 1
             elif subject['revenue'] <= 10000000:
                 scoring -= 1
+                subject['calculate']['revenue'] = -1
             # Медианная сумма продаж на одного продавца
             if subject['revenue'] / subject['suppliers'] >= 20000:
                 scoring += 1
+                subject['calculate']['revenue/suppliers'] = 1
             elif subject['revenue'] / subject['suppliers'] <= 10000:
                 scoring -= 1
+                subject['calculate']['revenue/suppliers'] = -1
             # Количество товаров
             if subject['items'] < 1000:
                 scoring += 1
+                subject['calculate']['items'] = 1
             elif subject['items'] > 2000:
                 scoring -= 1
+                subject['calculate']['items'] = -1
             # Выручка на товар
             if subject['revenue'] / subject['items'] >= 20000:
                 scoring += 1
+                subject['calculate']['revenue/items'] = 1
             elif subject['revenue'] / subject['items'] <= 10000:
                 scoring -= 1
+                subject['calculate']['revenue/items'] = -1
             # Оборачиваемость в днях
             if subject['turnover_days'] < 20:
                 scoring += 1
+                subject['calculate']['turnover_days'] = 1
             elif subject['turnover_days'] > 50:
                 scoring -= 1
+                subject['calculate']['turnover_days'] = -1
             # Количество продавцов
             if subject['suppliers'] < 1000:
                 scoring -= 1
+                subject['calculate']['suppliers'] = -1
             elif subject['suppliers'] < 5000:
                 scoring += 1
+                subject['calculate']['suppliers'] = 1
             # Количество продавцов с продажами
             if subject['suppliers_with_sells'] / subject['suppliers'] > 0.5:
                 scoring += 1
+                subject['calculate']['suppliers_with_sells/suppliers'] = 1
             elif subject['suppliers_with_sells'] / subject['suppliers'] < 0.2:
                 scoring -= 1
+                subject['calculate']['suppliers_with_sells/suppliers'] = -1
             # Средний процент выкупа с учетом возвратов
             if subject['purchase_after_return'] >= 90:
                 scoring += 1
+                subject['calculate']['purchase_after_return'] = 1
             elif subject['purchase_after_return'] < 40:
                 scoring -= 1
+                subject['calculate']['purchase_after_return'] = -1
             # Средняя цена по товарам с продажами
             if (subject['final_price_average_with_sells'] or 0) >= 1500:
                 scoring += 1
+                subject['calculate']['final_price_average_with_sells'] = 1
             elif (subject['final_price_average_with_sells'] or 0) < 750:
                 scoring -= 1
+                subject['calculate']['final_price_average_with_sells'] = -1
+            # Сезонность (доп 12 запросов за прошлый календарный год)
+            trend = trends[subject['id']]
+            subject['calculate']['trend'] = list(trend)
+            trend_coef = self.get_trend_coef(trend)
+            subject['calculate']['trend_coef'] = trend_coef
+            scoring += trend_coef
+
+            subject_db.data = subject
             subject_db.scoring = scoring
             subject_db.save()
+
+    def get_trend_coef(self, array):
+        all_in_range_0_7_to_1_3 = True
+        all_in_range_0_4_to_2_5 = True
+        
+        for number in array:
+            if number < 0.4 or number > 2.5:
+                return -1
+            if number < 0.7 or number > 1.3:
+                all_in_range_0_7_to_1_3 = False
+            if number < 0.4 or number > 2.5:
+                all_in_range_0_4_to_2_5 = False
+        
+        if all_in_range_0_7_to_1_3:
+            return 1
+        elif all_in_range_0_4_to_2_5:
+            return 0
+        else:
+            return -1
 
     def get_subcategories(self, path):
         url = f"https://mpstats.io/api/wb/get/category/subcategories?path={path}"
