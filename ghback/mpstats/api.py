@@ -55,6 +55,7 @@ class Mpstats:
             revenue.reverse()
             print('revenue', revenue)
             trend = self.get_trend(revenue)
+            trend = np.where(np.isnan(trend), None, trend)
             print('trend', trend)
             trends[id] = trend
         return trends
