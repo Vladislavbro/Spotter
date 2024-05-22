@@ -47,10 +47,11 @@ class Mpstats:
     def process_yearly_data(self):
         data = self.get_yearly_data()
         df = pd.DataFrame(data)
+        df['revenue'] = pd.to_numeric(df['revenue'], errors='coerce').fillna(0)
         trends = {}
         for id in df['id'].unique():
             id_data = df[df['id'] == id]
-            revenue = list(id_data['revenue'])
+            revenue = id_data['revenue']
             revenue.reverse()
             print('revenue', revenue)
             trend = self.get_trend(revenue)
