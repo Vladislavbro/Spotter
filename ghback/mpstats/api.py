@@ -134,7 +134,7 @@ class Mpstats:
                 scoring -= 1
                 subject['calculate']['final_price_average_with_sells'] = -1
             # Сезонность (доп 12 запросов за прошлый календарный год)
-            trend = trends[subject['id']]
+            trend = trends.get(subject['id'], [1])
             subject['calculate']['trend'] = list(trend)
             trend_coef = self.get_trend_coef(trend)
             subject['calculate']['trend_coef'] = trend_coef
