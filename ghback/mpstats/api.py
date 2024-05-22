@@ -51,7 +51,7 @@ class Mpstats:
         trends = {}
         for id in df['id'].unique():
             id_data = df[df['id'] == id]
-            revenue = id_data['revenue']
+            revenue = list(id_data['revenue'])
             revenue.reverse()
             print('revenue', revenue)
             trend = self.get_trend(revenue)
@@ -270,50 +270,6 @@ class Mpstats:
         return data
 
 
+# from mpstats.api import Mpstats
 # mpstats = Mpstats()
-# data = mpstats.get_category('2024-02-01', '2024-03-01', 'Женщинам', 1)
-    
-# curl --location --request GET 'https://mpstats.io/api/wb/get/category?d1=2024-02-01&d2=2024-03-01&path=Автотовары&fbs=1' \
-# --header 'X-Mpstats-TOKEN: 65d78fba6d7824.982500042ed2ade776ce4f181ede657c3afab330' \
-# --header 'Content-Type: application/json' \    
-
-# Выручка (revenue) +
-# Упущенная выручка +
-# Количество товаров (items) +
-# Выручка на товар (revenue / items) +
-# Количество продавцов (suppliers) +
-# Количество продавцов с продажами +
-# Средний процент выкупа с учетом возвратов (purchase_after_return среднее?)
-# Средняя цена по товарам с продажами (final_price_average_with_sells) +
-# Сезонность (sales / sales среднее)
-
-# 1
-# subjects select
-# {"id":8640,"days":30,"items":19,"live_items":4,"items_with_sells":4,"live_items_percent":21.05,"items_with_sells_percent":21.05,"brands":9,"brands_with_sells":2,"brands_with_sells_percent":22.22,"suppliers":9,"suppliers_with_sells":2,"suppliers_with_sells_percent":22.22,"sales":11,"revenue":29165,"final_price_min":1803,"final_price_max":26524,"final_price_average":8835.58,"final_price_median":5904,"final_price_min_with_sells":1803,"final_price_max_with_sells":4920,"final_price_average_with_sells":3297.75,"final_price_median_with_sells":3234,"rating_average":4.83,"card_rating_average":44.21,"comment_valuation_average":4.6427,"rating_with_sells":5,"card_rating_with_sells":62.75,"comment_valuation_with_sells":4.7975,"count_total":1,"items_with_stocks":1,"turnover_days":3,"turnover_once":11,"new_items":7,"revenue_potential":76932,"lost_profit":47767,"lost_profit_percent":62.09,"open_card_count":0,"add_to_cart_percent":0,"cart_to_order_percent":0,"category":"Мототовары","name":"Мотокофры","commision_fbo":16.5,"commision_fbs":16.5,"basic_logistics":0,"cost_pallet":0,"storage_price":0,"acceptance_price":0,"delivery_by_volume":0,"purchase":0,"purchase_after_return":0,"orders_count":0,"warehouses":[]}
-# 2
-# curl --location --request GET 'https://mpstats.io/api/wb/get/subject/price_segmentation?path=8640' \
-# --header 'X-Mpstats-TOKEN: 661013e49bcf55.065063530218f7c2a8454fe95db3e56c776587c6' \
-# --header 'Content-Type: application/json'
-
-# [
-#     {
-#         "range":"1803-3567",
-#         "items":6,
-#         "items_with_sells":3,
-#         "brands":4,
-#         "brands_with_sells":2,
-#         "sellers":4,
-#         "sellers_with_sells":2,
-#         "revenue":24125,
-#         "sales":10,
-#         "product_revenue":8041,
-#         "min_range_price":1803,
-#         "max_range_price":3567,
-#         "revenue_potential":323655,
-#         "lost_profit":299530,
-#         "lost_profit_percent":92
-#     },
-#     {"range":"3640-6314","items":6,"items_with_sells":1,"brands":4,"brands_with_sells":1,"sellers":4,"sellers_with_sells":1,"revenue":5040,"sales":1,"product_revenue":5040,"min_range_price":3640,"max_range_price":6314,"revenue_potential":151200,"lost_profit":146160,"lost_profit_percent":96},
-#     {"range":"7062-24587","items":6,"items_with_sells":0,"brands":3,"brands_with_sells":0,"sellers":3,"sellers_with_sells":0,"revenue":0,"sales":0,"product_revenue":0,"min_range_price":7062,"max_range_price":24587,"revenue_potential":0,"lost_profit":0,"lost_profit_percent":0},
-#     {"range":"24587-26524","items":1,"items_with_sells":0,"brands":1,"brands_with_sells":0,"sellers":1,"sellers_with_sells":0,"revenue":0,"sales":0,"product_revenue":0,"min_range_price":26524,"max_range_price":26524,"revenue_potential":0,"lost_profit":0,"lost_profit_percent":0}
-# ]
+# mpstats.calculate_subjects()
