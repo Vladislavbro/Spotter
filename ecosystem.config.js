@@ -8,7 +8,7 @@ module.exports = {
     {
       interpreter: '/home/deploy/.nvm/versions/node/v18.18.0/bin/node',
       script: 'front-site/.output/server/index.mjs'
-    }
+    },
     {
       script: 'ghback/manage.py',
       args: 'runserver',
