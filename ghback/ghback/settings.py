@@ -96,18 +96,13 @@ WSGI_APPLICATION = "ghback.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    # }
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "gh",
         "USER": "ghuser",
         "PASSWORD": "ghpassworde23f8852aa92",
-        "HOST": "db",
-        # "HOST": "localhost",
-        "PORT": 5432,  # default postgres port
+        "HOST": "localhost",
+        "PORT": 5432,
     }
 }
 

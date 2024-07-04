@@ -19,7 +19,7 @@ from api.migrate import Migrate
 from api.models import (Category, Product, ProductStat, 
                         Customer, Order, Config,
                         Config, Query, CategoryStat, Supplier)
-from api.parse import nlp
+# from api.parse import nlp
 from dotenv import load_dotenv
 import os
 import random
