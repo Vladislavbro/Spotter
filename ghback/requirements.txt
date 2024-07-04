@@ -7,12 +7,8 @@ python-dateutil
 mongoengine
 python-telegram-bot
 random_user_agent
-spacy
-nltk
-pymystem3
 pytz
 selenium-wire
 python-dotenv
 social-auth-app-django
-pymorphy2
 pandas

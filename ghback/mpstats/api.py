@@ -274,3 +274,5 @@ class Mpstats:
 # from mpstats.api import Mpstats
 # mpstats = Mpstats()
 # mpstats.calculate_subjects()
+# from mpstats.models import Subject
+# Subject.objects.count()
