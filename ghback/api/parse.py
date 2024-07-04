@@ -16,20 +16,20 @@ from json import JSONDecodeError
 from api.proxies import proxies
 from random import choice
 from random_user_agent.user_agent import UserAgent
-import spacy
+# import spacy
 import os
 from urllib import request
 import asyncio
 import pytz
-import pymorphy2
+# import pymorphy2
 from api.utils import get_scoring_productstats
 import threading
 
 
-morph = pymorphy2.MorphAnalyzer()
+# morph = pymorphy2.MorphAnalyzer()
 utc = pytz.UTC
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-nlp = spacy.load('ru_core_news_lg')
+# nlp = spacy.load('ru_core_news_lg')
 
 user_agent_rotator = UserAgent()
 TOKEN = '6161677884:AAE8uT0XWRVXr7SbGIjVTP3Ik6BhsDm8Z5I'
