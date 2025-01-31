@@ -9,11 +9,11 @@ module.exports = {
       interpreter: '/usr/bin/node',
       script: 'front-site/.output/server/index.mjs'
     },
-    {
-      script: 'ghback/manage.py',
-      args: 'runserver',
-      interpreter: '/home/deploy/venv/bin/python',
-    },
+    // {
+    //   script: 'ghback/manage.py',
+    //   args: 'runserver',
+    //   interpreter: '/home/deploy/venv/bin/python',
+    // },
     // {
     //   script: 'bot.py',
     //   interpreter: '/home/deploy/apps/goods_hunter/botvenv/bin/python',
@@ -23,7 +23,7 @@ module.exports = {
   deploy : {
     production : {
       user : 'deploy',
-      host : '194.87.101.169',
+      host : '194.87.214.88',
       ref  : 'origin/upgrade',
       repo : 'git@github.com:Vladislavbro/goods_hunter.git',
       path : '/home/deploy/apps/spotter',
